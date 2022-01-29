@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="dev.nakednamr.lunch_me">
+    package="dev.nakednamor.lunch_me">
    <application
         android:label="lunch_me"
         android:name="${applicationName}"

@@ -1,4 +1,4 @@
-package dev.nakednamr.lunch_me
+package dev.nakednamor.lunch_me
 
 import io.flutter.embedding.android.FlutterActivity
 
