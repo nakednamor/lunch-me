@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+
+import 'data/database.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    Provider<MyDatabase>(
+      create: (context) => MyDatabase(),
+      child: const MyApp(),
+      dispose: (context, db) => db.close(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -15,7 +24,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Lunch Me!',
       onGenerateTitle: (BuildContext context) =>
-      AppLocalizations.of(context)!.title,
+          AppLocalizations.of(context)!.title,
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -38,7 +47,6 @@ class MyApp extends StatelessWidget {
         Locale('en', ''), // English, no country code
         Locale('de', ''), // German, no country code
       ],
-
       home: MyHomePage(),
     );
   }
@@ -71,6 +79,21 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final database = Provider.of<MyDatabase>(context);
+
+    final Locale appLocale = Localizations.localeOf(context);
+
+    var tagGroupsWithTags = database.getAllTagsWithGroups(appLocale);
+
+    tagGroupsWithTags.then((value) {
+      for (var tagGroupWithTags in value) {
+        debugPrint("group: ${tagGroupWithTags.tagGroup}");
+        for (var tag in tagGroupWithTags.tags) {
+          debugPrint("tag: $tag");
+        }
+      }
+    });
+
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //

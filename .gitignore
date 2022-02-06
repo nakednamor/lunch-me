@@ -66,3 +66,6 @@ doc/api/
 *.js_
 *.js.deps
 *.js.map
+
+# this is automtically created by drift database
+/lib/data/database.g.dart
