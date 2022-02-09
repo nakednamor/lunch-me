@@ -77,7 +77,12 @@ LazyDatabase _openConnection() {
 
 @DriftDatabase(tables: [TagGroups, LocalizedTagGroups, Tags, LocalizedTags])
 class MyDatabase extends _$MyDatabase {
+  // MyDatabase() : super(_openConnection());
+  // MyDatabase(QueryExecutor? e) : super(e == null ? _openConnection() : e!);
+
   MyDatabase() : super(_openConnection());
+
+  MyDatabase.testDb(QueryExecutor e) : super(e);
 
   @override
   int get schemaVersion => 1;
@@ -106,6 +111,10 @@ class MyDatabase extends _$MyDatabase {
 
       return TagGroupWithTags(tagGroup, tags);
     }).toList();
+  }
+
+  Future<List<TagGroup>> getAllTagGroups() {
+    return select(tagGroups).get();
   }
 }
 
