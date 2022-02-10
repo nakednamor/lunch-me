@@ -62,6 +62,32 @@ class LocalizedTags extends Table {
   TextColumn get label => text().withLength(min: 1, max: 50)();
 }
 
+class Recipes extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  TextColumn get name => text().withLength(min: 1, max: 50)();
+
+  IntColumn get type => intEnum<Source>()();
+
+  TextColumn get url => text().withLength(max: 255).nullable()();
+
+  TextColumn get image => text().withLength(max: 255).nullable()();
+}
+
+enum Source { web, video, photo }
+
+class RecipeTags extends Table {
+  IntColumn get recipe => integer()();
+
+  IntColumn get tag => integer()();
+
+  @override
+  Set<Column> get primaryKey => {recipe, tag};
+
+  @override
+  String get tableName => "recipe_has_tag";
+}
+
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     // put the database file, called db.sqlite here, into the documents folder
@@ -81,8 +107,15 @@ LazyDatabase _openConnection() {
   });
 }
 
-@DriftDatabase(
-    tables: [Languages, TagGroups, LocalizedTagGroups, Tags, LocalizedTags])
+@DriftDatabase(tables: [
+  Languages,
+  TagGroups,
+  LocalizedTagGroups,
+  Tags,
+  LocalizedTags,
+  Recipes,
+  RecipeTags
+])
 class MyDatabase extends _$MyDatabase {
   // MyDatabase() : super(_openConnection());
   // MyDatabase(QueryExecutor? e) : super(e == null ? _openConnection() : e!);
@@ -131,6 +164,27 @@ class MyDatabase extends _$MyDatabase {
   Future<List<Language>> getAllLanguages() {
     return select(languages).get();
   }
+
+  Future<List<RecipeWithTags>> getAllRecipeWithTags() async {
+    var query = select(recipeTags).join([
+      innerJoin(recipes, recipes.id.equalsExp(recipeTags.recipe)),
+      innerJoin(tags, tags.id.equalsExp(recipeTags.tag))
+    ]);
+
+    var queryResult = query.map(
+        (row) => RecipeWithTag(row.readTable(recipes), row.readTable(tags)));
+
+    var tagsGroupedByRecipe =
+        (await queryResult.get()).groupListsBy((element) => element.recipe);
+
+    return tagsGroupedByRecipe.entries.map((entry) {
+      var recipe = entry.key;
+      var tags = entry.value.isEmpty
+          ? List<Tag>.empty()
+          : entry.value.map((e) => e.tag).toList();
+      return RecipeWithTags(recipe, tags);
+    }).toList();
+  }
 }
 
 class TagGroupWithTag {
@@ -145,4 +199,18 @@ class TagGroupWithTags {
   final List<LocalizedTag> tags;
 
   TagGroupWithTags(this.tagGroup, this.tags);
+}
+
+class RecipeWithTags {
+  final Recipe recipe;
+  final List<Tag> tags;
+
+  RecipeWithTags(this.recipe, this.tags);
+}
+
+class RecipeWithTag {
+  final Recipe recipe;
+  final Tag tag;
+
+  RecipeWithTag(this.recipe, this.tag);
 }
