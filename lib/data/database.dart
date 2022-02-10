@@ -1,14 +1,20 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:collection/collection.dart';
 
 part 'database.g.dart';
+
+class Languages extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  TextColumn get lang => text().withLength(min: 2, max: 3)();
+}
 
 class TagGroups extends Table {
   @override
@@ -27,7 +33,7 @@ class LocalizedTagGroups extends Table {
 
   IntColumn get tagGroup => integer().references(TagGroups, #id)();
 
-  TextColumn get lang => text().withLength(min: 2, max: 3)();
+  IntColumn get lang => integer().references(Languages, #id)();
 
   TextColumn get label => text().withLength(min: 1, max: 50)();
 }
@@ -51,7 +57,7 @@ class LocalizedTags extends Table {
 
   IntColumn get tag => integer().references(Tags, #id)();
 
-  TextColumn get lang => text().withLength(min: 2, max: 3)();
+  IntColumn get lang => integer().references(Languages, #id)();
 
   TextColumn get label => text().withLength(min: 1, max: 50)();
 }
@@ -75,7 +81,8 @@ LazyDatabase _openConnection() {
   });
 }
 
-@DriftDatabase(tables: [TagGroups, LocalizedTagGroups, Tags, LocalizedTags])
+@DriftDatabase(
+    tables: [Languages, TagGroups, LocalizedTagGroups, Tags, LocalizedTags])
 class MyDatabase extends _$MyDatabase {
   // MyDatabase() : super(_openConnection());
   // MyDatabase(QueryExecutor? e) : super(e == null ? _openConnection() : e!);
@@ -92,10 +99,14 @@ class MyDatabase extends _$MyDatabase {
       innerJoin(localizedTagGroups,
           localizedTagGroups.tagGroup.equalsExp(tagGroups.id)),
       innerJoin(tags, tags.tagGroup.equalsExp(tagGroups.id)),
-      innerJoin(localizedTags, localizedTags.tag.equalsExp(tags.id))
+      innerJoin(localizedTags, localizedTags.tag.equalsExp(tags.id)),
+      innerJoin(
+          languages,
+          localizedTags.lang.equalsExp(languages.id) &
+              localizedTagGroups.lang.equalsExp(languages.id))
     ])
-      ..where(localizedTagGroups.lang.equals(locale.languageCode))
-      ..where(localizedTags.lang.equals(locale.languageCode));
+      ..where(languages.lang.equals(locale.languageCode))
+      ..where(languages.lang.equals(locale.languageCode));
 
     var tagGroupWithTagList = query.map((row) => TagGroupWithTag(
         row.readTable(localizedTagGroups), row.readTable(localizedTags)));
@@ -115,6 +126,10 @@ class MyDatabase extends _$MyDatabase {
 
   Future<List<TagGroup>> getAllTagGroups() {
     return select(tagGroups).get();
+  }
+
+  Future<List<Language>> getAllLanguages() {
+    return select(languages).get();
   }
 }
 

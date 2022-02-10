@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -19,8 +17,9 @@ void main() {
     debugPrint('test: teardown finished');
   });
 
-  test('example test', () async {
-    var groups = await testDatabase.getAllTagGroups();
-    expect(groups.length, 3);
+  test('should return all languages', () async {
+    var languages = await testDatabase.getAllLanguages();
+    expect(languages.length, 2);
+    expect(languages.map((e) => e.lang), containsAll(['de', 'en']));
   });
 }
