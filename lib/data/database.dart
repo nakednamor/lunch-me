@@ -23,6 +23,8 @@ class TagGroups extends Table {
   IntColumn get id => integer().autoIncrement()();
 
   BoolColumn get system => boolean().withDefault(const Constant(false))();
+
+  IntColumn get ordering => integer()();
 }
 
 class LocalizedTagGroups extends Table {
@@ -47,6 +49,8 @@ class Tags extends Table {
   IntColumn get tagGroup => integer().references(TagGroups, #id)();
 
   BoolColumn get system => boolean().withDefault(const Constant(false))();
+
+  IntColumn get ordering => integer()();
 }
 
 class LocalizedTags extends Table {
@@ -139,7 +143,11 @@ class MyDatabase extends _$MyDatabase {
               localizedTagGroups.lang.equalsExp(languages.id))
     ])
       ..where(languages.lang.equals(locale.languageCode))
-      ..where(languages.lang.equals(locale.languageCode));
+      ..where(languages.lang.equals(locale.languageCode))
+      ..orderBy([
+        OrderingTerm(expression: tagGroups.ordering, mode: OrderingMode.asc),
+        OrderingTerm(expression: tags.ordering, mode: OrderingMode.asc)
+      ]);
 
     var tagGroupWithTagList = query.map((row) => TagGroupWithTag(
         row.readTable(localizedTagGroups), row.readTable(localizedTags)));
