@@ -94,6 +94,12 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     });
 
+    var recipesList = database.getAllRecipeWithTags();
+    recipesList.then((recipes) => {
+          for (var recipe in recipes)
+            {debugPrint("${recipe.recipe} with tags: ${recipe.tags}")}
+        });
+
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
