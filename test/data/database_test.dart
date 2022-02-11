@@ -22,4 +22,14 @@ void main() {
     expect(languages.length, 2);
     expect(languages.map((e) => e.lang), containsAll(['de', 'en']));
   });
+
+  test('should return all recipes', () async {
+    var recipeWithTags = await testDatabase.getAllRecipeWithTags();
+    expect(recipeWithTags.length, 8);
+
+    expect(recipeWithTags[4].recipe.name, "Erdäpfel-Paprika Gulasch");
+
+    var tags = recipeWithTags[4].tags.map((e) => e.id);
+    expect(tags, containsAll([2, 3, 5, 7]));
+  });
 }

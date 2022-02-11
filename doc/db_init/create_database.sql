@@ -9,7 +9,11 @@ foreign key(tag_group) references tag_groups(id) on delete cascade, foreign key(
 
 create table tags ( id int primary key, tag_group int not null, system boolean not null check (system in (0,1)), foreign key(tag_group) references tag_groups(id) on delete cascade);
 
-create table localized_tags (id int primary key, tag int not null, lang int not null, label varchar(50) not null, foreign key(tag) references tags(id) on delete cascade, foreign key(lang) references languages(id) on delete cascade, unique (tag, lang) );
+create table localized_tags ( id int primary key, tag int not null, lang int not null, label varchar(50) not null, foreign key(tag) references tags(id) on delete cascade, foreign key(lang) references languages(id) on delete cascade, unique (tag, lang) );
+
+create table recipes ( id int primary key, name varchar(50) not null, type int not null, url varchar(255), image varchar(255) );
+
+create table recipe_has_tag ( recipe int not null, tag int not null, primary key (recipe, tag) foreign key(recipe) references recipes(id) on delete cascade, foreign key(tag) references tags(id) on delete cascade );
 
 .mode csv
 
@@ -22,3 +26,7 @@ create table localized_tags (id int primary key, tag int not null, lang int not 
 .import lunch_me_tags.csv tags
 
 .import lunch_me_localized_tags.csv localized_tags
+
+.import lunch_me_recipes.csv recipes
+
+.import lunch_me_recipe_has_tag.csv recipe_has_tag
