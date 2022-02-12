@@ -22,8 +22,6 @@ class TagGroups extends Table {
 
   IntColumn get id => integer().autoIncrement()();
 
-  BoolColumn get system => boolean().withDefault(const Constant(false))();
-
   IntColumn get ordering => integer()();
 }
 
@@ -47,8 +45,6 @@ class Tags extends Table {
   IntColumn get id => integer().autoIncrement()();
 
   IntColumn get tagGroup => integer().references(TagGroups, #id)();
-
-  BoolColumn get system => boolean().withDefault(const Constant(false))();
 
   IntColumn get ordering => integer()();
 }
