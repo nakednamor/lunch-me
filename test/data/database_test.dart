@@ -31,11 +31,13 @@ void main() {
     var recipeWithTags = await testDatabase.getAllRecipeWithTags();
 
     // then
-    expect(recipeWithTags.length, 8);
-    expect(recipeWithTags[4].recipe.name, "Erdäpfel-Paprika Gulasch");
+    expect(recipeWithTags.length, 3);
+    expect(recipeWithTags.map((e) => e.recipe.name),
+        containsAllInOrder(["recipe #1", "recipe #2", "recipe #3"]));
 
-    var tags = recipeWithTags[4].tags.map((e) => e.id);
-    expect(tags, containsAll([2, 3, 5, 7]));
+    expect(recipeWithTags[0].tags.map((e) => e.id), containsAll([2]));
+    expect(recipeWithTags[1].tags.map((e) => e.id), containsAll([2, 4, 6]));
+    expect(recipeWithTags[2].tags, isEmpty);
   });
 
   test('should return tag-groups and tags ordered by order-column', () async {
@@ -46,10 +48,9 @@ void main() {
     var tagGroupIds = actual.map((e) => e.tagGroup.tagGroup);
     expect(tagGroupIds, containsAllInOrder([2, 1, 3]));
 
-    // and tags within group 'Type' should be ordered
-    var tagGroupTime =
-        actual.firstWhere((tagGroup) => tagGroup.tagGroup.tagGroup == 2);
-    var tagsOfTagGroupTime = tagGroupTime.tags.map((e) => e.tag);
-    expect(tagsOfTagGroupTime, containsAllInOrder([5, 12, 13, 6, 7, 8, 9, 10]));
+    // and tags should be ordered as well
+    expect(actual[0].tags.map((e) => e.id), containsAllInOrder([12,11]));
+    expect(actual[1].tags.map((e) => e.id), containsAllInOrder([7,9,8]));
+    expect(actual[2].tags.map((e) => e.id), containsAllInOrder([10]));
   });
 }
