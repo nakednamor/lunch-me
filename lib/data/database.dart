@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:ui';
 
@@ -161,10 +162,6 @@ class MyDatabase extends _$MyDatabase {
     }).toList();
   }
 
-  Future<List<TagGroup>> getAllTagGroups() {
-    return select(tagGroups).get();
-  }
-
   Future<List<Language>> getAllLanguages() {
     return select(languages).get();
   }
@@ -191,6 +188,13 @@ class MyDatabase extends _$MyDatabase {
       var tags = entry.value.map((e) => e.tag).whereType<Tag>().toList();
       return RecipeWithTags(recipe, tags);
     }).toList();
+  }
+
+  Future<void> addTagGroup(String name, Locale locale) async {
+    var language = select(languages)
+      ..where((l) => l.lang.equals(locale.languageCode));
+
+    // TODO to be continued
   }
 }
 

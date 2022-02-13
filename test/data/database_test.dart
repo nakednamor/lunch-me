@@ -49,8 +49,30 @@ void main() {
     expect(tagGroupIds, containsAllInOrder([2, 1, 3]));
 
     // and tags should be ordered as well
-    expect(actual[0].tags.map((e) => e.id), containsAllInOrder([12,11]));
-    expect(actual[1].tags.map((e) => e.id), containsAllInOrder([7,9,8]));
+    expect(actual[0].tags.map((e) => e.id), containsAllInOrder([12, 11]));
+    expect(actual[1].tags.map((e) => e.id), containsAllInOrder([7, 9, 8]));
     expect(actual[2].tags.map((e) => e.id), containsAllInOrder([10]));
+  });
+
+  test('should add new tag-group at last position', () async {
+    // given
+    var locale = const Locale("en");
+    var tagGroupsBefore = await testDatabase.getAllTagsWithGroups(locale);
+    expect(tagGroupsBefore.map((e) => e.tagGroup.label),
+        containsAllInOrder(["B en", "A en", "C en"]));
+
+    //when
+    await testDatabase.addTagGroup("D en", locale);
+
+    // then
+    var tagGroupsAfter = await testDatabase.getAllTagsWithGroups(locale);
+    expect(tagGroupsAfter.map((e) => e.tagGroup.label),
+        containsAllInOrder(["B en", "A en", "C en", "D en"]));
+
+    // and for different locale same localization should have been added
+    var tagGroupsAfterDifferentLocale =
+        await testDatabase.getAllTagsWithGroups(const Locale("de"));
+    expect(tagGroupsAfterDifferentLocale.map((e) => e.tagGroup.label),
+        containsAllInOrder(["B en", "A en", "C en", "D en"]));
   });
 }
