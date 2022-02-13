@@ -148,10 +148,10 @@ class MyDatabase extends _$MyDatabase {
     var tagGroupWithTagList = query.map((row) => TagGroupWithTag(
         row.readTable(localizedTagGroups), row.readTable(localizedTags)));
 
-    var tagGroupWithTagByTaGroup = (await tagGroupWithTagList.get())
+    var tagGroupWithTagByTagGroup = (await tagGroupWithTagList.get())
         .groupListsBy((element) => element.tagGroup);
 
-    return tagGroupWithTagByTaGroup.entries.map((entry) {
+    return tagGroupWithTagByTagGroup.entries.map((entry) {
       var tagGroup = entry.key;
       var tags = entry.value.isEmpty
           ? List<LocalizedTag>.empty()
