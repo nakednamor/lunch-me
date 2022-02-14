@@ -22,8 +22,6 @@ class TagGroups extends Table {
 
   IntColumn get id => integer().autoIncrement()();
 
-  BoolColumn get system => boolean().withDefault(const Constant(false))();
-
   IntColumn get ordering => integer()();
 }
 
@@ -47,8 +45,6 @@ class Tags extends Table {
   IntColumn get id => integer().autoIncrement()();
 
   IntColumn get tagGroup => integer().references(TagGroups, #id)();
-
-  BoolColumn get system => boolean().withDefault(const Constant(false))();
 
   IntColumn get ordering => integer()();
 }
@@ -174,22 +170,25 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Future<List<RecipeWithTags>> getAllRecipeWithTags() async {
-    var query = select(recipeTags).join([
-      innerJoin(recipes, recipes.id.equalsExp(recipeTags.recipe)),
-      innerJoin(tags, tags.id.equalsExp(recipeTags.tag))
-    ]);
+    var query = select(recipes).join([
+      leftOuterJoin(recipeTags, recipeTags.recipe.equalsExp(recipes.id)),
+      leftOuterJoin(tags, tags.id.equalsExp(recipeTags.tag)),
+    ])
+      ..orderBy([OrderingTerm(expression: recipes.name)]);
 
-    var queryResult = query.map(
-        (row) => RecipeWithTag(row.readTable(recipes), row.readTable(tags)));
+    var queryResult = query.map((row) {
+      var recipe = row.readTable(recipes);
+      var tag = row.readTableOrNull(tags);
+
+      return RecipeWithTag(recipe, tag);
+    });
 
     var tagsGroupedByRecipe =
         (await queryResult.get()).groupListsBy((element) => element.recipe);
 
     return tagsGroupedByRecipe.entries.map((entry) {
       var recipe = entry.key;
-      var tags = entry.value.isEmpty
-          ? List<Tag>.empty()
-          : entry.value.map((e) => e.tag).toList();
+      var tags = entry.value.map((e) => e.tag).whereType<Tag>().toList();
       return RecipeWithTags(recipe, tags);
     }).toList();
   }
@@ -218,7 +217,7 @@ class RecipeWithTags {
 
 class RecipeWithTag {
   final Recipe recipe;
-  final Tag tag;
+  final Tag? tag;
 
   RecipeWithTag(this.recipe, this.tag);
 }
