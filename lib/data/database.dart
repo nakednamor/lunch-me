@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:io';
 import 'dart:ui';
 
@@ -108,19 +107,19 @@ LazyDatabase _openConnection() {
   });
 }
 
-@DriftDatabase(tables: [
-  Languages,
-  TagGroups,
-  LocalizedTagGroups,
-  Tags,
-  LocalizedTags,
-  Recipes,
-  RecipeTags
-])
+@DriftDatabase(
+  tables: [
+    Languages,
+    TagGroups,
+    LocalizedTagGroups,
+    Tags,
+    LocalizedTags,
+    Recipes,
+    RecipeTags
+  ],
+  queries: {'lastTagGroupOrdering': 'SELECT MAX(ordering) FROM tag_groups;'},
+)
 class MyDatabase extends _$MyDatabase {
-  // MyDatabase() : super(_openConnection());
-  // MyDatabase(QueryExecutor? e) : super(e == null ? _openConnection() : e!);
-
   MyDatabase() : super(_openConnection());
 
   MyDatabase.testDb(QueryExecutor e) : super(e);
@@ -132,14 +131,10 @@ class MyDatabase extends _$MyDatabase {
     var query = select(tagGroups).join([
       innerJoin(localizedTagGroups,
           localizedTagGroups.tagGroup.equalsExp(tagGroups.id)),
-      innerJoin(tags, tags.tagGroup.equalsExp(tagGroups.id)),
-      innerJoin(localizedTags, localizedTags.tag.equalsExp(tags.id)),
-      innerJoin(
-          languages,
-          localizedTags.lang.equalsExp(languages.id) &
-              localizedTagGroups.lang.equalsExp(languages.id))
+      innerJoin(languages, localizedTagGroups.lang.equalsExp(languages.id)),
+      leftOuterJoin(tags, tags.tagGroup.equalsExp(tagGroups.id)),
+      leftOuterJoin(localizedTags, localizedTags.tag.equalsExp(tags.id)),
     ])
-      ..where(languages.lang.equals(locale.languageCode))
       ..where(languages.lang.equals(locale.languageCode))
       ..orderBy([
         OrderingTerm(expression: tagGroups.ordering, mode: OrderingMode.asc),
@@ -147,7 +142,7 @@ class MyDatabase extends _$MyDatabase {
       ]);
 
     var tagGroupWithTagList = query.map((row) => TagGroupWithTag(
-        row.readTable(localizedTagGroups), row.readTable(localizedTags)));
+        row.readTable(localizedTagGroups), row.readTableOrNull(localizedTags)));
 
     var tagGroupWithTagByTagGroup = (await tagGroupWithTagList.get())
         .groupListsBy((element) => element.tagGroup);
@@ -156,7 +151,7 @@ class MyDatabase extends _$MyDatabase {
       var tagGroup = entry.key;
       var tags = entry.value.isEmpty
           ? List<LocalizedTag>.empty()
-          : entry.value.map((e) => e.tag).toList();
+          : entry.value.map((e) => e.tag).whereType<LocalizedTag>().toList();
 
       return TagGroupWithTags(tagGroup, tags);
     }).toList();
@@ -190,17 +185,58 @@ class MyDatabase extends _$MyDatabase {
     }).toList();
   }
 
-  Future<void> addTagGroup(String name, Locale locale) async {
-    var language = select(languages)
-      ..where((l) => l.lang.equals(locale.languageCode));
+  Future<void> addTagGroup(String name) async {
+    await _validateTagGroupName(name);
 
-    // TODO to be continued
+    var lastOrdering = (await lastTagGroupOrdering().getSingle());
+    var newOrdering = lastOrdering == null ? 0 : lastOrdering + 1;
+
+    await into(tagGroups)
+        .insert(TagGroupsCompanion.insert(ordering: newOrdering));
+
+    var newTagGroup = await (select(tagGroups)
+          ..where((tbl) => tbl.ordering.equals(newOrdering)))
+        .getSingle();
+
+    var availableLanguages = await select(languages).get();
+    var languageIds = availableLanguages.map((e) => e.id);
+
+    var batches = languageIds.map((language) =>
+        LocalizedTagGroupsCompanion.insert(
+            tagGroup: newTagGroup.id, lang: language, label: name));
+
+    batch((batch) => batch.insertAll(localizedTagGroups, batches));
+  }
+
+  Future<int> _countTagGroupsWithName(String name) async {
+    var countExpression = countAll();
+    var countFilter = localizedTagGroups.label.equals(name);
+    var query = selectOnly(localizedTagGroups)
+      ..addColumns([countExpression])
+      ..where(countFilter);
+
+    return await query.map((p0) => p0.read(countExpression)).getSingle();
+  }
+
+  Future<void> _validateTagGroupName(String name) async {
+    if (name.isEmpty) {
+      throw EmptyNameException(name);
+    }
+
+    if (name.length > 50) {
+      throw NameTooLongException(name);
+    }
+
+    var groupCountWithSameName = await _countTagGroupsWithName(name);
+    if (groupCountWithSameName != 0) {
+      throw NameAlreadyExistsException(name);
+    }
   }
 }
 
 class TagGroupWithTag {
   final LocalizedTagGroup tagGroup;
-  final LocalizedTag tag;
+  final LocalizedTag? tag;
 
   TagGroupWithTag(this.tagGroup, this.tag);
 }
@@ -224,4 +260,22 @@ class RecipeWithTag {
   final Tag? tag;
 
   RecipeWithTag(this.recipe, this.tag);
+}
+
+class NameAlreadyExistsException implements Exception {
+  String cause;
+
+  NameAlreadyExistsException(this.cause);
+}
+
+class EmptyNameException implements Exception {
+  String cause;
+
+  EmptyNameException(this.cause);
+}
+
+class NameTooLongException implements Exception {
+  String cause;
+
+  NameTooLongException(this.cause);
 }
