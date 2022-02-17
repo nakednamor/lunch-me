@@ -61,7 +61,8 @@ class _HomePageState extends State<HomePage> {
   Widget _buildTagGroupRow(TagGroupWithTags tagGroupWithTags) {
     return Container(
         margin: const EdgeInsets.all(8.0),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(tagGroupWithTags.tagGroup.label),
             Wrap(
