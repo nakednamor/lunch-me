@@ -55,8 +55,6 @@ void main() {
     expect(actual[2].tags.map((e) => e.id), containsAllInOrder([10]));
   });
 
-  // TODO test if exsists + test if label >=1 && <= 50 + test if exists in any language
-
   test('should add new tag-group with same value for all languages', () async {
     // given
     var englishLocale = const Locale("en");
