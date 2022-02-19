@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lunch_me/data/database.dart';
 
 import 'flutter_test_config.dart';
 
@@ -49,8 +50,67 @@ void main() {
     expect(tagGroupIds, containsAllInOrder([2, 1, 3]));
 
     // and tags should be ordered as well
-    expect(actual[0].tags.map((e) => e.id), containsAllInOrder([12,11]));
-    expect(actual[1].tags.map((e) => e.id), containsAllInOrder([7,9,8]));
+    expect(actual[0].tags.map((e) => e.id), containsAllInOrder([12, 11]));
+    expect(actual[1].tags.map((e) => e.id), containsAllInOrder([7, 9, 8]));
     expect(actual[2].tags.map((e) => e.id), containsAllInOrder([10]));
+  });
+
+  // TODO test if exsists + test if label >=1 && <= 50 + test if exists in any language
+
+  test('should add new tag-group with same value for all languages', () async {
+    // given
+    var englishLocale = const Locale("en");
+    var germanLocale = const Locale("de");
+
+    var tagGroupsBefore =
+        await testDatabase.getAllTagsWithGroups(englishLocale);
+    expect(tagGroupsBefore.map((e) => e.tagGroup.label),
+        containsAllInOrder(["B en", "A en", "C en"]));
+
+    tagGroupsBefore = await testDatabase.getAllTagsWithGroups(germanLocale);
+    expect(tagGroupsBefore.map((e) => e.tagGroup.label),
+        containsAllInOrder(["B de", "A de", "C de"]));
+
+    //when
+    await testDatabase.addTagGroup("D en");
+
+    // then
+    var tagGroupsAfter = await testDatabase.getAllTagsWithGroups(englishLocale);
+    expect(tagGroupsAfter.map((e) => e.tagGroup.label),
+        containsAllInOrder(["B en", "A en", "C en", "D en"]));
+
+    tagGroupsAfter = await testDatabase.getAllTagsWithGroups(germanLocale);
+    expect(tagGroupsAfter.map((e) => e.tagGroup.label),
+        containsAllInOrder(["B de", "A de", "C de", "D en"]));
+  });
+
+  test(
+      'should throw exception when adding tag-group with already existing name',
+      () async {
+    // given
+    var newTagGroupName = 'new tag-group name';
+    await testDatabase.addTagGroup(newTagGroupName);
+
+    // expect
+    expect(() => testDatabase.addTagGroup(newTagGroupName),
+        throwsA(isA<NameAlreadyExistsException>()));
+  });
+
+  test('should throw exception when new tag-group name is empty', () async {
+    // given
+    var newTagGroupName = '';
+
+    // expect
+    expect(() => testDatabase.addTagGroup(newTagGroupName),
+        throwsA(isA<EmptyNameException>()));
+  });
+
+  test('should throw exception when new tag-group name > 50 chars', () async {
+    // given
+    var newTagGroupName = '012345678901234567890123456789012345678901234567890';
+
+    // expect
+    expect(() => testDatabase.addTagGroup(newTagGroupName),
+        throwsA(isA<NameTooLongException>()));
   });
 }
