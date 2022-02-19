@@ -111,4 +111,35 @@ void main() {
     expect(() => testDatabase.addTagGroup(newTagGroupName),
         throwsA(isA<NameTooLongException>()));
   });
+
+  test('should rename tag-group', () async {
+    // given
+    var localeEnglish = const Locale("en");
+    var localeGerman = const Locale("de");
+    var tagGroupName = 'this should be renamed';
+    var tagGroup = await testDatabase.addTagGroup(tagGroupName);
+
+    // when
+    var newTagGroupName = 'updated name!';
+    await testDatabase.renameTagGroup(tagGroup.id, newTagGroupName, localeEnglish);
+
+    // then name from other locales should not be renamed
+    var tagGroupsGerman = await testDatabase.getAllTagsWithGroups(localeGerman);
+    expect(
+        tagGroupsGerman
+            .where((e) => e.tagGroup.tagGroup == tagGroup.id)
+            .map((e) => e.tagGroup.label)
+            .first,
+        tagGroupName);
+
+    // and name for english should be renamed
+    var tagGroupsEnglish =
+        await testDatabase.getAllTagsWithGroups(localeEnglish);
+    expect(
+        tagGroupsEnglish
+            .where((e) => e.tagGroup.tagGroup == tagGroup.id)
+            .map((e) => e.tagGroup.label)
+            .first,
+        newTagGroupName);
+  });
 }

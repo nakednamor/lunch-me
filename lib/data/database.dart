@@ -185,7 +185,7 @@ class MyDatabase extends _$MyDatabase {
     }).toList();
   }
 
-  Future<void> addTagGroup(String name) async {
+  Future<TagGroup> addTagGroup(String name) async {
     await _validateTagGroupName(name);
 
     var lastOrdering = (await lastTagGroupOrdering().getSingle());
@@ -206,6 +206,23 @@ class MyDatabase extends _$MyDatabase {
             tagGroup: newTagGroup.id, lang: language, label: name));
 
     batch((batch) => batch.insertAll(localizedTagGroups, batches));
+
+    return newTagGroup;
+  }
+
+  Future<void> renameTagGroup(
+      int tagGroupId, String newName, Locale locale) async {
+    var language = await _getLanguage(locale);
+    (update(localizedTagGroups)
+          ..where((tbl) =>
+              tbl.tagGroup.equals(tagGroupId) & tbl.lang.equals(language.id)))
+        .write(LocalizedTagGroupsCompanion(label: Value(newName)));
+  }
+
+  Future<Language> _getLanguage(Locale locale) async {
+    return (select(languages)
+          ..where((tbl) => tbl.lang.equals(locale.languageCode)))
+        .getSingle();
   }
 
   Future<int> _countTagGroupsWithName(String name) async {
