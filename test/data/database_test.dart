@@ -111,4 +111,78 @@ void main() {
     expect(() => testDatabase.addTagGroup(newTagGroupName),
         throwsA(isA<NameTooLongException>()));
   });
+
+  test('should rename tag-group', () async {
+    // given
+    var localeEnglish = const Locale("en");
+    var localeGerman = const Locale("de");
+    var tagGroupName = 'this should be renamed';
+    var tagGroup = await testDatabase.addTagGroup(tagGroupName);
+
+    // when
+    var newTagGroupName = 'updated name!';
+    await testDatabase.renameTagGroup(
+        tagGroup.id, newTagGroupName, localeEnglish);
+
+    // then name from other locales should not be renamed
+    var tagGroupsGerman = await testDatabase.getAllTagsWithGroups(localeGerman);
+    expect(
+        tagGroupsGerman
+            .where((e) => e.tagGroup.tagGroup == tagGroup.id)
+            .map((e) => e.tagGroup.label)
+            .first,
+        tagGroupName);
+
+    // and name for english should be renamed
+    var tagGroupsEnglish =
+        await testDatabase.getAllTagsWithGroups(localeEnglish);
+    expect(
+        tagGroupsEnglish
+            .where((e) => e.tagGroup.tagGroup == tagGroup.id)
+            .map((e) => e.tagGroup.label)
+            .first,
+        newTagGroupName);
+  });
+
+  test(
+      'rename tag-group should throw exception when new tag-group name is empty',
+      () async {
+    // given
+    var localeEnglish = const Locale("en");
+    var tagGroup = await testDatabase.addTagGroup('a tag-group');
+
+    // expect
+    expect(() => testDatabase.renameTagGroup(tagGroup.id, '', localeEnglish),
+        throwsA(isA<EmptyNameException>()));
+  });
+
+  test(
+      'rename tag-group should throw exception when new tag-group name > 50 chars',
+      () async {
+    // given
+    var localeEnglish = const Locale("en");
+    var tagGroup = await testDatabase.addTagGroup('a tag-group');
+    var newTagGroupName = '012345678901234567890123456789012345678901234567890';
+
+    // expect
+    expect(
+        () => testDatabase.renameTagGroup(
+            tagGroup.id, newTagGroupName, localeEnglish),
+        throwsA(isA<NameTooLongException>()));
+  });
+
+  test(
+      'rename tag-group should throw exception when there is already tag-group with same name',
+      () async {
+    // given
+    var localeEnglish = const Locale("en");
+    await testDatabase.addTagGroup('first tag-group');
+    var tagGroup = await testDatabase.addTagGroup('second tag-group');
+
+    // expect
+    expect(
+        () => testDatabase.renameTagGroup(
+            tagGroup.id, 'first tag-group', localeEnglish),
+        throwsA(isA<NameAlreadyExistsException>()));
+  });
 }
