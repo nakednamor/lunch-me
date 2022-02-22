@@ -129,11 +129,16 @@ class MyDatabase extends _$MyDatabase {
 
   Future<List<TagGroupWithTags>> getAllTagsWithGroups(Locale locale) async {
     var query = select(tagGroups).join([
-      innerJoin(localizedTagGroups,
-          localizedTagGroups.tagGroup.equalsExp(tagGroups.id)),
       innerJoin(languages, localizedTagGroups.lang.equalsExp(languages.id)),
+      innerJoin(
+          localizedTagGroups,
+          localizedTagGroups.tagGroup.equalsExp(tagGroups.id) &
+              localizedTagGroups.lang.equalsExp(languages.id)),
       leftOuterJoin(tags, tags.tagGroup.equalsExp(tagGroups.id)),
-      leftOuterJoin(localizedTags, localizedTags.tag.equalsExp(tags.id)),
+      leftOuterJoin(
+          localizedTags,
+          localizedTags.tag.equalsExp(tags.id) &
+              localizedTags.lang.equalsExp(languages.id)),
     ])
       ..where(languages.lang.equals(locale.languageCode))
       ..orderBy([
