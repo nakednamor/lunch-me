@@ -205,13 +205,14 @@ class MyDatabase extends _$MyDatabase {
         LocalizedTagGroupsCompanion.insert(
             tagGroup: newTagGroup.id, lang: language, label: name));
 
-    batch((batch) => batch.insertAll(localizedTagGroups, batches));
+    await batch((batch) => batch.insertAll(localizedTagGroups, batches));
 
     return newTagGroup;
   }
 
   Future<void> renameTagGroup(
       int tagGroupId, String newName, Locale locale) async {
+    await _validateTagGroupName(newName);
     var language = await _getLanguage(locale);
     (update(localizedTagGroups)
           ..where((tbl) =>
