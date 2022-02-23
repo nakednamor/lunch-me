@@ -185,4 +185,39 @@ void main() {
             tagGroup.id, 'first tag-group', localeEnglish),
         throwsA(isA<NameAlreadyExistsException>()));
   });
+
+  test('should allow changing order of tag-groups', () async {
+    // given
+    var initialTagGroups = await testDatabase.getAllTagGroups();
+    expect(initialTagGroups.map((e) => e.id), containsAllInOrder([2, 1, 3]));
+
+    // when group #3 is moved to second position
+    await testDatabase.changeTagGroupOrdering(
+        initialTagGroups.elementAt(2).id, 1);
+
+    // then
+    var tagGroups = await testDatabase.getAllTagGroups();
+    expect(tagGroups.map((e) => e.id), containsAllInOrder([2, 3, 1]));
+    expect(tagGroups.map((e) => e.ordering), containsAllInOrder([0,1,2]));
+
+    // when group #2 is moved to last position
+    await testDatabase.changeTagGroupOrdering(
+        initialTagGroups.elementAt(0).id, 2);
+
+    // then
+    tagGroups = await testDatabase.getAllTagGroups();
+    expect(tagGroups.map((e) => e.id), containsAllInOrder([1, 3, 2]));
+  });
+
+  test('should throw exception when tag-group not found by id', () async {
+    // expect
+    expect(() => testDatabase.changeTagGroupOrdering(999, 1),
+        throwsA(isA<TagGroupNotFoundException>()));
+  });
+
+  test('should throw exception when new ordering value negative', () async {
+    // expect
+    expect(() => testDatabase.changeTagGroupOrdering(1, -1),
+        throwsA(isA<NegativeValueException>()));
+  });
 }
