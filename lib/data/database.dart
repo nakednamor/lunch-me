@@ -225,6 +225,36 @@ class MyDatabase extends _$MyDatabase {
         .write(LocalizedTagGroupsCompanion(label: Value(newName)));
   }
 
+  Future<List<TagGroup>> getAllTagGroups() {
+    return (select(tagGroups)..orderBy([(t) => OrderingTerm.asc(t.ordering)]))
+        .get();
+  }
+
+  Future<void> changeTagGroupOrdering(int tagGroupId, int newOrder) async {
+    if (newOrder < 0) {
+      throw NegativeValueException(newOrder);
+    }
+
+    var allTagGroups = await getAllTagGroups();
+    var target = allTagGroups.singleWhere((element) => element.id == tagGroupId,
+        orElse: () => throw TagGroupNotFoundException(tagGroupId));
+    var currentOrdering = target.ordering;
+
+    var otherTarget =
+        allTagGroups.singleWhere((element) => element.ordering == newOrder);
+
+    var lastOrdering = (await lastTagGroupOrdering().getSingle()) ?? 0;
+
+    await (update(tagGroups)..where((tbl) => tbl.id.equals(otherTarget.id)))
+        .write(TagGroupsCompanion(ordering: Value(lastOrdering + 1)));
+
+    await (update(tagGroups)..where((tbl) => tbl.id.equals(target.id)))
+        .write(TagGroupsCompanion(ordering: Value(newOrder)));
+
+    await (update(tagGroups)..where((tbl) => tbl.id.equals(otherTarget.id)))
+        .write(TagGroupsCompanion(ordering: Value(currentOrdering)));
+  }
+
   Future<Language> _getLanguage(Locale locale) async {
     return (select(languages)
           ..where((tbl) => tbl.lang.equals(locale.languageCode)))
@@ -301,4 +331,16 @@ class NameTooLongException implements Exception {
   String cause;
 
   NameTooLongException(this.cause);
+}
+
+class TagGroupNotFoundException implements Exception {
+  int cause;
+
+  TagGroupNotFoundException(this.cause);
+}
+
+class NegativeValueException implements Exception {
+  int cause;
+
+  NegativeValueException(this.cause);
 }
