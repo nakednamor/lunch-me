@@ -198,7 +198,7 @@ void main() {
     // then
     var tagGroups = await testDatabase.getAllTagGroups();
     expect(tagGroups.map((e) => e.id), containsAllInOrder([2, 3, 1]));
-    expect(tagGroups.map((e) => e.ordering), containsAllInOrder([0,1,2]));
+    expect(tagGroups.map((e) => e.ordering), containsAllInOrder([0, 1, 2]));
 
     // when group #2 is moved to last position
     await testDatabase.changeTagGroupOrdering(
@@ -209,7 +209,9 @@ void main() {
     expect(tagGroups.map((e) => e.id), containsAllInOrder([1, 3, 2]));
   });
 
-  test('should throw exception when tag-group not found by id', () async {
+  test(
+      'should throw exception when tag-group not found by id while changing tag-group ordering',
+      () async {
     // expect
     expect(() => testDatabase.changeTagGroupOrdering(999, 1),
         throwsA(isA<TagGroupNotFoundException>()));
@@ -219,5 +221,49 @@ void main() {
     // expect
     expect(() => testDatabase.changeTagGroupOrdering(1, -1),
         throwsA(isA<NegativeValueException>()));
+  });
+
+  test('should proper remove tag-groups', () async {
+    // given
+    var tagGroupIdToDelete = 2;
+    var affectedTagIds = [1, 2];
+    var affectedRecipeIds = [2, 3];
+
+    var tagGroupsBefore = await testDatabase.getAllTagGroups();
+    expect(tagGroupsBefore.map((e) => e.id), contains(tagGroupIdToDelete));
+
+    var tagsBefore = await testDatabase.getAllTags();
+    expect(tagsBefore.map((e) => e.id), containsAll(affectedTagIds));
+
+    var recipesBefore = (await testDatabase.getAllRecipeWithTags()).where(
+        (element) =>
+            element.tags.any((tag) => affectedTagIds.contains(tag.id)));
+    expect(
+        recipesBefore.map((e) => e.recipe.id), containsAll(affectedRecipeIds));
+
+    // when
+    await testDatabase.deleteTagGroup(tagGroupIdToDelete);
+
+    // then
+    var tagGroupsAfter = await testDatabase.getAllTagGroups();
+    expect(
+        tagGroupsAfter.map((e) => e.id), isNot(contains(tagGroupIdToDelete)));
+
+    var tagsAfter = await testDatabase.getAllTags();
+    expect(tagsAfter.map((e) => e.id), isNot(containsAll(affectedTagIds)));
+
+    var recipesAfter = (await testDatabase.getAllRecipeWithTags()).where(
+        (element) =>
+            element.tags.any((tag) => affectedTagIds.contains(tag.id)));
+    expect(recipesAfter.map((e) => e.recipe.id),
+        isNot(containsAll(affectedRecipeIds)));
+  });
+
+  test(
+      'should throw exception when tag-group not found by id while deleting tag-group',
+      () async {
+    // expect
+    expect(() => testDatabase.deleteTagGroup(999),
+        throwsA(isA<TagGroupNotFoundException>()));
   });
 }

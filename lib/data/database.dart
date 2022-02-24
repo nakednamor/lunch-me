@@ -31,7 +31,8 @@ class LocalizedTagGroups extends Table {
 
   IntColumn get id => integer().autoIncrement()();
 
-  IntColumn get tagGroup => integer().references(TagGroups, #id)();
+  IntColumn get tagGroup =>
+      integer().references(TagGroups, #id, onDelete: KeyAction.cascade)();
 
   IntColumn get lang => integer().references(Languages, #id)();
 
@@ -44,7 +45,8 @@ class Tags extends Table {
 
   IntColumn get id => integer().autoIncrement()();
 
-  IntColumn get tagGroup => integer().references(TagGroups, #id)();
+  IntColumn get tagGroup =>
+      integer().references(TagGroups, #id, onDelete: KeyAction.cascade)();
 
   IntColumn get ordering => integer()();
 }
@@ -55,7 +57,8 @@ class LocalizedTags extends Table {
 
   IntColumn get id => integer().autoIncrement()();
 
-  IntColumn get tag => integer().references(Tags, #id)();
+  IntColumn get tag =>
+      integer().references(Tags, #id, onDelete: KeyAction.cascade)();
 
   IntColumn get lang => integer().references(Languages, #id)();
 
@@ -77,9 +80,11 @@ class Recipes extends Table {
 enum Source { web, video, photo }
 
 class RecipeTags extends Table {
-  IntColumn get recipe => integer()();
+  IntColumn get recipe =>
+      integer().references(Recipes, #id, onDelete: KeyAction.cascade)();
 
-  IntColumn get tag => integer()();
+  IntColumn get tag =>
+      integer().references(Tags, #id, onDelete: KeyAction.cascade)();
 
   @override
   Set<Column> get primaryKey => {recipe, tag};
@@ -126,6 +131,12 @@ class MyDatabase extends _$MyDatabase {
 
   @override
   int get schemaVersion => 1;
+
+  @override
+  MigrationStrategy get migration =>
+      MigrationStrategy(beforeOpen: (details) async {
+        await customStatement('PRAGMA foreign_keys = ON');
+      });
 
   Future<List<TagGroupWithTags>> getAllTagsWithGroups(Locale locale) async {
     var query = select(tagGroups).join([
@@ -230,6 +241,10 @@ class MyDatabase extends _$MyDatabase {
         .get();
   }
 
+  Future<List<Tag>> getAllTags() {
+    return (select(tags)).get();
+  }
+
   Future<void> changeTagGroupOrdering(int tagGroupId, int newOrder) async {
     if (newOrder < 0) {
       throw NegativeValueException(newOrder);
@@ -253,6 +268,17 @@ class MyDatabase extends _$MyDatabase {
 
     await (update(tagGroups)..where((tbl) => tbl.id.equals(otherTarget.id)))
         .write(TagGroupsCompanion(ordering: Value(currentOrdering)));
+  }
+
+  Future<void> deleteTagGroup(int tagGroupId) async {
+    var tagGroup = await (select(tagGroups)
+          ..where((tbl) => tbl.id.equals(tagGroupId)))
+        .getSingleOrNull();
+    if (tagGroup == null) {
+      throw TagGroupNotFoundException(tagGroupId);
+    }
+
+    await (delete(tagGroups)..where((tbl) => tbl.id.equals(tagGroupId))).go();
   }
 
   Future<Language> _getLanguage(Locale locale) async {
