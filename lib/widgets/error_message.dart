@@ -4,13 +4,13 @@ Widget errorMessage(String message) {
   return Card(
     child: Padding(
       child: Center(
-      child: Text(
-        message,
-        style: const TextStyle(
-          color: Colors.red,
-          fontWeight: FontWeight.bold,
+        child: Text(
+          message,
+          style: const TextStyle(
+            color: Colors.red,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
       ),
       padding: const EdgeInsets.all(8.0),
     ),
