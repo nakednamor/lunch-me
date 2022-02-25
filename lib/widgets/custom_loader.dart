@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
 
-Widget CustomLoader() {
-  return Center(child: CircularProgressIndicator());
+Widget buildCustomLoader() {
+  return const Center(child: CircularProgressIndicator());
 }

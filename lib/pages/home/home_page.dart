@@ -1,9 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:lunch_me/data/database.dart';
 import 'package:lunch_me/widgets/custom_loader.dart';
+import 'package:lunch_me/widgets/error_message.dart';
 
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -16,32 +16,34 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Future<List<TagGroupWithTags>>? getTagGroupsWithTags;
-  Future<List<RecipeWithTags>>? getAllRecipes;
+  late final Future<List<TagGroupWithTags>> _getTagGroupsWithTags;
+  late final Future<List<RecipeWithTags>> _getAllRecipes;
   late final MyDatabase database;
   late final Locale locale;
   late final Future<String> test;
 
   final List<String> _selectedTags = <String>[];
 
-  void initializeDatabaseFutures() async {
+  void initializeData() {
     database = Provider.of<MyDatabase>(context, listen: false);
     locale = Localizations.localeOf(context);
-    getTagGroupsWithTags = database.getAllTagsWithGroups(locale);
-    getAllRecipes = database.getAllRecipeWithTags();
+    _getTagGroupsWithTags = database.getAllTagsWithGroups(locale);
+    _getAllRecipes = database.getAllRecipeWithTags();
   }
 
   @override
-  void initState() {
-    WidgetsBinding.instance
-        ?.addPostFrameCallback((_) => initializeDatabaseFutures());
+  void didChangeDependencies() {
+    initializeData();
 
-    super.initState();
+    super.didChangeDependencies();
   }
 
-  Widget _createRecipesListView(AsyncSnapshot snapshot) {
-    final List<RecipeWithTags>? _recipesWithTags = snapshot.data;
-    if(_recipesWithTags == null) return Text("Could not fetch recipes");
+  Widget _buildRecipeListView(AsyncSnapshot snapshot) {
+    if (!snapshot.hasData) {
+      return errorMessage(AppLocalizations.of(context)!.errorNoRecipesFound);
+    }
+
+    final List<RecipeWithTags> _recipesWithTags = snapshot.data!;
     return ListView(
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
@@ -74,8 +76,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _createTagGroupsListView(AsyncSnapshot snapshot) {
-    final List<TagGroupWithTags>? _tagGroupsWithTags = snapshot.data;
-    if(_tagGroupsWithTags == null) return Text("Could not fetch tags");
+    if (!snapshot.hasData) {
+      return errorMessage(AppLocalizations.of(context)!.errorNoTagsFound);
+    }
+
+    final List<TagGroupWithTags> _tagGroupsWithTags = snapshot.data!;
     return ListView(
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
@@ -127,20 +132,15 @@ class _HomePageState extends State<HomePage> {
         appBar: AppBar(
           title: Text(AppLocalizations.of(context)!.greeting),
         ),
-        //body: _buildTagGroups(),
         body: Column(children: [
           Flexible(
-            child: FutureBuilder(
-                future: getAllRecipes,
-                initialData: const [],
-                builder:
-                    (BuildContext context, AsyncSnapshot recipesSnapshot) {
-                  if (!recipesSnapshot.hasData)
-                    return Text("Could not fetch recipes!");
+            child: FutureBuilder<List<RecipeWithTags>>(
+                future: _getAllRecipes,
+                builder: (BuildContext context, AsyncSnapshot recipesSnapshot) {
                   return recipesSnapshot.connectionState ==
                           ConnectionState.waiting
-                      ? CustomLoader()
-                      : _createRecipesListView(recipesSnapshot);
+                      ? buildCustomLoader()
+                      : _buildRecipeListView(recipesSnapshot);
                 }),
           ),
           Container(
@@ -149,24 +149,19 @@ class _HomePageState extends State<HomePage> {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.5), //color of shadow
+                  color: Colors.grey.withOpacity(0.5),
                   spreadRadius: 5, //spread radius
                   blurRadius: 7, // blur radius
-                  offset: Offset(0, 2), // changes position of shadow
-                  //first paramerter of offset is left-right
-                  //second parameter is top to down
+                  offset: const Offset(0, 2),
                 ),
                 //you can set more BoxShadow() here
               ],
             ),
-            child: FutureBuilder(
-                future: getTagGroupsWithTags,
-                initialData: const [],
+            child: FutureBuilder<List<TagGroupWithTags>>(
+                future: _getTagGroupsWithTags,
                 builder: (BuildContext context, AsyncSnapshot tagsSnapshot) {
-                  if (!tagsSnapshot.hasData)
-                    return Text("Could not fetch tags!");
                   return tagsSnapshot.connectionState == ConnectionState.waiting
-                      ? CustomLoader()
+                      ? buildCustomLoader()
                       : _createTagGroupsListView(tagsSnapshot);
                 }),
           ),
