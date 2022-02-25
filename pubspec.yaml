@@ -49,7 +49,6 @@ dependencies:
   path: ^1.8.0
   provider: ^6.0.2
 
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
