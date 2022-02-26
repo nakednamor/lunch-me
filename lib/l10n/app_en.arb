@@ -1,5 +1,8 @@
 {
     "title": "Lunch Me!",
     "greeting": "Hello!",
-    "buttonCount": "You have pushed the button this many times:"
+    "recipes": "Your recipes:",
+    "error": "Ooops. Some error occured.",
+    "errorNoTagsFound": "Sorry, we could not find any tags.",
+    "errorNoRecipesFound": "Sorry, we could not find any recipes."
 }
