@@ -121,10 +121,6 @@ class MyDatabase extends _$MyDatabase {
       return RecipeWithTags(recipe, tags);
     }).toList();
   }
-
-  Future<List<TagGroup>> getAllTagGroups() {
-    return allTagGroups().get();
-  }
 }
 
 class TagGroupWithTag {

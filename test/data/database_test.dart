@@ -188,7 +188,7 @@ void main() {
 
   test('should allow changing order of tag-groups', () async {
     // given
-    var initialTagGroups = await testDatabase.getAllTagGroups();
+    var initialTagGroups = await testDatabase.tagGroupDao.getAllTagGroups();
     expect(initialTagGroups.map((e) => e.id), containsAllInOrder([2, 1, 3]));
 
     // when group #3 is moved to second position
@@ -196,7 +196,7 @@ void main() {
         initialTagGroups.elementAt(2).id, 1);
 
     // then
-    var tagGroups = await testDatabase.getAllTagGroups();
+    var tagGroups = await testDatabase.tagGroupDao.getAllTagGroups();
     expect(tagGroups.map((e) => e.id), containsAllInOrder([2, 3, 1]));
     expect(tagGroups.map((e) => e.ordering), containsAllInOrder([0, 1, 2]));
 
@@ -205,7 +205,7 @@ void main() {
         initialTagGroups.elementAt(0).id, 2);
 
     // then
-    tagGroups = await testDatabase.getAllTagGroups();
+    tagGroups = await testDatabase.tagGroupDao.getAllTagGroups();
     expect(tagGroups.map((e) => e.id), containsAllInOrder([1, 3, 2]));
   });
 
@@ -229,7 +229,7 @@ void main() {
     var affectedTagIds = [1, 2];
     var affectedRecipeIds = [2, 3];
 
-    var tagGroupsBefore = await testDatabase.getAllTagGroups();
+    var tagGroupsBefore = await testDatabase.tagGroupDao.getAllTagGroups();
     expect(tagGroupsBefore.map((e) => e.id), contains(tagGroupIdToDelete));
 
     var tagsBefore = await testDatabase.tagDao.getAllTags();
@@ -245,7 +245,7 @@ void main() {
     await testDatabase.tagGroupDao.deleteTagGroup(tagGroupIdToDelete);
 
     // then
-    var tagGroupsAfter = await testDatabase.getAllTagGroups();
+    var tagGroupsAfter = await testDatabase.tagGroupDao.getAllTagGroups();
     expect(
         tagGroupsAfter.map((e) => e.id), isNot(contains(tagGroupIdToDelete)));
 
