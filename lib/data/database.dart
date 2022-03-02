@@ -9,6 +9,7 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'tables.dart';
+import 'exceptions.dart';
 
 part 'database.g.dart';
 
@@ -237,34 +238,4 @@ class RecipeWithTag {
   final Tag? tag;
 
   RecipeWithTag(this.recipe, this.tag);
-}
-
-class NameAlreadyExistsException implements Exception {
-  String cause;
-
-  NameAlreadyExistsException(this.cause);
-}
-
-class EmptyNameException implements Exception {
-  String cause;
-
-  EmptyNameException(this.cause);
-}
-
-class NameTooLongException implements Exception {
-  String cause;
-
-  NameTooLongException(this.cause);
-}
-
-class TagGroupNotFoundException implements Exception {
-  int cause;
-
-  TagGroupNotFoundException(this.cause);
-}
-
-class NegativeValueException implements Exception {
-  int cause;
-
-  NegativeValueException(this.cause);
 }
