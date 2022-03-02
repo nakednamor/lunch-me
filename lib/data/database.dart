@@ -41,6 +41,9 @@ LazyDatabase _openConnection() {
     Recipes,
     RecipeTags
   ],
+  include: {
+    'queries.drift'
+  },
   queries: {'lastTagGroupOrdering': 'SELECT MAX(ordering) FROM tag_groups;'},
 )
 class MyDatabase extends _$MyDatabase {
@@ -93,7 +96,7 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Future<List<Language>> getAllLanguages() {
-    return select(languages).get();
+    return allLanguages().get();
   }
 
   Future<List<RecipeWithTags>> getAllRecipeWithTags() async {
@@ -156,12 +159,11 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Future<List<TagGroup>> getAllTagGroups() {
-    return (select(tagGroups)..orderBy([(t) => OrderingTerm.asc(t.ordering)]))
-        .get();
+    return allTagGroups().get();
   }
 
   Future<List<Tag>> getAllTags() {
-    return (select(tags)).get();
+    return allTags().get();
   }
 
   Future<void> changeTagGroupOrdering(int tagGroupId, int newOrder) async {
