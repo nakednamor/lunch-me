@@ -8,6 +8,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'dao/languageDao.dart';
 import 'tables.dart';
 import 'exceptions.dart';
 
@@ -42,6 +43,7 @@ LazyDatabase _openConnection() {
     Recipes,
     RecipeTags
   ],
+  daos: [LanguageDao],
   include: {'queries.drift'}
 )
 class MyDatabase extends _$MyDatabase {
@@ -93,10 +95,6 @@ class MyDatabase extends _$MyDatabase {
     }).toList();
   }
 
-  Future<List<Language>> getAllLanguages() {
-    return allLanguages().get();
-  }
-
   Future<List<RecipeWithTags>> getAllRecipeWithTags() async {
     var query = select(recipes).join([
       leftOuterJoin(recipeTags, recipeTags.recipe.equalsExp(recipes.id)),
@@ -133,7 +131,7 @@ class MyDatabase extends _$MyDatabase {
 
     var newTagGroup = await getTagGroupById(newTagGroupId).getSingle();
 
-    var availableLanguages = await allLanguages().get();
+    var availableLanguages = await languageDao.getAllLanguages();
     var languageIds = availableLanguages.map((e) => e.id);
 
     var batches = languageIds.map((language) =>
@@ -148,7 +146,7 @@ class MyDatabase extends _$MyDatabase {
   Future<void> renameTagGroup(
       int tagGroupId, String newName, Locale locale) async {
     await _validateTagGroupName(newName);
-    var language = await _getLanguage(locale);
+    var language = await languageDao.getLanguage(locale);
     await renameTagGroupLabel(newName, tagGroupId, language.id);
   }
 
@@ -186,10 +184,6 @@ class MyDatabase extends _$MyDatabase {
     if(deletedGroupCount != 1) {
       throw TagGroupNotFoundException(tagGroupId);
     }
-  }
-
-  Future<Language> _getLanguage(Locale locale) async {
-    return getLanguageByLang(locale.languageCode).getSingle();
   }
 
   Future<int> _countTagGroupsWithName(String name) async {

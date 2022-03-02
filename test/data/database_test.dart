@@ -20,7 +20,7 @@ void main() {
 
   test('should return all languages', () async {
     // when
-    var languages = await testDatabase.getAllLanguages();
+    var languages = await testDatabase.languageDao.getAllLanguages();
 
     // then
     expect(languages.length, 2);
