@@ -201,9 +201,7 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Future<Language> _getLanguage(Locale locale) async {
-    return (select(languages)
-          ..where((tbl) => tbl.lang.equals(locale.languageCode)))
-        .getSingle();
+    return getLanguageByLang(locale.languageCode).getSingle();
   }
 
   Future<int> _countTagGroupsWithName(String name) async {
