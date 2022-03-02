@@ -5,14 +5,13 @@ import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:lunch_me/data/dao/languageDao.dart';
 import 'package:lunch_me/data/dao/tagDao.dart';
 import 'package:lunch_me/data/dao/tagGroupDao.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'dao/languageDao.dart';
 import 'tables.dart';
-import 'exceptions.dart';
 
 part 'database.g.dart';
 
@@ -35,23 +34,21 @@ LazyDatabase _openConnection() {
   });
 }
 
-@DriftDatabase(
-  tables: [
-    Languages,
-    TagGroups,
-    LocalizedTagGroups,
-    Tags,
-    LocalizedTags,
-    Recipes,
-    RecipeTags
-  ],
-  daos: [
-    LanguageDao,
-    TagDao,
-    TagGroupDao
-  ],
-  include: {'queries.drift'}
-)
+@DriftDatabase(tables: [
+  Languages,
+  TagGroups,
+  LocalizedTagGroups,
+  Tags,
+  LocalizedTags,
+  Recipes,
+  RecipeTags
+], daos: [
+  LanguageDao,
+  TagDao,
+  TagGroupDao
+], include: {
+  'queries.drift'
+})
 class MyDatabase extends _$MyDatabase {
   MyDatabase() : super(_openConnection());
 
@@ -127,27 +124,6 @@ class MyDatabase extends _$MyDatabase {
 
   Future<List<TagGroup>> getAllTagGroups() {
     return allTagGroups().get();
-  }
-
-  Future<void> changeTagGroupOrdering(int tagGroupId, int newOrder) async {
-    if (newOrder < 0) {
-      throw NegativeValueException(newOrder);
-    }
-
-    var target = await _getTagGroupById(tagGroupId).getSingleOrNull();
-    if(target == null) {
-      throw TagGroupNotFoundException(tagGroupId);
-    }
-
-    var otherTarget = await getTagGroupByOrdering(newOrder).getSingle();  // TODO potential bug if newOrder > max(ordering)
-
-    var currentOrdering = target.ordering;
-
-    var lastOrdering = (await _getMaxTagGroupOrdering().getSingle()) ?? 0;
-
-    await updateOrderingOfTagGroup( (lastOrdering + 1), otherTarget.id);
-    await updateOrderingOfTagGroup( newOrder, target.id);
-    await updateOrderingOfTagGroup( currentOrdering, otherTarget.id);
   }
 }
 

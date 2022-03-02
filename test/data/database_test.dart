@@ -192,7 +192,7 @@ void main() {
     expect(initialTagGroups.map((e) => e.id), containsAllInOrder([2, 1, 3]));
 
     // when group #3 is moved to second position
-    await testDatabase.changeTagGroupOrdering(
+    await testDatabase.tagGroupDao.changeTagGroupOrdering(
         initialTagGroups.elementAt(2).id, 1);
 
     // then
@@ -201,7 +201,7 @@ void main() {
     expect(tagGroups.map((e) => e.ordering), containsAllInOrder([0, 1, 2]));
 
     // when group #2 is moved to last position
-    await testDatabase.changeTagGroupOrdering(
+    await testDatabase.tagGroupDao.changeTagGroupOrdering(
         initialTagGroups.elementAt(0).id, 2);
 
     // then
@@ -213,13 +213,13 @@ void main() {
       'should throw exception when tag-group not found by id while changing tag-group ordering',
       () async {
     // expect
-    expect(() => testDatabase.changeTagGroupOrdering(999, 1),
+    expect(() => testDatabase.tagGroupDao.changeTagGroupOrdering(999, 1),
         throwsA(isA<TagGroupNotFoundException>()));
   });
 
   test('should throw exception when new ordering value negative', () async {
     // expect
-    expect(() => testDatabase.changeTagGroupOrdering(1, -1),
+    expect(() => testDatabase.tagGroupDao.changeTagGroupOrdering(1, -1),
         throwsA(isA<NegativeValueException>()));
   });
 
