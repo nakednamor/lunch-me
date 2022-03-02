@@ -232,7 +232,7 @@ void main() {
     var tagGroupsBefore = await testDatabase.getAllTagGroups();
     expect(tagGroupsBefore.map((e) => e.id), contains(tagGroupIdToDelete));
 
-    var tagsBefore = await testDatabase.getAllTags();
+    var tagsBefore = await testDatabase.tagDao.getAllTags();
     expect(tagsBefore.map((e) => e.id), containsAll(affectedTagIds));
 
     var recipesBefore = (await testDatabase.getAllRecipeWithTags()).where(
@@ -249,7 +249,7 @@ void main() {
     expect(
         tagGroupsAfter.map((e) => e.id), isNot(contains(tagGroupIdToDelete)));
 
-    var tagsAfter = await testDatabase.getAllTags();
+    var tagsAfter = await testDatabase.tagDao.getAllTags();
     expect(tagsAfter.map((e) => e.id), isNot(containsAll(affectedTagIds)));
 
     var recipesAfter = (await testDatabase.getAllRecipeWithTags()).where(

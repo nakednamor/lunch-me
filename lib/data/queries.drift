@@ -7,7 +7,7 @@ _allLanguages: SELECT * FROM languages ORDER BY lang ASC;
 _getLanguageByLang: SELECT * FROM languages WHERE lang = :lang;
 
 -- tags
-allTags: SELECT * FROM tags ORDER BY tag_group,ordering ASC;
+_allTags: SELECT * FROM tags ORDER BY tag_group,ordering ASC;
 
 -- tag-groups
 allTagGroups: SELECT * FROM tag_groups ORDER BY ordering ASC;

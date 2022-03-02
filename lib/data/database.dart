@@ -5,6 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:lunch_me/data/dao/tagDao.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -43,7 +44,10 @@ LazyDatabase _openConnection() {
     Recipes,
     RecipeTags
   ],
-  daos: [LanguageDao],
+  daos: [
+    LanguageDao,
+    TagDao
+  ],
   include: {'queries.drift'}
 )
 class MyDatabase extends _$MyDatabase {
@@ -152,10 +156,6 @@ class MyDatabase extends _$MyDatabase {
 
   Future<List<TagGroup>> getAllTagGroups() {
     return allTagGroups().get();
-  }
-
-  Future<List<Tag>> getAllTags() {
-    return allTags().get();
   }
 
   Future<void> changeTagGroupOrdering(int tagGroupId, int newOrder) async {
