@@ -19,4 +19,4 @@ updateOrderingOfTagGroup: UPDATE tag_groups SET ordering = :ordering WHERE id = 
 
 -- localized tag-groups
 countTagGroupByLabel: SELECT COUNT(label) AS tagGroupCount FROM localized_tag_groups WHERE label = :label;
-renameTagGroupLabel: UPDATE localized_tag_groups SET label = :label WHERE tag_group = :tagGroupId AND lang = :lang;
+_renameTagGroupLabel: UPDATE localized_tag_groups SET label = :label WHERE tag_group = :tagGroupId AND lang = :lang;

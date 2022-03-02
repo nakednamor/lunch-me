@@ -125,13 +125,6 @@ class MyDatabase extends _$MyDatabase {
     }).toList();
   }
 
-  Future<void> renameTagGroup(
-      int tagGroupId, String newName, Locale locale) async {
-    await _validateTagGroupName(newName);
-    var language = await languageDao.getLanguage(locale);
-    await renameTagGroupLabel(newName, tagGroupId, language.id);
-  }
-
   Future<List<TagGroup>> getAllTagGroups() {
     return allTagGroups().get();
   }

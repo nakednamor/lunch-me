@@ -121,7 +121,7 @@ void main() {
 
     // when
     var newTagGroupName = 'updated name!';
-    await testDatabase.renameTagGroup(
+    await testDatabase.tagGroupDao.renameTagGroup(
         tagGroup.id, newTagGroupName, localeEnglish);
 
     // then name from other locales should not be renamed
@@ -152,7 +152,7 @@ void main() {
     var tagGroup = await testDatabase.tagGroupDao.addTagGroup('a tag-group');
 
     // expect
-    expect(() => testDatabase.renameTagGroup(tagGroup.id, '', localeEnglish),
+    expect(() => testDatabase.tagGroupDao.renameTagGroup(tagGroup.id, '', localeEnglish),
         throwsA(isA<EmptyNameException>()));
   });
 
@@ -166,7 +166,7 @@ void main() {
 
     // expect
     expect(
-        () => testDatabase.renameTagGroup(
+        () => testDatabase.tagGroupDao.renameTagGroup(
             tagGroup.id, newTagGroupName, localeEnglish),
         throwsA(isA<NameTooLongException>()));
   });
@@ -181,7 +181,7 @@ void main() {
 
     // expect
     expect(
-        () => testDatabase.renameTagGroup(
+        () => testDatabase.tagGroupDao.renameTagGroup(
             tagGroup.id, 'first tag-group', localeEnglish),
         throwsA(isA<NameAlreadyExistsException>()));
   });

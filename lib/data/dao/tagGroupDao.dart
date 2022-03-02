@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:lunch_me/data/database.dart';
 
 import 'package:drift/drift.dart';
@@ -33,6 +35,13 @@ class TagGroupDao extends DatabaseAccessor<MyDatabase> with _$TagGroupDaoMixin {
     await batch((batch) => batch.insertAll(localizedTagGroups, batches));
 
     return newTagGroup;
+  }
+
+  Future<void> renameTagGroup(
+      int tagGroupId, String newName, Locale locale) async {
+    await _validateTagGroupName(newName);
+    var language = await attachedDatabase.languageDao.getLanguage(locale);
+    await _renameTagGroupLabel(newName, tagGroupId, language.id);
   }
 
   Future<void> _validateTagGroupName(String name) async {
