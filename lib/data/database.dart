@@ -41,9 +41,7 @@ LazyDatabase _openConnection() {
     Recipes,
     RecipeTags
   ],
-  include: {
-    'queries.drift'
-  },
+  include: {'queries.drift'},
   queries: {'lastTagGroupOrdering': 'SELECT MAX(ordering) FROM tag_groups;'},
 )
 class MyDatabase extends _$MyDatabase {
@@ -209,13 +207,7 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Future<int> _countTagGroupsWithName(String name) async {
-    var countExpression = countAll();
-    var countFilter = localizedTagGroups.label.equals(name);
-    var query = selectOnly(localizedTagGroups)
-      ..addColumns([countExpression])
-      ..where(countFilter);
-
-    return await query.map((p0) => p0.read(countExpression)).getSingle();
+    return countTagGroupByLabel(name).getSingle();
   }
 
   Future<void> _validateTagGroupName(String name) async {
