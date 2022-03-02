@@ -127,14 +127,12 @@ class MyDatabase extends _$MyDatabase {
 
     var newOrdering = lastOrdering == null ? 0 : lastOrdering + 1;
 
-    await into(tagGroups)
+    var newTagGroupId = await into(tagGroups)
         .insert(TagGroupsCompanion.insert(ordering: newOrdering));
 
-    var newTagGroup = await (select(tagGroups)
-          ..where((tbl) => tbl.ordering.equals(newOrdering)))
-        .getSingle();
+    var newTagGroup = await getTagGroupById(newTagGroupId).getSingle();
 
-    var availableLanguages = await select(languages).get();
+    var availableLanguages = await allLanguages().get();
     var languageIds = availableLanguages.map((e) => e.id);
 
     var batches = languageIds.map((language) =>
