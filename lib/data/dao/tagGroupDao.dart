@@ -44,6 +44,13 @@ class TagGroupDao extends DatabaseAccessor<MyDatabase> with _$TagGroupDaoMixin {
     await _renameTagGroupLabel(newName, tagGroupId, language.id);
   }
 
+  Future<void> deleteTagGroup(int tagGroupId) async {
+    var deletedGroupCount = await _deleteTagGroupById(tagGroupId);
+    if(deletedGroupCount != 1) {
+      throw TagGroupNotFoundException(tagGroupId);
+    }
+  }
+
   Future<void> _validateTagGroupName(String name) async {
     if (name.isEmpty) {
       throw EmptyNameException(name);

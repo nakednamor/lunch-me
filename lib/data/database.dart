@@ -149,32 +149,6 @@ class MyDatabase extends _$MyDatabase {
     await updateOrderingOfTagGroup( newOrder, target.id);
     await updateOrderingOfTagGroup( currentOrdering, otherTarget.id);
   }
-
-  Future<void> deleteTagGroup(int tagGroupId) async {
-    var deletedGroupCount = await deleteTagGroupById(tagGroupId);
-    if(deletedGroupCount != 1) {
-      throw TagGroupNotFoundException(tagGroupId);
-    }
-  }
-
-  Future<int> _countTagGroupsWithName(String name) async {
-    return countTagGroupByLabel(name).getSingle();
-  }
-
-  Future<void> _validateTagGroupName(String name) async {
-    if (name.isEmpty) {
-      throw EmptyNameException(name);
-    }
-
-    if (name.length > 50) {
-      throw NameTooLongException(name);
-    }
-
-    var groupCountWithSameName = await _countTagGroupsWithName(name);
-    if (groupCountWithSameName != 0) {
-      throw NameAlreadyExistsException(name);
-    }
-  }
 }
 
 class TagGroupWithTag {

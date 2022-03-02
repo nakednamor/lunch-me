@@ -11,7 +11,7 @@ _allTags: SELECT * FROM tags ORDER BY tag_group,ordering ASC;
 
 -- tag-groups
 allTagGroups: SELECT * FROM tag_groups ORDER BY ordering ASC;
-deleteTagGroupById: DELETE FROM tag_groups where id = :id;
+_deleteTagGroupById: DELETE FROM tag_groups where id = :id;
 _getTagGroupById: SELECT * FROM tag_groups WHERE id = :id;
 getTagGroupByOrdering: SELECT * FROM tag_groups WHERE ordering = :ordering;
 _getMaxTagGroupOrdering: SELECT MAX(ordering) FROM tag_groups;

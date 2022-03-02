@@ -242,7 +242,7 @@ void main() {
         recipesBefore.map((e) => e.recipe.id), containsAll(affectedRecipeIds));
 
     // when
-    await testDatabase.deleteTagGroup(tagGroupIdToDelete);
+    await testDatabase.tagGroupDao.deleteTagGroup(tagGroupIdToDelete);
 
     // then
     var tagGroupsAfter = await testDatabase.getAllTagGroups();
@@ -263,7 +263,7 @@ void main() {
       'should throw exception when tag-group not found by id while deleting tag-group',
       () async {
     // expect
-    expect(() => testDatabase.deleteTagGroup(999),
+    expect(() => testDatabase.tagGroupDao.deleteTagGroup(999),
         throwsA(isA<TagGroupNotFoundException>()));
   });
 }
