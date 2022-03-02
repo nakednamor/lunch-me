@@ -190,14 +190,10 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Future<void> deleteTagGroup(int tagGroupId) async {
-    var tagGroup = await (select(tagGroups)
-          ..where((tbl) => tbl.id.equals(tagGroupId)))
-        .getSingleOrNull();
-    if (tagGroup == null) {
+    var deletedGroupCount = await deleteTagGroupById(tagGroupId);
+    if(deletedGroupCount != 1) {
       throw TagGroupNotFoundException(tagGroupId);
     }
-
-    await (delete(tagGroups)..where((tbl) => tbl.id.equals(tagGroupId))).go();
   }
 
   Future<Language> _getLanguage(Locale locale) async {
