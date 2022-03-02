@@ -150,10 +150,7 @@ class MyDatabase extends _$MyDatabase {
       int tagGroupId, String newName, Locale locale) async {
     await _validateTagGroupName(newName);
     var language = await _getLanguage(locale);
-    (update(localizedTagGroups)
-          ..where((tbl) =>
-              tbl.tagGroup.equals(tagGroupId) & tbl.lang.equals(language.id)))
-        .write(LocalizedTagGroupsCompanion(label: Value(newName)));
+    await renameTagGroupLabel(newName, tagGroupId, language.id);
   }
 
   Future<List<TagGroup>> getAllTagGroups() {
