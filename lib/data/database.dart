@@ -6,6 +6,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:lunch_me/data/dao/tagDao.dart';
+import 'package:lunch_me/data/dao/tagGroupDao.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -46,7 +47,8 @@ LazyDatabase _openConnection() {
   ],
   daos: [
     LanguageDao,
-    TagDao
+    TagDao,
+    TagGroupDao
   ],
   include: {'queries.drift'}
 )
@@ -123,30 +125,6 @@ class MyDatabase extends _$MyDatabase {
     }).toList();
   }
 
-  Future<TagGroup> addTagGroup(String name) async {
-    await _validateTagGroupName(name);
-
-    var lastOrdering = await getMaxTagGroupOrdering().getSingleOrNull();
-
-    var newOrdering = lastOrdering == null ? 0 : lastOrdering + 1;
-
-    var newTagGroupId = await into(tagGroups)
-        .insert(TagGroupsCompanion.insert(ordering: newOrdering));
-
-    var newTagGroup = await getTagGroupById(newTagGroupId).getSingle();
-
-    var availableLanguages = await languageDao.getAllLanguages();
-    var languageIds = availableLanguages.map((e) => e.id);
-
-    var batches = languageIds.map((language) =>
-        LocalizedTagGroupsCompanion.insert(
-            tagGroup: newTagGroup.id, lang: language, label: name));
-
-    await batch((batch) => batch.insertAll(localizedTagGroups, batches));
-
-    return newTagGroup;
-  }
-
   Future<void> renameTagGroup(
       int tagGroupId, String newName, Locale locale) async {
     await _validateTagGroupName(newName);
@@ -163,7 +141,7 @@ class MyDatabase extends _$MyDatabase {
       throw NegativeValueException(newOrder);
     }
 
-    var target = await getTagGroupById(tagGroupId).getSingleOrNull();
+    var target = await _getTagGroupById(tagGroupId).getSingleOrNull();
     if(target == null) {
       throw TagGroupNotFoundException(tagGroupId);
     }
@@ -172,7 +150,7 @@ class MyDatabase extends _$MyDatabase {
 
     var currentOrdering = target.ordering;
 
-    var lastOrdering = (await getMaxTagGroupOrdering().getSingle()) ?? 0;
+    var lastOrdering = (await _getMaxTagGroupOrdering().getSingle()) ?? 0;
 
     await updateOrderingOfTagGroup( (lastOrdering + 1), otherTarget.id);
     await updateOrderingOfTagGroup( newOrder, target.id);

@@ -70,7 +70,7 @@ void main() {
         containsAllInOrder(["B de", "A de", "C de"]));
 
     //when
-    await testDatabase.addTagGroup("D en");
+    await testDatabase.tagGroupDao.addTagGroup("D en");
 
     // then
     var tagGroupsAfter = await testDatabase.getAllTagsWithGroups(englishLocale);
@@ -87,10 +87,10 @@ void main() {
       () async {
     // given
     var newTagGroupName = 'new tag-group name';
-    await testDatabase.addTagGroup(newTagGroupName);
+    await testDatabase.tagGroupDao.addTagGroup(newTagGroupName);
 
     // expect
-    expect(() => testDatabase.addTagGroup(newTagGroupName),
+    expect(() => testDatabase.tagGroupDao.addTagGroup(newTagGroupName),
         throwsA(isA<NameAlreadyExistsException>()));
   });
 
@@ -99,7 +99,7 @@ void main() {
     var newTagGroupName = '';
 
     // expect
-    expect(() => testDatabase.addTagGroup(newTagGroupName),
+    expect(() => testDatabase.tagGroupDao.addTagGroup(newTagGroupName),
         throwsA(isA<EmptyNameException>()));
   });
 
@@ -108,7 +108,7 @@ void main() {
     var newTagGroupName = '012345678901234567890123456789012345678901234567890';
 
     // expect
-    expect(() => testDatabase.addTagGroup(newTagGroupName),
+    expect(() => testDatabase.tagGroupDao.addTagGroup(newTagGroupName),
         throwsA(isA<NameTooLongException>()));
   });
 
@@ -117,7 +117,7 @@ void main() {
     var localeEnglish = const Locale("en");
     var localeGerman = const Locale("de");
     var tagGroupName = 'this should be renamed';
-    var tagGroup = await testDatabase.addTagGroup(tagGroupName);
+    var tagGroup = await testDatabase.tagGroupDao.addTagGroup(tagGroupName);
 
     // when
     var newTagGroupName = 'updated name!';
@@ -149,7 +149,7 @@ void main() {
       () async {
     // given
     var localeEnglish = const Locale("en");
-    var tagGroup = await testDatabase.addTagGroup('a tag-group');
+    var tagGroup = await testDatabase.tagGroupDao.addTagGroup('a tag-group');
 
     // expect
     expect(() => testDatabase.renameTagGroup(tagGroup.id, '', localeEnglish),
@@ -161,7 +161,7 @@ void main() {
       () async {
     // given
     var localeEnglish = const Locale("en");
-    var tagGroup = await testDatabase.addTagGroup('a tag-group');
+    var tagGroup = await testDatabase.tagGroupDao.addTagGroup('a tag-group');
     var newTagGroupName = '012345678901234567890123456789012345678901234567890';
 
     // expect
@@ -176,8 +176,8 @@ void main() {
       () async {
     // given
     var localeEnglish = const Locale("en");
-    await testDatabase.addTagGroup('first tag-group');
-    var tagGroup = await testDatabase.addTagGroup('second tag-group');
+    await testDatabase.tagGroupDao.addTagGroup('first tag-group');
+    var tagGroup = await testDatabase.tagGroupDao.addTagGroup('second tag-group');
 
     // expect
     expect(
