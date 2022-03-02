@@ -41,8 +41,7 @@ LazyDatabase _openConnection() {
     Recipes,
     RecipeTags
   ],
-  include: {'queries.drift'},
-  queries: {'lastTagGroupOrdering': 'SELECT MAX(ordering) FROM tag_groups;'},
+  include: {'queries.drift'}
 )
 class MyDatabase extends _$MyDatabase {
   MyDatabase() : super(_openConnection());
@@ -124,7 +123,8 @@ class MyDatabase extends _$MyDatabase {
   Future<TagGroup> addTagGroup(String name) async {
     await _validateTagGroupName(name);
 
-    var lastOrdering = (await lastTagGroupOrdering().getSingle());
+    var lastOrdering = await getMaxTagGroupOrdering().getSingleOrNull();
+
     var newOrdering = lastOrdering == null ? 0 : lastOrdering + 1;
 
     await into(tagGroups)
@@ -169,24 +169,20 @@ class MyDatabase extends _$MyDatabase {
       throw NegativeValueException(newOrder);
     }
 
-    var allTagGroups = await getAllTagGroups();
-    var target = allTagGroups.singleWhere((element) => element.id == tagGroupId,
-        orElse: () => throw TagGroupNotFoundException(tagGroupId));
+    var target = await getTagGroupById(tagGroupId).getSingleOrNull();
+    if(target == null) {
+      throw TagGroupNotFoundException(tagGroupId);
+    }
+
+    var otherTarget = await getTagGroupByOrdering(newOrder).getSingle();  // TODO potential bug if newOrder > max(ordering)
+
     var currentOrdering = target.ordering;
 
-    var otherTarget =
-        allTagGroups.singleWhere((element) => element.ordering == newOrder);
+    var lastOrdering = (await getMaxTagGroupOrdering().getSingle()) ?? 0;
 
-    var lastOrdering = (await lastTagGroupOrdering().getSingle()) ?? 0;
-
-    await (update(tagGroups)..where((tbl) => tbl.id.equals(otherTarget.id)))
-        .write(TagGroupsCompanion(ordering: Value(lastOrdering + 1)));
-
-    await (update(tagGroups)..where((tbl) => tbl.id.equals(target.id)))
-        .write(TagGroupsCompanion(ordering: Value(newOrder)));
-
-    await (update(tagGroups)..where((tbl) => tbl.id.equals(otherTarget.id)))
-        .write(TagGroupsCompanion(ordering: Value(currentOrdering)));
+    await updateOrderingOfTagGroup( (lastOrdering + 1), otherTarget.id);
+    await updateOrderingOfTagGroup( newOrder, target.id);
+    await updateOrderingOfTagGroup( currentOrdering, otherTarget.id);
   }
 
   Future<void> deleteTagGroup(int tagGroupId) async {
