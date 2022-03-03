@@ -69,3 +69,4 @@ doc/api/
 
 # this is automtically created by drift database
 /lib/data/database.g.dart
+/lib/data/dao/*.g.dart
