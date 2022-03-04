@@ -5,9 +5,9 @@ import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:lunch_me/data/dao/languageDao.dart';
-import 'package:lunch_me/data/dao/tagDao.dart';
-import 'package:lunch_me/data/dao/tagGroupDao.dart';
+import 'package:lunch_me/data/dao/language_dao.dart';
+import 'package:lunch_me/data/dao/tag_dao.dart';
+import 'package:lunch_me/data/dao/taggroup_dao.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 

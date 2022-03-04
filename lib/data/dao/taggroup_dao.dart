@@ -7,7 +7,7 @@ import 'package:lunch_me/data/tables.dart';
 
 import '../exceptions.dart';
 
-part 'tagGroupDao.g.dart';
+part 'taggroup_dao.g.dart';
 
 @DriftAccessor(tables: [TagGroups], include: {'../queries.drift'})
 class TagGroupDao extends DatabaseAccessor<MyDatabase> with _$TagGroupDaoMixin {

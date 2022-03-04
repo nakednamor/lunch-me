@@ -4,7 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:lunch_me/data/tables.dart';
 import 'package:lunch_me/data/database.dart';
 
-part 'languageDao.g.dart';
+part 'language_dao.g.dart';
 
 @DriftAccessor(tables: [Languages], include: {'../queries.drift'})
 class LanguageDao extends DatabaseAccessor<MyDatabase> with _$LanguageDaoMixin {

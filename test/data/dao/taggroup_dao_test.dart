@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lunch_me/data/dao/tagGroupDao.dart';
+import 'package:lunch_me/data/dao/taggroup_dao.dart';
 import 'package:lunch_me/data/exceptions.dart';
 
 import '../flutter_test_config.dart';

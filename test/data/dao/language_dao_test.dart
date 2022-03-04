@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lunch_me/data/dao/languageDao.dart';
+import 'package:lunch_me/data/dao/language_dao.dart';
 
 import '../flutter_test_config.dart';
 
