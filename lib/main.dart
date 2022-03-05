@@ -29,6 +29,11 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         // This is the theme of your application.
         primarySwatch: Colors.cyan,
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            primary: Colors.black, // This is a custom color variable
+          ),
+        ),
       ),
       localizationsDelegates: const [
         AppLocalizations.delegate,
