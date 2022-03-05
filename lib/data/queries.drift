@@ -1,0 +1,29 @@
+import 'tables.dart';
+
+-- todo: all should be private
+
+-- languages
+_allLanguages: SELECT * FROM languages ORDER BY lang ASC;
+_getLanguageByLang: SELECT * FROM languages WHERE lang = :lang;
+
+-- tags
+_allTags: SELECT * FROM tags ORDER BY tag_group,ordering ASC;
+
+-- tag-groups
+_allTagGroups: SELECT * FROM tag_groups ORDER BY ordering ASC;
+_deleteTagGroupById: DELETE FROM tag_groups where id = :id;
+_getTagGroupById: SELECT * FROM tag_groups WHERE id = :id;
+_getTagGroupByOrdering: SELECT * FROM tag_groups WHERE ordering = :ordering;
+_getMaxTagGroupOrdering: SELECT MAX(ordering) FROM tag_groups;
+_updateOrderingOfTagGroup: UPDATE tag_groups SET ordering = :ordering WHERE id = :id;
+
+-- localized tag-groups
+countTagGroupByLabel: SELECT COUNT(label) AS tagGroupCount FROM localized_tag_groups WHERE label = :label;
+_renameTagGroupLabel: UPDATE localized_tag_groups SET label = :label WHERE tag_group = :tagGroupId AND lang = :lang;
+
+-- recipes
+_allRecipesWithTags AS RecipeWithTags: SELECT recipe.**, LIST(
+        SELECT tags.* FROM recipe_has_tag rht INNER JOIN tags ON rht.tag = tags.id WHERE rht.recipe = recipe.id
+    ) AS tags
+    FROM recipes recipe
+    ORDER BY recipe.name;
