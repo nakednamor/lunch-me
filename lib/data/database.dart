@@ -69,12 +69,12 @@ class MyDatabase extends _$MyDatabase {
       innerJoin(
           localizedTagGroups,
           localizedTagGroups.tagGroup.equalsExp(tagGroups.id) &
-              localizedTagGroups.lang.equalsExp(languages.id)),
+          localizedTagGroups.lang.equalsExp(languages.id)),
       leftOuterJoin(tags, tags.tagGroup.equalsExp(tagGroups.id)),
       leftOuterJoin(
           localizedTags,
           localizedTags.tag.equalsExp(tags.id) &
-              localizedTags.lang.equalsExp(languages.id)),
+          localizedTags.lang.equalsExp(languages.id)),
     ])
       ..where(languages.lang.equals(locale.languageCode))
       ..orderBy([
@@ -82,8 +82,10 @@ class MyDatabase extends _$MyDatabase {
         OrderingTerm(expression: tags.ordering, mode: OrderingMode.asc)
       ]);
 
-    var tagGroupWithTagList = query.map((row) => TagGroupWithTag(
-        row.readTable(localizedTagGroups), row.readTableOrNull(localizedTags)));
+    var tagGroupWithTagList = query.map((row) =>
+        TagGroupWithTag(
+            row.readTable(localizedTagGroups),
+            row.readTableOrNull(localizedTags)));
 
     var tagGroupWithTagByTagGroup = (await tagGroupWithTagList.get())
         .groupListsBy((element) => element.tagGroup);
@@ -99,27 +101,7 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Future<List<RecipeWithTags>> getAllRecipeWithTags() async {
-    var query = select(recipes).join([
-      leftOuterJoin(recipeTags, recipeTags.recipe.equalsExp(recipes.id)),
-      leftOuterJoin(tags, tags.id.equalsExp(recipeTags.tag)),
-    ])
-      ..orderBy([OrderingTerm(expression: recipes.name)]);
-
-    var queryResult = query.map((row) {
-      var recipe = row.readTable(recipes);
-      var tag = row.readTableOrNull(tags);
-
-      return RecipeWithTag(recipe, tag);
-    });
-
-    var tagsGroupedByRecipe =
-        (await queryResult.get()).groupListsBy((element) => element.recipe);
-
-    return tagsGroupedByRecipe.entries.map((entry) {
-      var recipe = entry.key;
-      var tags = entry.value.map((e) => e.tag).whereType<Tag>().toList();
-      return RecipeWithTags(recipe, tags);
-    }).toList();
+    return _allRecipesWithTags().get();
   }
 }
 
@@ -135,18 +117,4 @@ class TagGroupWithTags {
   final List<LocalizedTag> tags;
 
   TagGroupWithTags(this.tagGroup, this.tags);
-}
-
-class RecipeWithTags {
-  final Recipe recipe;
-  final List<Tag> tags;
-
-  RecipeWithTags(this.recipe, this.tags);
-}
-
-class RecipeWithTag {
-  final Recipe recipe;
-  final Tag? tag;
-
-  RecipeWithTag(this.recipe, this.tag);
 }
