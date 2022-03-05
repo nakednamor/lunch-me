@@ -49,6 +49,8 @@ dependencies:
   path: ^1.8.0
   provider: ^6.0.2
 
+  url_launcher: ^6.0.20
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

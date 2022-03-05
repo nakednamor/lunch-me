@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
-
 import 'package:transparent_image/transparent_image.dart';
+
+// import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:lunch_me/data/database.dart';
 import 'package:lunch_me/widgets/error_message.dart';
@@ -48,24 +50,44 @@ class _RecipeListState extends State<RecipeList> {
 
   Widget _buildRecipeRow(RecipeWithTags recipeWithTags) {
     return Container(
-        margin: const EdgeInsets.all(8.0),
-        child: Row(
-          children: <Widget>[
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: FadeInImage.memoryNetwork(
-                width: MediaQuery.of(context).size.width * 0.2,
-                fit: BoxFit.cover,
-                placeholder: kTransparentImage,
-                image:
-                    recipeWithTags.recipe.image ?? kTransparentImage.toString(),
+      margin: const EdgeInsets.all(8.0),
+      child: Row(
+        children: <Widget>[
+          Stack(children: [
+            Container(
+                decoration: ShapeDecoration(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0)),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: FadeInImage.memoryNetwork(
+                  width: MediaQuery.of(context).size.width * 0.2,
+                  fit: BoxFit.cover,
+                  placeholder: kTransparentImage,
+                  image: recipeWithTags.recipe.image ??
+                      kTransparentImage.toString(),
+                )),
+            Positioned.fill(
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    _launchUrl(recipeWithTags.recipe.url);
+                  },
+                ),
               ),
             ),
-            Container(
-                margin: const EdgeInsets.only(left: 10),
-                child: Text(recipeWithTags.recipe.name)),
-          ],
-        ));
+          ]),
+          Container(
+              margin: const EdgeInsets.only(left: 10),
+              child: TextButton(
+                  onPressed: () {
+                    _launchUrl(recipeWithTags.recipe.url);
+                  },
+                  child: Text(recipeWithTags.recipe.name))),
+        ],
+      ),
+    );
   }
 
   @override
@@ -77,5 +99,20 @@ class _RecipeListState extends State<RecipeList> {
               ? buildCustomLoader()
               : _buildRecipeListView(recipesSnapshot);
         });
+  }
+}
+
+Future<void> _launchUrl(String? _url) async {
+  if (_url != null && _url.isNotEmpty) {
+    final bool _nativeAppLaunchSucceeded = await launch(
+      _url,
+      forceSafariVC: false,
+      universalLinksOnly: true,
+    );
+    if (!_nativeAppLaunchSucceeded &&
+        !await launch(_url,
+            forceWebView: true, forceSafariVC: true, enableJavaScript: true)) {
+      throw 'Could not launch $_url';
+    }
   }
 }
