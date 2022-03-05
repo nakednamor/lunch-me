@@ -1,7 +1,5 @@
 import 'tables.dart';
 
--- todo: all should be private
-
 -- languages
 _allLanguages: SELECT * FROM languages ORDER BY lang ASC;
 _getLanguageByLang: SELECT * FROM languages WHERE lang = :lang;
@@ -31,7 +29,7 @@ _allTagGroupsWithTags AS TagGroupWithTags: SELECT tagGroup.**, LIST(
 
 
 -- localized tag-groups
-countTagGroupByLabel: SELECT COUNT(label) AS tagGroupCount FROM localized_tag_groups WHERE label = :label;
+_countTagGroupByLabel: SELECT COUNT(label) AS tagGroupCount FROM localized_tag_groups WHERE label = :label;
 _renameTagGroupLabel: UPDATE localized_tag_groups SET label = :label WHERE tag_group = :tagGroupId AND lang = :lang;
 
 -- recipes

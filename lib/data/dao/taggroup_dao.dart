@@ -92,6 +92,6 @@ class TagGroupDao extends DatabaseAccessor<MyDatabase> with _$TagGroupDaoMixin {
   }
 
   Future<int> _countTagGroupsWithName(String name) async {
-    return countTagGroupByLabel(name).getSingle();
+    return _countTagGroupByLabel(name).getSingle();
   }
 }
