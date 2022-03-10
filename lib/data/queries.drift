@@ -31,10 +31,3 @@ _allTagGroupsWithTags AS TagGroupWithTags: SELECT tagGroup.**, LIST(
 -- localized tag-groups
 _countTagGroupByLabel: SELECT COUNT(label) AS tagGroupCount FROM localized_tag_groups WHERE label = :label;
 _renameTagGroupLabel: UPDATE localized_tag_groups SET label = :label WHERE tag_group = :tagGroupId AND lang = :lang;
-
--- recipes
-_allRecipesWithTags AS RecipeWithTags: SELECT recipe.**, LIST(
-        SELECT tags.* FROM recipe_has_tag rht INNER JOIN tags ON rht.tag = tags.id WHERE rht.recipe = recipe.id
-    ) AS tags
-    FROM recipes recipe
-    ORDER BY recipe.name;
