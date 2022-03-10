@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 
+import "package:collection/collection.dart";
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -67,6 +68,40 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Future<List<RecipeWithTags>> getAllRecipeWithTags() async {
-    return _allRecipesWithTags().get();
+    var query = select(recipes).join([
+      leftOuterJoin(recipeTags, recipeTags.recipe.equalsExp(recipes.id)),
+      leftOuterJoin(tags, tags.id.equalsExp(recipeTags.tag)),
+    ])
+      ..orderBy([OrderingTerm(expression: recipes.name)]);
+
+    var queryResult = query.map((row) {
+      var recipe = row.readTable(recipes);
+      var tag = row.readTableOrNull(tags);
+
+      return _RecipeWithTag(recipe, tag);
+    });
+
+    var tagsGroupedByRecipe =
+        (await queryResult.get()).groupListsBy((element) => element.recipe);
+
+    return tagsGroupedByRecipe.entries.map((entry) {
+      var recipe = entry.key;
+      var tags = entry.value.map((e) => e.tag).whereType<Tag>().toList();
+      return RecipeWithTags(recipe, tags);
+    }).toList();
   }
+}
+
+class RecipeWithTags {
+  final Recipe recipe;
+  final List<Tag> tags;
+
+  RecipeWithTags(this.recipe, this.tags);
+}
+
+class _RecipeWithTag {
+  final Recipe recipe;
+  final Tag? tag;
+
+  _RecipeWithTag(this.recipe, this.tag);
 }
