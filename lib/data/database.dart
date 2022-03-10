@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -64,57 +63,10 @@ class MyDatabase extends _$MyDatabase {
       });
 
   Future<List<TagGroupWithTags>> getAllTagsWithGroups(Locale locale) async {
-    var query = select(tagGroups).join([
-      innerJoin(languages, localizedTagGroups.lang.equalsExp(languages.id)),
-      innerJoin(
-          localizedTagGroups,
-          localizedTagGroups.tagGroup.equalsExp(tagGroups.id) &
-          localizedTagGroups.lang.equalsExp(languages.id)),
-      leftOuterJoin(tags, tags.tagGroup.equalsExp(tagGroups.id)),
-      leftOuterJoin(
-          localizedTags,
-          localizedTags.tag.equalsExp(tags.id) &
-          localizedTags.lang.equalsExp(languages.id)),
-    ])
-      ..where(languages.lang.equals(locale.languageCode))
-      ..orderBy([
-        OrderingTerm(expression: tagGroups.ordering, mode: OrderingMode.asc),
-        OrderingTerm(expression: tags.ordering, mode: OrderingMode.asc)
-      ]);
-
-    var tagGroupWithTagList = query.map((row) =>
-        TagGroupWithTag(
-            row.readTable(localizedTagGroups),
-            row.readTableOrNull(localizedTags)));
-
-    var tagGroupWithTagByTagGroup = (await tagGroupWithTagList.get())
-        .groupListsBy((element) => element.tagGroup);
-
-    return tagGroupWithTagByTagGroup.entries.map((entry) {
-      var tagGroup = entry.key;
-      var tags = entry.value.isEmpty
-          ? List<LocalizedTag>.empty()
-          : entry.value.map((e) => e.tag).whereType<LocalizedTag>().toList();
-
-      return TagGroupWithTags(tagGroup, tags);
-    }).toList();
+    return _allTagGroupsWithTags(locale.languageCode).get();
   }
 
   Future<List<RecipeWithTags>> getAllRecipeWithTags() async {
     return _allRecipesWithTags().get();
   }
-}
-
-class TagGroupWithTag {
-  final LocalizedTagGroup tagGroup;
-  final LocalizedTag? tag;
-
-  TagGroupWithTag(this.tagGroup, this.tag);
-}
-
-class TagGroupWithTags {
-  final LocalizedTagGroup tagGroup;
-  final List<LocalizedTag> tags;
-
-  TagGroupWithTags(this.tagGroup, this.tags);
 }
