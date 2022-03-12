@@ -51,6 +51,9 @@ dependencies:
 
   url_launcher: ^6.0.20
 
+  # ui widgets / helpers
+  flutter_speed_dial: ^5.0.0+1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

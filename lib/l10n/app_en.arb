@@ -2,6 +2,11 @@
     "title": "Lunch Me!",
     "greeting": "Hello!",
     "recipes": "Your recipes:",
+    "floatingMenuRecipes": "Recipes",
+    "floatingMenuTags": "Tags",
+    "editTags": "Edit tags",
+    "editRecipes": "Edit recipes",
+    "navigationBack": "Back",
     "error": "Ooops. Some error occured.",
     "errorNoTagsFound": "Sorry, we could not find any tags.",
     "errorNoRecipesFound": "Sorry, we could not find any recipes."
