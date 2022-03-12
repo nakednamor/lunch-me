@@ -8,7 +8,7 @@ class EditTagsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.editTags),
+        title: Text(AppLocalizations.of(context)!.titleEditTags),
       ),
       body: Center(
         child: ElevatedButton(

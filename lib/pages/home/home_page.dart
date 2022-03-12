@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:lunch_me/pages/edit_recipes/edit_recipes_page.dart';
 import 'package:lunch_me/pages/edit_tags/edit_tags_page.dart';
 
 import 'package:lunch_me/pages/home/widgets/recipe_list.dart';
@@ -18,7 +19,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.greeting),
+          title: Text(AppLocalizations.of(context)!.titleHome),
         ),
         body: Column(children: [
           const Flexible(child: RecipeList()),
@@ -45,12 +46,17 @@ class _HomePageState extends State<HomePage> {
             spaceBetweenChildren: 10,
             children: [
               SpeedDialChild(
-                  child: Icon(Icons.article),
+                  child: const Icon(Icons.article),
                   label: AppLocalizations.of(context)!.floatingMenuRecipes,
-                  onTap: () => print("Recipes") // TODO recipe route
-                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const EditRecipesPage()),
+                    );
+                  }),
               SpeedDialChild(
-                  child: Icon(Icons.local_offer),
+                  child: const Icon(Icons.local_offer),
                   label: AppLocalizations.of(context)!.floatingMenuTags,
                   onTap: () {
                     Navigator.push(

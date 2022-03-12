@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Lunch Me!',
       onGenerateTitle: (BuildContext context) =>
-          AppLocalizations.of(context)!.title,
+          AppLocalizations.of(context)!.appTitle,
       theme: ThemeData(
         // This is the theme of your application.
         primarySwatch: Colors.cyan,

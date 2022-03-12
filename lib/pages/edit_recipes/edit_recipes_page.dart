@@ -8,7 +8,7 @@ class EditRecipesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.editRecipes),
+        title: Text(AppLocalizations.of(context)!.titleEditRecipes),
       ),
       body: Center(
         child: ElevatedButton(
