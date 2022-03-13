@@ -7,6 +7,7 @@ _getLanguageByLang: SELECT * FROM languages WHERE lang = :lang;
 -- tags
 _allTags: SELECT * FROM tags ORDER BY tag_group,ordering ASC;
 _getMaxTagOrdering: SELECT MAX(ordering) from tags where tag_group = :tagGroupId;
+_deleteTagById: DELETE FROM tags WHERE id = :id;
 
 -- localized tags
 _countByTagGroupAndName: SELECT COUNT(lt.label) FROM localized_tags lt

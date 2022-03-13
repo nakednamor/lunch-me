@@ -27,3 +27,9 @@ class NegativeValueException implements Exception {
 
   NegativeValueException(this.cause);
 }
+
+class TagNotFoundException implements Exception{
+  int cause;
+
+  TagNotFoundException(this.cause);
+}

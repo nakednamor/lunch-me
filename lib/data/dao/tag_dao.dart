@@ -37,6 +37,13 @@ class TagDao extends DatabaseAccessor<MyDatabase> with _$TagDaoMixin {
     return Tag(id: newTagId, tagGroup: tagGroupId, ordering: newOrdering);
   }
 
+  Future<void> deleteTag(int id) async {
+    var deleteCount = await _deleteTagById(id);
+    if (deleteCount != 1) {
+      throw TagNotFoundException(id);
+    }
+  }
+
   Future<void> _validateNewTag(String name) async {
     if (name.isEmpty) {
       throw EmptyNameException(name);

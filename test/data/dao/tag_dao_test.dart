@@ -116,9 +116,31 @@ void main() {
   test('reordering should throw exception when there is no tag with given id', () async {});
   test('reordering should throw exception when new position is negative', () async {});
 
-  test('should remove tag properly', () async {});
-  test('removing tag should throw exception when there is no tag with given id', () async {});
+  test('should remove tag properly', () async {
+    // given
+    var tagToDelete = await dao.addTag(2, 'new tag');
+    var allTagIds = (await dao.getAllTags()).map((e) => e.id);
+    expect(allTagIds, contains(tagToDelete.id));
 
+    // when
+    dao.deleteTag(tagToDelete.id);
 
+    // then
+    allTagIds = (await dao.getAllTags()).map((e) => e.id);
+    expect(allTagIds.contains(tagToDelete.id), isFalse);
 
+    var tagGroupsWithTags = await dao.attachedDatabase.getAllTagsWithGroups(const Locale("en"));
+    var localizedTags = tagGroupsWithTags.where((tagGroup) => tagGroup.tags.map((tag) => tag.tag).contains(tagToDelete.id)).length;
+    expect(localizedTags, 0);
+
+    tagGroupsWithTags = await dao.attachedDatabase.getAllTagsWithGroups(const Locale("de"));
+    localizedTags = tagGroupsWithTags.where((tagGroup) => tagGroup.tags.map((tag) => tag.tag).contains(tagToDelete.id)).length;
+    expect(localizedTags, 0);
+  });
+
+  test('removing tag should throw exception when there is no tag with given id', () async {
+    // expect
+    expect(() => dao.deleteTag(666),
+        throwsA(isA<TagNotFoundException>()));
+  });
 }
