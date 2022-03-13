@@ -63,7 +63,7 @@ dev_dependencies:
   flutter_lints: ^1.0.0
 
   # the following ones are needed for drift database (https://drift.simonbinder.eu/docs/getting-started/)
-  drift_dev: ^1.3.0
+  drift_dev: ^1.4.0
   build_runner: ^2.1.7
   collection: ^1.15.0
 
