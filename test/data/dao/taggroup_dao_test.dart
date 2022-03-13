@@ -226,4 +226,20 @@ void main() {
     expect(() => dao.deleteTagGroup(999),
         throwsA(isA<TagGroupNotFoundException>()));
   });
+
+  test('tagGroupExists should return false', () async {
+    // when
+    var actual = await dao.tagGroupExists(666);
+
+    // then
+    expect(actual, isFalse);
+  });
+
+  test('tagGroupExists should return true', () async {
+    // when
+    var actual = await dao.tagGroupExists(2);
+
+    // then
+    expect(actual, isTrue);
+  });
 }

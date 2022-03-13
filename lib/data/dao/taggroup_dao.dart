@@ -76,6 +76,11 @@ class TagGroupDao extends DatabaseAccessor<MyDatabase> with _$TagGroupDaoMixin {
     return _allTagGroups().get();
   }
 
+  Future<bool> tagGroupExists(int id) async {
+    var tagGroup = await _getTagGroupById(id).getSingleOrNull();
+    return tagGroup != null;
+  }
+
   Future<void> _validateTagGroupName(String name) async {
     if (name.isEmpty) {
       throw EmptyNameException(name);
