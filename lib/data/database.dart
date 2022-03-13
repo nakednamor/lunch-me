@@ -90,6 +90,42 @@ class MyDatabase extends _$MyDatabase {
       return RecipeWithTags(recipe, tags);
     }).toList();
   }
+
+  Future<List<RecipeWithTags>> filterRecipeByTags(List<int> tagIds) async {
+    var recipeIds = await _getRecipeIdsHavingTags(tagIds);
+
+    var query = select(recipes).join([
+      leftOuterJoin(recipeTags, recipeTags.recipe.equalsExp(recipes.id)),
+      leftOuterJoin(tags, tags.id.equalsExp(recipeTags.tag)),
+    ])
+      ..where(recipes.id.isIn(recipeIds))
+      ..orderBy([OrderingTerm(expression: recipes.name)]);
+
+    var queryResult = query.map((row) {
+      var recipe = row.readTable(recipes);
+      var tag = row.readTableOrNull(tags);
+
+      return _RecipeWithTag(recipe, tag);
+    });
+
+    var tagsGroupedByRecipe =
+        (await queryResult.get()).groupListsBy((element) => element.recipe);
+
+    var result = tagsGroupedByRecipe.entries.map((entry) {
+      var recipe = entry.key;
+      var tags = entry.value.map((e) => e.tag).whereType<Tag>().toList();
+      return RecipeWithTags(recipe, tags);
+    }).toList();
+
+    result.sort((a, b) => a.tags.length.compareTo(b.tags.length));
+
+    return result.reversed.toList();
+  }
+
+  Future<List<int>> _getRecipeIdsHavingTags(List<int> tagIds) async {
+    var query = select(recipeTags)..where((tbl) => tbl.tag.isIn(tagIds));
+    return query.map((row) => row.recipe).get();
+  }
 }
 
 class RecipeWithTags {
