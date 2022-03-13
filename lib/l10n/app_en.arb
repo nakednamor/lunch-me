@@ -2,6 +2,7 @@
     "appTitle": "Lunch Me!",
     "titleHome": "Your recipes",
     "titleEditTags": "Edit tags",
+    "addTagGroup": "Add new tag category",
     "titleEditRecipes": "Edit recipes",
     "floatingMenuRecipes": "Recipes",
     "floatingMenuTags": "Tags",
