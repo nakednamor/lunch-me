@@ -9,6 +9,8 @@ _allTags: SELECT * FROM tags ORDER BY tag_group,ordering ASC;
 _getMaxTagOrdering: SELECT MAX(ordering) from tags where tag_group = :tagGroupId;
 _deleteTagById: DELETE FROM tags WHERE id = :id;
 _getTagById: SELECT * FROM tags WHERE id = :id;
+_getTagByTagGroupAndOrdering: SELECT * FROM tags WHERE tag_group = :tagGroupId AND ordering = :ordering;
+_updateOrderingOfTag: UPDATE tags SET ordering = :ordering WHERE id = :id;
 
 -- localized tags
 _countByTagGroupAndName: SELECT COUNT(lt.label) FROM localized_tags lt

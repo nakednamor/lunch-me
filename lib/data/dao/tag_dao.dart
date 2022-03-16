@@ -52,6 +52,27 @@ class TagDao extends DatabaseAccessor<MyDatabase> with _$TagDaoMixin {
     await _renameTag(name, tag.id, language.id);
   }
 
+  Future<void> changeTagOrdering(int id, int newOrdering) async {
+    if (newOrdering < 0) {
+      throw NegativeValueException(newOrdering);
+    }
+
+    var target = await _getTagById(id).getSingleOrNull();
+    if (target == null) {
+      throw TagNotFoundException(id);
+    }
+
+    var tagGroupId = target.tagGroup;
+    var otherTarget = await _getTagByTagGroupAndOrdering(tagGroupId, newOrdering).getSingle();
+    var currentOrdering = target.ordering;
+
+    var lastOrdering = (await _getMaxTagOrdering(tagGroupId).getSingleOrNull()) ?? 0;
+
+    await _updateOrderingOfTag((lastOrdering + 1), otherTarget.id);
+    await _updateOrderingOfTag(newOrdering, target.id);
+    await _updateOrderingOfTag(currentOrdering, otherTarget.id);
+  }
+
   _validateTagName(String name) {
     if (name.isEmpty) {
       throw EmptyNameException(name);

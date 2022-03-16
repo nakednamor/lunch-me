@@ -1,3 +1,4 @@
+import "package:collection/collection.dart";
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lunch_me/data/dao/tag_dao.dart';
@@ -152,9 +153,39 @@ void main() {
     expect(renamedTag.label, previousTagName);
   });
 
-  test('should allow changing order of tag', () async {});
-  test('reordering should throw exception when there is no tag with given id', () async {});
-  test('reordering should throw exception when new position is negative', () async {});
+  test('reordering should throw exception when there is no tag with given id', () async {
+    // expect
+    expect(() => dao.changeTagOrdering(666, 5), throwsA(isA<TagNotFoundException>()));
+  });
+
+  test('reordering should throw exception when new position is negative', () async {
+    // given
+    var tag = await dao.addTag(2, 'some tag');
+
+    // expect
+    expect(() => dao.changeTagOrdering(tag.id, -1), throwsA(isA<NegativeValueException>()));
+  });
+
+  test('should allow changing order of tag', () async {
+    // given
+    var tagGroupId = 1;
+    var tags = (await dao.getAllTags()).groupListsBy((element) => element.tagGroup)[tagGroupId] ?? (throw Exception("no tags with group $tagGroupId"));
+    expect(tags.map((e) => e.id), containsAllInOrder([3, 5, 4]));
+
+    // when tag #4 is moved to first position
+    await dao.changeTagOrdering(4, 0);
+
+    // then
+    tags = (await dao.getAllTags()).groupListsBy((element) => element.tagGroup)[tagGroupId] ?? (throw Exception("no tags with group $tagGroupId"));
+    expect(tags.map((e) => e.id), containsAllInOrder([4, 5, 3]));
+
+    // when tag #5 is moved to last position
+    await dao.changeTagOrdering(5, 2);
+
+    // then
+    tags = (await dao.getAllTags()).groupListsBy((element) => element.tagGroup)[tagGroupId] ?? (throw Exception("no tags with group $tagGroupId"));
+    expect(tags.map((e) => e.id), containsAllInOrder([4, 3, 5]));
+  });
 
   test('should remove tag properly', () async {
     // given
