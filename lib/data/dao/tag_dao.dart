@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:lunch_me/data/database.dart';
 
 import 'package:drift/drift.dart';
@@ -16,7 +18,7 @@ class TagDao extends DatabaseAccessor<MyDatabase> with _$TagDaoMixin {
   }
 
   Future<Tag> addTag(int tagGroupId, String name) async {
-    await _validateNewTag(name);
+    _validateTagName(name);
     await _validateTagGroupExists(tagGroupId);
     await _validateTagNameDoesNotExist(tagGroupId, name);
 
@@ -44,7 +46,16 @@ class TagDao extends DatabaseAccessor<MyDatabase> with _$TagDaoMixin {
     }
   }
 
-  Future<void> _validateNewTag(String name) async {
+  Future<void> renameTag(int id, String name, Locale locale) async {
+    _validateTagName(name);
+    var tag = await _getTagById(id).getSingle();
+    await _validateTagNameDoesNotExist(tag.tagGroup, name);
+
+    var language = await attachedDatabase.languageDao.getLanguage(locale);
+    await _renameTag(name, tag.id, language.id);
+  }
+
+  _validateTagName(String name) {
     if (name.isEmpty) {
       throw EmptyNameException(name);
     }

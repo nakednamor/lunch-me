@@ -48,7 +48,7 @@ void main() {
     var newTagName = 'a new tag';
     await dao.addTag(tagGroupId, newTagName);
 
-    var x = await dao.attachedDatabase.getAllTagsWithGroups(Locale("en"));
+    await dao.attachedDatabase.getAllTagsWithGroups(const Locale("en"));
 
     // when
     expect(() => dao.addTag(tagGroupId, newTagName),
@@ -87,7 +87,7 @@ void main() {
     expect(tagGroupsWithTagsBefore.where((tagGroup) => tagGroup.tags.any((tag) => tag.label == newTagName)).length, 0);
 
     // when
-    var actual = await dao.addTag(tagGroupId, newTagName);
+    await dao.addTag(tagGroupId, newTagName);
 
     // then
     tagGroupsWithTagsBefore = await dao.attachedDatabase.getAllTagsWithGroups(englishLocale);
@@ -100,17 +100,64 @@ void main() {
   test('should allow tags with same name in different tag-groups', () async {
     // given
     var newTagName = 'new tag';
-    var firstTag = await dao.addTag(1, newTagName);
+    await dao.addTag(1, newTagName);
 
     // expect no exception
     await dao.addTag(2, newTagName);
     await dao.addTag(3, newTagName);
   });
 
-  test('should rename tag', () async {});
-  test('rename tag should throw exception when name already exists', () async {});
-  test('rename tag should throw exception when name is empty', () async {});
-  test('rename tag should throw exception when name > 50 chars', () async {});
+  test('rename tag should throw exception when name already exists', () async {
+    // given
+    var tagToRename = await dao.addTag(3, 'this should be renamed');
+    var tagName = 'a different tag name';
+    await dao.addTag(3, tagName);
+
+    // expect
+    expect(() => dao.renameTag(tagToRename.id, tagName, const Locale("en")),
+        throwsA(isA<NameAlreadyExistsException>()));
+
+  });
+
+  test('rename tag should throw exception when name is empty', () async {
+    // given
+    var tag = await dao.addTag(3, 'a tag');
+
+    // expect
+    expect(() => dao.renameTag(tag.id, '', const Locale("en")),
+        throwsA(isA<EmptyNameException>()));
+  });
+
+  test('rename tag should throw exception when name > 50 chars', () async {
+    // given
+    var tag = await dao.addTag(3, 'a tag');
+
+    // expect
+    expect(() => dao.renameTag(tag.id, '012345678901234567890123456789012345678901234567890', const Locale("en")),
+        throwsA(isA<NameTooLongException>()));
+  });
+
+  test('should rename tag', () async {
+    // given
+    var tagGroupId = 3;
+    var previousTagName = 'previous name';
+    var localeForRenaming = const Locale("en");
+    var tag = await dao.addTag(tagGroupId, previousTagName);
+
+    // when
+    var newTagName = 'this is new';
+    await dao.renameTag(tag.id, newTagName, localeForRenaming);
+
+    // then
+    var tagGroupsWithTags = await dao.attachedDatabase.getAllTagsWithGroups(localeForRenaming);
+    var renamedTag = tagGroupsWithTags.firstWhere((tagGroup) => tagGroup.tagGroup.tagGroup == tagGroupId).tags.firstWhere((t) => t.tag == tag.id);
+    expect(renamedTag.label, newTagName);
+
+    // other locales still have old name
+    tagGroupsWithTags = await dao.attachedDatabase.getAllTagsWithGroups(const Locale("de"));
+    renamedTag = tagGroupsWithTags.firstWhere((tagGroup) => tagGroup.tagGroup.tagGroup == tagGroupId).tags.firstWhere((t) => t.tag == tag.id);
+    expect(renamedTag.label, previousTagName);
+  });
 
   test('should allow changing order of tag', () async {});
   test('reordering should throw exception when there is no tag with given id', () async {});
