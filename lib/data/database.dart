@@ -26,29 +26,14 @@ LazyDatabase _openConnection() {
       // Extract the pre-populated database file from assets
       final blob = await rootBundle.load('assets/db/lunch_me_db');
       final buffer = blob.buffer;
-      await file.writeAsBytes(
-          buffer.asUint8List(blob.offsetInBytes, blob.lengthInBytes));
+      await file.writeAsBytes(buffer.asUint8List(blob.offsetInBytes, blob.lengthInBytes));
     }
 
     return NativeDatabase(file);
   });
 }
 
-@DriftDatabase(tables: [
-  Languages,
-  TagGroups,
-  LocalizedTagGroups,
-  Tags,
-  LocalizedTags,
-  Recipes,
-  RecipeTags
-], daos: [
-  LanguageDao,
-  TagDao,
-  TagGroupDao
-], include: {
-  'queries.drift'
-})
+@DriftDatabase(tables: [Languages, TagGroups, LocalizedTagGroups, Tags, LocalizedTags, Recipes, RecipeTags], daos: [LanguageDao, TagDao, TagGroupDao], include: {'queries.drift'})
 class MyDatabase extends _$MyDatabase {
   MyDatabase() : super(_openConnection());
 
@@ -58,8 +43,7 @@ class MyDatabase extends _$MyDatabase {
   int get schemaVersion => 1;
 
   @override
-  MigrationStrategy get migration =>
-      MigrationStrategy(beforeOpen: (details) async {
+  MigrationStrategy get migration => MigrationStrategy(beforeOpen: (details) async {
         await customStatement('PRAGMA foreign_keys = ON');
       });
 
@@ -81,8 +65,7 @@ class MyDatabase extends _$MyDatabase {
       return _RecipeWithTag(recipe, tag);
     });
 
-    var tagsGroupedByRecipe =
-        (await queryResult.get()).groupListsBy((element) => element.recipe);
+    var tagsGroupedByRecipe = (await queryResult.get()).groupListsBy((element) => element.recipe);
 
     return tagsGroupedByRecipe.entries.map((entry) {
       var recipe = entry.key;

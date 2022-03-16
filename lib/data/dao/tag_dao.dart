@@ -25,15 +25,12 @@ class TagDao extends DatabaseAccessor<MyDatabase> with _$TagDaoMixin {
     var lastOrdering = await _getMaxTagOrdering(tagGroupId).getSingleOrNull();
     var newOrdering = lastOrdering == null ? 0 : lastOrdering + 1;
 
-    var newTagId = await into(tags).insert(
-        TagsCompanion.insert(tagGroup: tagGroupId, ordering: newOrdering));
+    var newTagId = await into(tags).insert(TagsCompanion.insert(tagGroup: tagGroupId, ordering: newOrdering));
 
-    var availableLanguages =
-        await attachedDatabase.languageDao.getAllLanguages();
+    var availableLanguages = await attachedDatabase.languageDao.getAllLanguages();
     var languageIds = availableLanguages.map((e) => e.id);
 
-    var batches = languageIds.map((language) => LocalizedTagsCompanion.insert(
-        tag: newTagId, lang: language, label: name));
+    var batches = languageIds.map((language) => LocalizedTagsCompanion.insert(tag: newTagId, lang: language, label: name));
     await batch((batch) => batch.insertAll(localizedTags, batches));
 
     return Tag(id: newTagId, tagGroup: tagGroupId, ordering: newOrdering);
@@ -66,8 +63,7 @@ class TagDao extends DatabaseAccessor<MyDatabase> with _$TagDaoMixin {
   }
 
   Future<void> _validateTagGroupExists(int tagGroup) async {
-    var tagGroupExists =
-        await attachedDatabase.tagGroupDao.tagGroupExists(tagGroup);
+    var tagGroupExists = await attachedDatabase.tagGroupDao.tagGroupExists(tagGroup);
     if (!tagGroupExists) {
       throw TagGroupNotFoundException(tagGroup);
     }

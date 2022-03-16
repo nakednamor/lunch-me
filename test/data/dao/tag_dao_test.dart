@@ -32,14 +32,12 @@ void main() {
     var newTagName = '012345678901234567890123456789012345678901234567890';
 
     // expect
-    expect(
-        () => dao.addTag(3, newTagName), throwsA(isA<NameTooLongException>()));
+    expect(() => dao.addTag(3, newTagName), throwsA(isA<NameTooLongException>()));
   });
 
   test('should throw exception when tag-group not found by given id', () async {
     // expect
-    expect(() => dao.addTag(666, "some tag name"),
-        throwsA(isA<TagGroupNotFoundException>()));
+    expect(() => dao.addTag(666, "some tag name"), throwsA(isA<TagGroupNotFoundException>()));
   });
 
   test('should throw exception when adding tag with existing name', () async {
@@ -51,8 +49,7 @@ void main() {
     await dao.attachedDatabase.getAllTagsWithGroups(const Locale("en"));
 
     // when
-    expect(() => dao.addTag(tagGroupId, newTagName),
-        throwsA(isA<NameAlreadyExistsException>()));
+    expect(() => dao.addTag(tagGroupId, newTagName), throwsA(isA<NameAlreadyExistsException>()));
   });
 
   test('should add new tag at the last position within tag-group', () async {
@@ -60,23 +57,23 @@ void main() {
     var tagGroupId = 3;
     var newTagName = 'new tag';
     var locale = const Locale("en");
-    
+
     var tagGroupsWithTagsBefore = await dao.attachedDatabase.getAllTagsWithGroups(locale);
     var lastTagOrderingBefore = tagGroupsWithTagsBefore.firstWhere((element) => element.tagGroup.tagGroup == tagGroupId).tags.length - 1;
 
     // when
     var actual = await dao.addTag(tagGroupId, newTagName);
-    
+
     // then
     expect(actual.tagGroup, tagGroupId);
     expect(actual.ordering, lastTagOrderingBefore + 1);
   });
-  
+
   test('should add new tag with same value for all languages', () async {
     // given
     var englishLocale = const Locale("en");
     var germanLocale = const Locale("de");
-    
+
     var tagGroupId = 3;
     var newTagName = 'new tag';
 
@@ -114,9 +111,7 @@ void main() {
     await dao.addTag(3, tagName);
 
     // expect
-    expect(() => dao.renameTag(tagToRename.id, tagName, const Locale("en")),
-        throwsA(isA<NameAlreadyExistsException>()));
-
+    expect(() => dao.renameTag(tagToRename.id, tagName, const Locale("en")), throwsA(isA<NameAlreadyExistsException>()));
   });
 
   test('rename tag should throw exception when name is empty', () async {
@@ -124,8 +119,7 @@ void main() {
     var tag = await dao.addTag(3, 'a tag');
 
     // expect
-    expect(() => dao.renameTag(tag.id, '', const Locale("en")),
-        throwsA(isA<EmptyNameException>()));
+    expect(() => dao.renameTag(tag.id, '', const Locale("en")), throwsA(isA<EmptyNameException>()));
   });
 
   test('rename tag should throw exception when name > 50 chars', () async {
@@ -133,8 +127,7 @@ void main() {
     var tag = await dao.addTag(3, 'a tag');
 
     // expect
-    expect(() => dao.renameTag(tag.id, '012345678901234567890123456789012345678901234567890', const Locale("en")),
-        throwsA(isA<NameTooLongException>()));
+    expect(() => dao.renameTag(tag.id, '012345678901234567890123456789012345678901234567890', const Locale("en")), throwsA(isA<NameTooLongException>()));
   });
 
   test('should rename tag', () async {
@@ -187,7 +180,6 @@ void main() {
 
   test('removing tag should throw exception when there is no tag with given id', () async {
     // expect
-    expect(() => dao.deleteTag(666),
-        throwsA(isA<TagNotFoundException>()));
+    expect(() => dao.deleteTag(666), throwsA(isA<TagNotFoundException>()));
   });
 }
