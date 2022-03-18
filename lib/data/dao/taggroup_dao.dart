@@ -20,25 +20,21 @@ class TagGroupDao extends DatabaseAccessor<MyDatabase> with _$TagGroupDaoMixin {
 
     var newOrdering = lastOrdering == null ? 0 : lastOrdering + 1;
 
-    var newTagGroupId = await into(tagGroups)
-        .insert(TagGroupsCompanion.insert(ordering: newOrdering));
+    var newTagGroupId = await into(tagGroups).insert(TagGroupsCompanion.insert(ordering: newOrdering));
 
     var newTagGroup = await _getTagGroupById(newTagGroupId).getSingle();
 
     var availableLanguages = await attachedDatabase.languageDao.getAllLanguages();
     var languageIds = availableLanguages.map((e) => e.id);
 
-    var batches = languageIds.map((language) =>
-        LocalizedTagGroupsCompanion.insert(
-            tagGroup: newTagGroup.id, lang: language, label: name));
+    var batches = languageIds.map((language) => LocalizedTagGroupsCompanion.insert(tagGroup: newTagGroup.id, lang: language, label: name));
 
     await batch((batch) => batch.insertAll(localizedTagGroups, batches));
 
     return newTagGroup;
   }
 
-  Future<void> renameTagGroup(
-      int tagGroupId, String newName, Locale locale) async {
+  Future<void> renameTagGroup(int tagGroupId, String newName, Locale locale) async {
     await _validateTagGroupName(newName);
     var language = await attachedDatabase.languageDao.getLanguage(locale);
     await _renameTagGroupLabel(newName, tagGroupId, language.id);
@@ -46,7 +42,7 @@ class TagGroupDao extends DatabaseAccessor<MyDatabase> with _$TagGroupDaoMixin {
 
   Future<void> deleteTagGroup(int tagGroupId) async {
     var deletedGroupCount = await _deleteTagGroupById(tagGroupId);
-    if(deletedGroupCount != 1) {
+    if (deletedGroupCount != 1) {
       throw TagGroupNotFoundException(tagGroupId);
     }
   }
@@ -57,23 +53,28 @@ class TagGroupDao extends DatabaseAccessor<MyDatabase> with _$TagGroupDaoMixin {
     }
 
     var target = await _getTagGroupById(tagGroupId).getSingleOrNull();
-    if(target == null) {
+    if (target == null) {
       throw TagGroupNotFoundException(tagGroupId);
     }
 
-    var otherTarget = await _getTagGroupByOrdering(newOrder).getSingle();  // TODO potential bug if newOrder > max(ordering)
+    var otherTarget = await _getTagGroupByOrdering(newOrder).getSingle(); // TODO potential bug if newOrder > max(ordering)
 
     var currentOrdering = target.ordering;
 
     var lastOrdering = (await _getMaxTagGroupOrdering().getSingle()) ?? 0;
 
-    await _updateOrderingOfTagGroup( (lastOrdering + 1), otherTarget.id);
-    await _updateOrderingOfTagGroup( newOrder, target.id);
-    await _updateOrderingOfTagGroup( currentOrdering, otherTarget.id);
+    await _updateOrderingOfTagGroup((lastOrdering + 1), otherTarget.id);
+    await _updateOrderingOfTagGroup(newOrder, target.id);
+    await _updateOrderingOfTagGroup(currentOrdering, otherTarget.id);
   }
 
   Future<List<TagGroup>> getAllTagGroups() {
     return _allTagGroups().get();
+  }
+
+  Future<bool> tagGroupExists(int id) async {
+    var tagGroup = await _getTagGroupById(id).getSingleOrNull();
+    return tagGroup != null;
   }
 
   Future<void> _validateTagGroupName(String name) async {

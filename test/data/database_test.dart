@@ -23,8 +23,7 @@ void main() {
 
     // then
     expect(recipeWithTags.length, 3);
-    expect(recipeWithTags.map((e) => e.recipe.name),
-        containsAllInOrder(["recipe #1", "recipe #2", "recipe #3"]));
+    expect(recipeWithTags.map((e) => e.recipe.name), containsAllInOrder(["recipe #1", "recipe #2", "recipe #3"]));
 
     expect(recipeWithTags[0].tags.map((e) => e.id), containsAll([2]));
     expect(recipeWithTags[1].tags.map((e) => e.id), containsAll([2, 4, 6]));

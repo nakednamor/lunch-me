@@ -5,7 +5,6 @@ import 'package:lunch_me/data/dao/language_dao.dart';
 import '../flutter_test_config.dart';
 
 void main() {
-
   late LanguageDao dao;
 
   setUp(() async {

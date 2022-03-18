@@ -64,8 +64,7 @@ Future<File> _prepareTestDatabaseFile() async {
   final file = File(testDatabasePath);
 
   if (!await testDatabaseFile.exists()) {
-    debugPrint(
-        'top-level: temporary file ${file.path} does not exist - copying content from ${file.path}');
+    debugPrint('top-level: temporary file ${file.path} does not exist - copying content from ${file.path}');
     file.copy(testDatabaseFile.path);
   }
   return testDatabaseFile;
