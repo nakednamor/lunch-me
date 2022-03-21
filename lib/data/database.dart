@@ -67,6 +67,10 @@ class MyDatabase extends _$MyDatabase {
     return _allTagGroupsWithTags(locale.languageCode).get();
   }
 
+  Stream<List<TagGroupWithTags>> watchAllTagsWithGroups(Locale locale) {
+    return _allTagGroupsWithTags(locale.languageCode).watch();
+  }
+
   Future<List<RecipeWithTags>> getAllRecipeWithTags() async {
     var query = select(recipes).join([
       leftOuterJoin(recipeTags, recipeTags.recipe.equalsExp(recipes.id)),

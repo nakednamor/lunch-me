@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:lunch_me/pages/edit_recipes/edit_recipes_page.dart';
+import 'package:lunch_me/pages/edit_tags/edit_tags_page.dart';
 import 'package:provider/provider.dart';
 
 import 'package:lunch_me/data/database.dart';
@@ -45,7 +47,12 @@ class MyApp extends StatelessWidget {
         Locale('en', ''), // English, no country code
         Locale('de', ''), // German, no country code
       ],
-      home: const HomePage(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const HomePage(),
+        '/edit-tags': (context) => const EditTagsPage(),
+        '/edit-recipes': (context) => const EditRecipesPage(),
+      },
     );
   }
 }
