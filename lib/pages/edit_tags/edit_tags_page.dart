@@ -14,6 +14,7 @@ class EditTagsPage extends StatefulWidget {
 
 class _EditTagsPageState extends State<EditTagsPage> {
   final _tagGroupFormKey = GlobalKey<FormState>();
+  final _deleteTagGroupFormKey = GlobalKey<FormState>(); // temp
   late final MyDatabase database;
   late TagGroupDao tagGroupDao;
   late TagDao tagDao;
@@ -63,8 +64,13 @@ class _EditTagsPageState extends State<EditTagsPage> {
                             final newTagGroup =
                                 await tagGroupDao.addTagGroup(value);
 
+                            debugPrint("new tag group id");
+                            debugPrint(newTagGroup.id.toString());
+
                             // TODO temporary add a new tag so deletion is possible
-                            // TBD when tag crud is there
+                            final newTag = await tagDao.addTag(
+                                newTagGroup.id, "initial tag");
+                            debugPrint(newTag.id.toString());
                           }
                         },
                       ),
@@ -82,49 +88,51 @@ class _EditTagsPageState extends State<EditTagsPage> {
                           }
                         }),
                   ]),
-                  // // Just a temporary helper to remove tag groups by name (should be with X icon instead)
-                  // Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  //   Expanded(
-                  //       child: Padding(
-                  //     padding: const EdgeInsets.all(16),
-                  //     child: TextFormField(
-                  //       validator: (String? value) {
-                  //         if (value == null || value.isEmpty) {
-                  //           return 'Should not be empty!'; // TODO validate
-                  //         }
-                  //         return null;
-                  //       },
-                  //       decoration: const InputDecoration(
-                  //         border: UnderlineInputBorder(),
-                  //         labelText:
-                  //             "Remove tag group", // TODO this is just temporary
-                  //       ),
-                  //       onSaved: (String? value) async {
-                  //         if (value != null) {
-                  //           final allTagGroups =
-                  //               await tagGroupDao.getAllTagGroups();
-
-                  //               allTagGroups.firstWhere((tagGroup) => tagGroup.)
-                  //           //await tagGroupDao.deleteTagGroup(value);
-                  //         }
-                  //       },
-                  //     ),
-                  //   )),
-                  //   IconButton(
-                  //       iconSize: 38,
-                  //       padding: const EdgeInsets.only(left: 0),
-                  //       icon: const Icon(
-                  //         Icons.remove,
-                  //       ),
-                  //       onPressed: () {
-                  //         if (_tagGroupFormKey.currentState != null &&
-                  //             _tagGroupFormKey.currentState!.validate()) {
-                  //           _tagGroupFormKey.currentState?.save();
-                  //         }
-                  //       }),
-                  // ])
                 ],
               )),
+          // Just a temporary helper to remove tag groups by name
+          Form(
+              key: _deleteTagGroupFormKey,
+              child:
+                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Expanded(
+                    child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: TextFormField(
+                    validator: (String? value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Should not be empty!'; // TODO validate
+                      }
+                      return null;
+                    },
+                    decoration: const InputDecoration(
+                      border: UnderlineInputBorder(),
+                      labelText:
+                          "Remove tag group by id", // TODO this is just temporary
+                    ),
+                    onSaved: (String? value) async {
+                      if (value != null) {
+                        final tagGroupId = int.parse(value);
+
+                        debugPrint('TagGroupId to delete: $tagGroupId');
+                        await tagGroupDao.deleteTagGroup(tagGroupId);
+                      }
+                    },
+                  ),
+                )),
+                IconButton(
+                    iconSize: 38,
+                    padding: const EdgeInsets.only(left: 0),
+                    icon: const Icon(
+                      Icons.delete,
+                    ),
+                    onPressed: () {
+                      if (_deleteTagGroupFormKey.currentState != null &&
+                          _deleteTagGroupFormKey.currentState!.validate()) {
+                        _deleteTagGroupFormKey.currentState?.save();
+                      }
+                    }),
+              ])),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
