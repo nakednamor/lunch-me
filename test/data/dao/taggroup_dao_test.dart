@@ -175,6 +175,20 @@ void main() {
     expect(recipesAfter.map((e) => e.recipe.id), isNot(containsAll(affectedRecipeIds)));
   });
 
+  test('should proper remove empty tag-group', () async {
+    // given
+    var tagGroup = await dao.addTagGroup('tag-group to be deleted soon');
+    var allTagGroups = await dao.getAllTagGroups();
+    expect(allTagGroups.map((e) => e.id).contains(tagGroup.id), isTrue);
+
+    // when
+    await dao.deleteTagGroup(tagGroup.id);
+
+    // then
+    allTagGroups = await dao.getAllTagGroups();
+    expect(allTagGroups.map((e) => e.id).contains(tagGroup.id), isFalse);
+  });
+
   test('should throw exception when tag-group not found by id while deleting tag-group', () async {
     // expect
     expect(() => dao.deleteTagGroup(999), throwsA(isA<TagGroupNotFoundException>()));
