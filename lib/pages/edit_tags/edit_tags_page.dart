@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lunch_me/data/database.dart';
-import 'package:lunch_me/data/dao/tag_dao.dart';
 import 'package:lunch_me/data/dao/taggroup_dao.dart';
+import 'package:lunch_me/pages/edit_tags/widgets/editable_tag_group_list.dart';
 import 'package:provider/provider.dart';
 
 class EditTagsPage extends StatefulWidget {
@@ -14,15 +14,12 @@ class EditTagsPage extends StatefulWidget {
 
 class _EditTagsPageState extends State<EditTagsPage> {
   final _tagGroupFormKey = GlobalKey<FormState>();
-  final _deleteTagGroupFormKey = GlobalKey<FormState>(); // temp
   late final MyDatabase database;
-  late TagGroupDao tagGroupDao;
-  late TagDao tagDao;
+  late TagGroupDao _tagGroupDao;
 
   void initializeData() {
     database = Provider.of<MyDatabase>(context, listen: false);
-    tagGroupDao = database.tagGroupDao;
-    tagDao = database.tagDao;
+    _tagGroupDao = database.tagGroupDao;
   }
 
   @override
@@ -51,7 +48,7 @@ class _EditTagsPageState extends State<EditTagsPage> {
                       child: TextFormField(
                         validator: (String? value) {
                           if (value == null || value.isEmpty) {
-                            return 'Should not be empty!'; // TODO validate
+                            return 'Should not be empty!'; // TODO validation + messages
                           }
                           return null;
                         },
@@ -61,16 +58,8 @@ class _EditTagsPageState extends State<EditTagsPage> {
                         ),
                         onSaved: (String? value) async {
                           if (value != null) {
-                            final newTagGroup =
-                                await tagGroupDao.addTagGroup(value);
-
-                            debugPrint("new tag group id");
-                            debugPrint(newTagGroup.id.toString());
-
-                            // TODO temporary add a new tag so deletion is possible
-                            final newTag = await tagDao.addTag(
-                                newTagGroup.id, "initial tag");
-                            debugPrint(newTag.id.toString());
+                            await _tagGroupDao.addTagGroup(value);
+                            _tagGroupFormKey.currentState?.reset();
                           }
                         },
                       ),
@@ -90,49 +79,7 @@ class _EditTagsPageState extends State<EditTagsPage> {
                   ]),
                 ],
               )),
-          // Just a temporary helper to remove tag groups by name
-          Form(
-              key: _deleteTagGroupFormKey,
-              child:
-                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Expanded(
-                    child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: TextFormField(
-                    validator: (String? value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Should not be empty!'; // TODO validate
-                      }
-                      return null;
-                    },
-                    decoration: const InputDecoration(
-                      border: UnderlineInputBorder(),
-                      labelText:
-                          "Remove tag group by id", // TODO this is just temporary
-                    ),
-                    onSaved: (String? value) async {
-                      if (value != null) {
-                        final tagGroupId = int.parse(value);
-
-                        debugPrint('TagGroupId to delete: $tagGroupId');
-                        await tagGroupDao.deleteTagGroup(tagGroupId);
-                      }
-                    },
-                  ),
-                )),
-                IconButton(
-                    iconSize: 38,
-                    padding: const EdgeInsets.only(left: 0),
-                    icon: const Icon(
-                      Icons.delete,
-                    ),
-                    onPressed: () {
-                      if (_deleteTagGroupFormKey.currentState != null &&
-                          _deleteTagGroupFormKey.currentState!.validate()) {
-                        _deleteTagGroupFormKey.currentState?.save();
-                      }
-                    }),
-              ])),
+          const Flexible(child: EditableTagGroupList()),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);

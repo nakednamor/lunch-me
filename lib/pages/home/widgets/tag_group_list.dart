@@ -55,8 +55,7 @@ class _TagGroupListState extends State<TagGroupList> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Text(
-                '${tagGroupWithTags.tagGroup.label} (ID: ${tagGroupWithTags.tagGroup.tagGroup})'), // Temporary ID added as info
+            Text(tagGroupWithTags.tagGroup.label),
             Wrap(
               children: tagGroupWithTags.tags.map<Widget>((LocalizedTag tag) {
                 return Padding(
