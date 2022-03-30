@@ -1,7 +1,13 @@
 {
-    "title": "Lunch Me!",
-    "greeting": "Hello!",
-    "recipes": "Your recipes:",
+    "appTitle": "Lunch Me!",
+    "titleHome": "Your recipes",
+    "titleEditTags": "Edit tags",
+    "addTagGroup": "Add new tag category",
+     "addTag": "Add new tag",
+    "titleEditRecipes": "Edit recipes",
+    "floatingMenuRecipes": "Recipes",
+    "floatingMenuTags": "Tags",
+    "navigationBack": "Back",
     "error": "Ooops. Some error occured.",
     "errorNoTagsFound": "Sorry, we could not find any tags.",
     "errorNoRecipesFound": "Sorry, we could not find any recipes."

@@ -14,7 +14,7 @@ class TagGroupList extends StatefulWidget {
 }
 
 class _TagGroupListState extends State<TagGroupList> {
-  late final Future<List<TagGroupWithTags>> _getTagGroupsWithTags;
+  late final Stream<List<TagGroupWithTags>> _watchTagGroupsWithTags;
   late final MyDatabase database;
   late final Locale locale;
 
@@ -23,7 +23,7 @@ class _TagGroupListState extends State<TagGroupList> {
   void initializeData() {
     database = Provider.of<MyDatabase>(context, listen: false);
     locale = Localizations.localeOf(context);
-    _getTagGroupsWithTags = database.getAllTagsWithGroups(locale);
+    _watchTagGroupsWithTags = database.watchAllTagsWithGroups(locale);
   }
 
   @override
@@ -86,8 +86,8 @@ class _TagGroupListState extends State<TagGroupList> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<TagGroupWithTags>>(
-        future: _getTagGroupsWithTags,
+    return StreamBuilder<List<TagGroupWithTags>>(
+        stream: _watchTagGroupsWithTags,
         builder: (BuildContext context, AsyncSnapshot tagsSnapshot) {
           return tagsSnapshot.connectionState == ConnectionState.waiting
               ? buildCustomLoader()
