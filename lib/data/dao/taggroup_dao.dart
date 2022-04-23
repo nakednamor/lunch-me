@@ -57,15 +57,23 @@ class TagGroupDao extends DatabaseAccessor<MyDatabase> with _$TagGroupDaoMixin {
       throw TagGroupNotFoundException(tagGroupId);
     }
 
-    var otherTarget = await _getTagGroupByOrdering(newOrder).getSingle(); // TODO potential bug if newOrder > max(ordering)
-
     var currentOrdering = target.ordering;
 
-    var lastOrdering = (await _getMaxTagGroupOrdering().getSingle()) ?? 0;
+    if (currentOrdering == newOrder) {
+      return;
+    }
 
-    await _updateOrderingOfTagGroup((lastOrdering + 1), otherTarget.id);
+    var lastOrdering = (await _getMaxTagGroupOrdering().getSingle()) ?? 0;
+    await _updateOrderingOfTagGroup((lastOrdering + 1), target.id);
+
+    if (currentOrdering < newOrder) {
+      await _tagGroupRightPositionChange(currentOrdering, newOrder);
+    } else {
+      await _tagGroupLeftPositionChange_1(newOrder, currentOrdering);
+      await _tagGroupLeftPositionChange_2();
+    }
+
     await _updateOrderingOfTagGroup(newOrder, target.id);
-    await _updateOrderingOfTagGroup(currentOrdering, otherTarget.id);
   }
 
   Future<List<TagGroup>> getAllTagGroups() {

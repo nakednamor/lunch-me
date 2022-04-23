@@ -39,6 +39,10 @@ _allTagGroupsWithTags AS TagGroupWithTags: SELECT tagGroup.**, LIST(
     WHERE languages.lang = :lang
     ORDER BY tg.ordering;
 
+_tagGroupRightPositionChange: UPDATE tag_groups SET ordering = ( ordering - 1 ) WHERE ordering > :currentOrdering AND ordering <= :newOrdering;
+_tagGroupLeftPositionChange_1: UPDATE tag_groups SET ordering = - ( ordering + 1 ) WHERE ordering >= :newOrdering AND ordering < :currentOrdering;
+_tagGroupLeftPositionChange_2: UPDATE tag_groups SET ordering = - ordering WHERE ordering < 0;
+
 
 -- localized tag-groups
 _countTagGroupByLabel: SELECT COUNT(label) AS tagGroupCount FROM localized_tag_groups WHERE label = :label;
