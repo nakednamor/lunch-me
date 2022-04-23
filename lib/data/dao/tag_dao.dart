@@ -63,14 +63,24 @@ class TagDao extends DatabaseAccessor<MyDatabase> with _$TagDaoMixin {
     }
 
     var tagGroupId = target.tagGroup;
-    var otherTarget = await _getTagByTagGroupAndOrdering(tagGroupId, newOrdering).getSingle();
     var currentOrdering = target.ordering;
+
+    if(currentOrdering == newOrdering){
+      return;
+    }
 
     var lastOrdering = (await _getMaxTagOrdering(tagGroupId).getSingleOrNull()) ?? 0;
 
-    await _updateOrderingOfTag((lastOrdering + 1), otherTarget.id);
+    await _updateOrderingOfTag((lastOrdering + 1), target.id);
+
+    if(currentOrdering < newOrdering) {
+      await _tagRightPositionChange(currentOrdering, newOrdering);
+    } else {
+      await _tagLeftPositionChange_1(newOrdering, currentOrdering);
+      await _tagLeftPositionChange_2();
+    }
+
     await _updateOrderingOfTag(newOrdering, target.id);
-    await _updateOrderingOfTag(currentOrdering, otherTarget.id);
   }
 
   _validateTagName(String name) {
