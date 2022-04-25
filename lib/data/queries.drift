@@ -11,6 +11,10 @@ _deleteTagById: DELETE FROM tags WHERE id = :id;
 _getTagById: SELECT * FROM tags WHERE id = :id;
 _getTagByTagGroupAndOrdering: SELECT * FROM tags WHERE tag_group = :tagGroupId AND ordering = :ordering;
 _updateOrderingOfTag: UPDATE tags SET ordering = :ordering WHERE id = :id;
+_tagRightPositionChange: UPDATE tags SET ordering = ( ordering - 1 ) WHERE ordering > :currentOrdering AND ordering <= :newOrdering;
+_tagLeftPositionChange_1: UPDATE tags SET ordering = - ( ordering + 1 ) WHERE ordering >= :newOrdering AND ordering < :currentOrdering;
+_tagLeftPositionChange_2: UPDATE tags SET ordering = - ordering WHERE ordering < 0;
+
 
 -- localized tags
 _countByTagGroupAndName: SELECT COUNT(lt.label) FROM localized_tags lt
@@ -38,6 +42,9 @@ _allTagGroupsWithTags AS TagGroupWithTags: SELECT tagGroup.**, LIST(
     INNER JOIN languages ON languages.id = tagGroup.lang
     WHERE languages.lang = :lang
     ORDER BY tg.ordering;
+_tagGroupRightPositionChange: UPDATE tag_groups SET ordering = ( ordering - 1 ) WHERE ordering > :currentOrdering AND ordering <= :newOrdering;
+_tagGroupLeftPositionChange_1: UPDATE tag_groups SET ordering = - ( ordering + 1 ) WHERE ordering >= :newOrdering AND ordering < :currentOrdering;
+_tagGroupLeftPositionChange_2: UPDATE tag_groups SET ordering = - ordering WHERE ordering < 0;
 
 
 -- localized tag-groups
