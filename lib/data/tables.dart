@@ -67,7 +67,7 @@ class Recipes extends Table {
   TextColumn get image => text().withLength(max: 255).nullable()();
 }
 
-enum Source { web, video, photo }
+enum Source { web, video, photo, memory }
 
 class RecipeTags extends Table {
   IntColumn get recipe =>
