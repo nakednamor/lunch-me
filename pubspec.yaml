@@ -49,7 +49,7 @@ dependencies:
   path: ^1.8.0
   provider: ^6.0.2
 
-  url_launcher: ^6.0.20
+  url_launcher: ^6.1.0
 
   # ui widgets / helpers
   flutter_speed_dial: ^5.0.0+1
