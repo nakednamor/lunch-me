@@ -55,16 +55,21 @@ class _RecipeListState extends State<RecipeList> {
         children: <Widget>[
           Stack(children: [
             Container(
-                decoration: ShapeDecoration(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: FadeInImage.memoryNetwork(
-                  width: MediaQuery.of(context).size.width * 0.2,
-                  fit: BoxFit.cover,
-                  placeholder: kTransparentImage,
-                  image: recipeWithTags.recipe.image ?? kTransparentImage.toString(),
-                )),
+              decoration: ShapeDecoration(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+              ),
+              clipBehavior: Clip.antiAlias,
+              // child: Text(recipeWithTags.recipe.image ?? "no image selected")),
+              child: recipeWithTags.recipe.image != null
+                  ? FadeInImage.memoryNetwork(
+                      width: MediaQuery.of(context).size.width * 0.2,
+                      fit: BoxFit.cover,
+                      placeholder: kTransparentImage,
+                      image: recipeWithTags.recipe.image!,
+                    )
+                  : Container(color: Colors.grey.shade300, width: MediaQuery.of(context).size.width * 0.2),
+              height: 50,
+            ), // TODO replace Container with placeholder image
             Positioned.fill(
               child: Material(
                 color: Colors.transparent,
