@@ -56,16 +56,14 @@ class _RecipeListState extends State<RecipeList> {
           Stack(children: [
             Container(
                 decoration: ShapeDecoration(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: FadeInImage.memoryNetwork(
                   width: MediaQuery.of(context).size.width * 0.2,
                   fit: BoxFit.cover,
                   placeholder: kTransparentImage,
-                  image: recipeWithTags.recipe.image ??
-                      kTransparentImage.toString(),
+                  image: recipeWithTags.recipe.image ?? kTransparentImage.toString(),
                 )),
             Positioned.fill(
               child: Material(
@@ -95,24 +93,19 @@ class _RecipeListState extends State<RecipeList> {
     return FutureBuilder<List<RecipeWithTags>>(
         future: _getAllRecipes,
         builder: (BuildContext context, AsyncSnapshot recipesSnapshot) {
-          return recipesSnapshot.connectionState == ConnectionState.waiting
-              ? buildCustomLoader()
-              : _buildRecipeListView(recipesSnapshot);
+          return recipesSnapshot.connectionState == ConnectionState.waiting ? buildCustomLoader() : _buildRecipeListView(recipesSnapshot);
         });
   }
 }
 
 Future<void> _launchUrl(String? _url) async {
   if (_url != null && _url.isNotEmpty) {
-    final bool _nativeAppLaunchSucceeded = await launch(
-      _url,
-      forceSafariVC: false,
-      universalLinksOnly: true,
-    );
-    if (!_nativeAppLaunchSucceeded &&
-        !await launch(_url,
-            forceWebView: true, forceSafariVC: true, enableJavaScript: true)) {
-      throw 'Could not launch $_url';
+    try {
+      final _uri = Uri.parse(_url);
+
+      if (!await launchUrl(_uri)) throw 'Could not launch $_url';
+    } catch (e) {
+      throw 'Could not parse url: $_url';
     }
   }
 }
