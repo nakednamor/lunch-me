@@ -18,7 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.15.1 <3.0.0"
+  sdk: ">=2.17.0 <3.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -53,6 +53,9 @@ dependencies:
 
   # ui widgets / helpers
   flutter_speed_dial: ^5.0.0+1
+
+  flutter_cache_manager: ^3.3.0
+  cached_network_image: ^3.2.1
 
 dev_dependencies:
   flutter_test:
@@ -114,3 +117,5 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
   assets:
     - assets/db/lunch_me_db
+    - assets/images/recipe/not_available.png
+    - assets/images/recipe/error.png

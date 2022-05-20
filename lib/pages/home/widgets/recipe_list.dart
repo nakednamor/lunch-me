@@ -1,14 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:provider/provider.dart';
-import 'package:transparent_image/transparent_image.dart';
-
-// import 'package:cached_network_image/cached_network_image.dart';
-import 'package:url_launcher/url_launcher.dart';
-
 import 'package:lunch_me/data/database.dart';
-import 'package:lunch_me/widgets/error_message.dart';
 import 'package:lunch_me/widgets/custom_loader.dart';
+import 'package:lunch_me/widgets/error_message.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RecipeList extends StatefulWidget {
   const RecipeList({Key? key}) : super(key: key);
@@ -61,13 +58,20 @@ class _RecipeListState extends State<RecipeList> {
               clipBehavior: Clip.antiAlias,
               // child: Text(recipeWithTags.recipe.image ?? "no image selected")),
               child: recipeWithTags.recipe.image != null
-                  ? FadeInImage.memoryNetwork(
-                      width: MediaQuery.of(context).size.width * 0.2,
-                      fit: BoxFit.cover,
-                      placeholder: kTransparentImage,
-                      image: recipeWithTags.recipe.image!,
+                  ? CachedNetworkImage(
+                      //FIXME define how long an image should be cached -> forever !!
+                      progressIndicatorBuilder: (context, url, progress) => Center(
+                        child: CircularProgressIndicator(
+                          value: progress.progress,
+                        ),
+                      ),
+                      key: Key(recipeWithTags.recipe.id.toString()),
+                      imageUrl: recipeWithTags.recipe.image!,
+                      errorWidget: (context, url, error) => Image.asset('assets/images/recipe/error.png'),
+                      fadeOutDuration: const Duration(seconds: 1),
+                      fadeInDuration: const Duration(seconds: 1),
                     )
-                  : Container(color: Colors.grey.shade300, width: MediaQuery.of(context).size.width * 0.2),
+                  : Image.asset('assets/images/recipe/not_available.png'),
               height: 50,
             ), // TODO replace Container with placeholder image
             Positioned.fill(
