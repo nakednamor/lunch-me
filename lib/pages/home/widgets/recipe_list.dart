@@ -3,7 +3,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
 
-// import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:lunch_me/data/database.dart';
@@ -11,10 +10,10 @@ import 'package:lunch_me/widgets/error_message.dart';
 import 'package:lunch_me/widgets/custom_loader.dart';
 
 class RecipeList extends StatefulWidget {
-  const RecipeList({Key? key}) : super(key: key);
+  const RecipeList({super.key});
 
   @override
-  _RecipeListState createState() => _RecipeListState();
+  State<RecipeList> createState() => _RecipeListState();
 }
 
 class _RecipeListState extends State<RecipeList> {
@@ -38,11 +37,11 @@ class _RecipeListState extends State<RecipeList> {
       return errorMessage(AppLocalizations.of(context)!.errorNoRecipesFound);
     }
 
-    final List<RecipeWithTags> _recipesWithTags = snapshot.data!;
+    final List<RecipeWithTags> recipesWithTags = snapshot.data!;
     return ListView(
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
-      children: _recipesWithTags.map<Widget>((RecipeWithTags recipeWithTags) {
+      children: recipesWithTags.map<Widget>((RecipeWithTags recipeWithTags) {
         return _buildRecipeRow(recipeWithTags);
       }).toList(),
     );
@@ -59,6 +58,7 @@ class _RecipeListState extends State<RecipeList> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
               ),
               clipBehavior: Clip.antiAlias,
+              height: 50,
               // child: Text(recipeWithTags.recipe.image ?? "no image selected")),
               child: recipeWithTags.recipe.image != null
                   ? FadeInImage.memoryNetwork(
@@ -68,7 +68,6 @@ class _RecipeListState extends State<RecipeList> {
                       image: recipeWithTags.recipe.image!,
                     )
                   : Container(color: Colors.grey.shade300, width: MediaQuery.of(context).size.width * 0.2),
-              height: 50,
             ), // TODO replace Container with placeholder image
             Positioned.fill(
               child: Material(
@@ -103,14 +102,14 @@ class _RecipeListState extends State<RecipeList> {
   }
 }
 
-Future<void> _launchUrl(String? _url) async {
-  if (_url != null && _url.isNotEmpty) {
+Future<void> _launchUrl(String? url) async {
+  if (url != null && url.isNotEmpty) {
     try {
-      final _uri = Uri.parse(_url);
+      final uri = Uri.parse(url);
 
-      if (!await launchUrl(_uri)) throw 'Could not launch $_url';
+      if (!await launchUrl(uri)) throw 'Could not launch $url';
     } catch (e) {
-      throw 'Could not parse url: $_url';
+      throw 'Could not parse url: $url';
     }
   }
 }

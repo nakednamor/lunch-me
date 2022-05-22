@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:lunch_me/data/dao/taggroup_dao.dart'
-    as tag_group_dao; // TODO workaround unambigous imports
-import 'package:lunch_me/data/dao/tag_dao.dart'
-    as tag_dao; // TODO workaround unambigous imports
+import 'package:lunch_me/data/dao/tag_dao.dart' as tag_dao; // TODO workaround unambigous imports
+import 'package:lunch_me/data/dao/taggroup_dao.dart' as tag_group_dao; // TODO workaround unambigous imports
+import 'package:lunch_me/data/database.dart';
+import 'package:lunch_me/widgets/custom_loader.dart';
+import 'package:lunch_me/widgets/error_message.dart';
 import 'package:provider/provider.dart';
 
-import 'package:lunch_me/data/database.dart';
-import 'package:lunch_me/widgets/error_message.dart';
-import 'package:lunch_me/widgets/custom_loader.dart';
-
 class EditableTagGroupList extends StatefulWidget {
-  const EditableTagGroupList({Key? key}) : super(key: key);
+  const EditableTagGroupList({super.key});
 
   @override
-  _EditableTagGroupListState createState() => _EditableTagGroupListState();
+  State<EditableTagGroupList> createState() => _EditableTagGroupListState();
 }
 
 class _EditableTagGroupListState extends State<EditableTagGroupList> {
@@ -44,19 +41,18 @@ class _EditableTagGroupListState extends State<EditableTagGroupList> {
       return errorMessage(AppLocalizations.of(context)!.errorNoTagsFound);
     }
 
-    final List<TagGroupWithTags> _tagGroupsWithTags = snapshot.data!;
+    final List<TagGroupWithTags> tagGroupsWithTags = snapshot.data!;
     return ListView(
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
-      children:
-          _tagGroupsWithTags.map<Widget>((TagGroupWithTags tagGroupWithTags) {
+      children: tagGroupsWithTags.map<Widget>((TagGroupWithTags tagGroupWithTags) {
         return _buildTagGroupRow(tagGroupWithTags);
       }).toList(),
     );
   }
 
   Widget _buildTagGroupRow(TagGroupWithTags tagGroupWithTags) {
-    final _tagGroupFormKey = GlobalKey<FormState>();
+    final tagGroupFormKey = GlobalKey<FormState>();
 
     return Container(
         margin: const EdgeInsets.all(8.0),
@@ -72,8 +68,7 @@ class _EditableTagGroupListState extends State<EditableTagGroupList> {
                 ),
               ]),
               onPressed: () async {
-                await _tagGroupDao
-                    .deleteTagGroup(tagGroupWithTags.tagGroup.tagGroup);
+                await _tagGroupDao.deleteTagGroup(tagGroupWithTags.tagGroup.tagGroup);
               },
             ),
             Wrap(
@@ -91,46 +86,42 @@ class _EditableTagGroupListState extends State<EditableTagGroupList> {
                   );
                 }).toList(),
                 Form(
-                  key: _tagGroupFormKey,
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Expanded(
-                            child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: TextFormField(
-                            validator: (String? value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Should not be empty!'; // TODO validation + messages
-                              }
-                              return null;
-                            },
-                            decoration: InputDecoration(
-                              border: const UnderlineInputBorder(),
-                              labelText: AppLocalizations.of(context)!.addTag,
-                            ),
-                            onSaved: (String? value) async {
-                              if (value != null) {
-                                await _tagDao.addTag(
-                                    tagGroupWithTags.tagGroup.tagGroup, value);
-                                _tagGroupFormKey.currentState?.reset();
-                              }
-                            },
-                          ),
-                        )),
-                        IconButton(
-                            iconSize: 24,
-                            padding: const EdgeInsets.only(left: 0),
-                            icon: const Icon(
-                              Icons.add_task,
-                            ),
-                            onPressed: () {
-                              if (_tagGroupFormKey.currentState != null &&
-                                  _tagGroupFormKey.currentState!.validate()) {
-                                _tagGroupFormKey.currentState?.save();
-                              }
-                            }),
-                      ]),
+                  key: tagGroupFormKey,
+                  child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Expanded(
+                        child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: TextFormField(
+                        validator: (String? value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Should not be empty!'; // TODO validation + messages
+                          }
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                          border: const UnderlineInputBorder(),
+                          labelText: AppLocalizations.of(context)!.addTag,
+                        ),
+                        onSaved: (String? value) async {
+                          if (value != null) {
+                            await _tagDao.addTag(tagGroupWithTags.tagGroup.tagGroup, value);
+                            tagGroupFormKey.currentState?.reset();
+                          }
+                        },
+                      ),
+                    )),
+                    IconButton(
+                        iconSize: 24,
+                        padding: const EdgeInsets.only(left: 0),
+                        icon: const Icon(
+                          Icons.add_task,
+                        ),
+                        onPressed: () {
+                          if (tagGroupFormKey.currentState != null && tagGroupFormKey.currentState!.validate()) {
+                            tagGroupFormKey.currentState?.save();
+                          }
+                        }),
+                  ]),
                 )
               ],
             )
@@ -143,9 +134,7 @@ class _EditableTagGroupListState extends State<EditableTagGroupList> {
     return StreamBuilder<List<TagGroupWithTags>>(
         stream: _watchTagGroupsWithTags,
         builder: (BuildContext context, AsyncSnapshot tagsSnapshot) {
-          return tagsSnapshot.connectionState == ConnectionState.waiting
-              ? buildCustomLoader()
-              : _buildTagGroupListView(tagsSnapshot);
+          return tagsSnapshot.connectionState == ConnectionState.waiting ? buildCustomLoader() : _buildTagGroupListView(tagsSnapshot);
         });
   }
 }

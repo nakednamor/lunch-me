@@ -55,6 +55,8 @@ dependencies:
   # ui widgets / helpers
   flutter_speed_dial: ^6.0.0
 
+  collection: ^1.16.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -69,7 +71,6 @@ dev_dependencies:
   # the following ones are needed for drift database (https://drift.simonbinder.eu/docs/getting-started/)
   drift_dev: ^1.4.0
   build_runner: ^2.1.7
-  collection: ^1.15.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

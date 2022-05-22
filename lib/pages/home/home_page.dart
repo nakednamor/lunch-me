@@ -6,10 +6,10 @@ import 'package:lunch_me/pages/home/widgets/recipe_list.dart';
 import 'package:lunch_me/pages/home/widgets/tag_group_list.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
@@ -37,24 +37,19 @@ class _HomePageState extends State<HomePage> {
               ),
               child: const TagGroupList()),
         ]),
-        floatingActionButton: SpeedDial(
-            icon: Icons.edit,
-            childPadding: const EdgeInsets.all(4),
-            spacing: 5,
-            spaceBetweenChildren: 10,
-            children: [
-              SpeedDialChild(
-                  child: const Icon(Icons.article),
-                  label: AppLocalizations.of(context)!.floatingMenuRecipes,
-                  onTap: () {
-                    Navigator.pushNamed(context, '/edit-recipes');
-                  }),
-              SpeedDialChild(
-                  child: const Icon(Icons.local_offer),
-                  label: AppLocalizations.of(context)!.floatingMenuTags,
-                  onTap: () {
-                    Navigator.pushNamed(context, '/edit-tags');
-                  })
-            ]));
+        floatingActionButton: SpeedDial(icon: Icons.edit, childPadding: const EdgeInsets.all(4), spacing: 5, spaceBetweenChildren: 10, children: [
+          SpeedDialChild(
+              child: const Icon(Icons.article),
+              label: AppLocalizations.of(context)!.floatingMenuRecipes,
+              onTap: () {
+                Navigator.pushNamed(context, '/edit-recipes');
+              }),
+          SpeedDialChild(
+              child: const Icon(Icons.local_offer),
+              label: AppLocalizations.of(context)!.floatingMenuTags,
+              onTap: () {
+                Navigator.pushNamed(context, '/edit-tags');
+              })
+        ]));
   }
 }

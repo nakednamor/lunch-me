@@ -7,10 +7,10 @@ import 'package:lunch_me/widgets/error_message.dart';
 import 'package:lunch_me/widgets/custom_loader.dart';
 
 class TagGroupList extends StatefulWidget {
-  const TagGroupList({Key? key}) : super(key: key);
+  const TagGroupList({super.key});
 
   @override
-  _TagGroupListState createState() => _TagGroupListState();
+  State<TagGroupList> createState() => _TagGroupListState();
 }
 
 class _TagGroupListState extends State<TagGroupList> {
@@ -38,12 +38,12 @@ class _TagGroupListState extends State<TagGroupList> {
       return errorMessage(AppLocalizations.of(context)!.errorNoTagsFound);
     }
 
-    final List<TagGroupWithTags> _tagGroupsWithTags = snapshot.data!;
+    final List<TagGroupWithTags> tagGroupsWithTags = snapshot.data!;
     return ListView(
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
       children:
-          _tagGroupsWithTags.map<Widget>((TagGroupWithTags tagGroupWithTags) {
+          tagGroupsWithTags.map<Widget>((TagGroupWithTags tagGroupWithTags) {
         return _buildTagGroupRow(tagGroupWithTags);
       }).toList(),
     );

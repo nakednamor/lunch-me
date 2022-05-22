@@ -6,10 +6,10 @@ import 'package:lunch_me/pages/edit_tags/widgets/editable_tag_group_list.dart';
 import 'package:provider/provider.dart';
 
 class EditTagsPage extends StatefulWidget {
-  const EditTagsPage({Key? key}) : super(key: key);
+  const EditTagsPage({super.key});
 
   @override
-  _EditTagsPageState createState() => _EditTagsPageState();
+  State<EditTagsPage> createState() => _EditTagsPageState();
 }
 
 class _EditTagsPageState extends State<EditTagsPage> {
