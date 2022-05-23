@@ -21,14 +21,12 @@ class RecipeList extends StatefulWidget {
 }
 
 class _RecipeListState extends State<RecipeList> {
-  late final Future<List<RecipeWithTags>> _getAllRecipes;
   late final MyDatabase database;
 
   BaseCacheManager cacheManager = LunchMeCacheManager();
 
   void initializeData() {
     database = Provider.of<MyDatabase>(context, listen: false);
-    _getAllRecipes = database.getAllRecipeWithTags();
   }
 
   @override
@@ -107,7 +105,7 @@ class _RecipeListState extends State<RecipeList> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<RecipeWithTags>>(
-        future: _getAllRecipes,
+        future: database.getAllRecipeWithTags(),
         builder: (BuildContext context, AsyncSnapshot recipesSnapshot) {
           return recipesSnapshot.connectionState == ConnectionState.waiting ? buildCustomLoader() : _buildRecipeListView(recipesSnapshot);
         });

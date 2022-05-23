@@ -61,6 +61,9 @@ dependencies:
   flutter_cache_manager: ^3.3.0
   cached_network_image: ^3.2.1
   file: ^6.1.2
+  image_picker: ^0.8.5+3
+  fluttertoast: ^8.0.9
+  random_string: ^2.3.1
 
 dev_dependencies:
   flutter_test:

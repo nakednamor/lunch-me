@@ -95,8 +95,7 @@ class MyDatabase extends _$MyDatabase {
       return _RecipeWithTag(recipe, tag);
     });
 
-    var tagsGroupedByRecipe =
-        (await queryResult.get()).groupListsBy((element) => element.recipe);
+    var tagsGroupedByRecipe = (await queryResult.get()).groupListsBy((element) => element.recipe);
 
     var result = tagsGroupedByRecipe.entries.map((entry) {
       var recipe = entry.key;
@@ -107,6 +106,11 @@ class MyDatabase extends _$MyDatabase {
     result.sort((a, b) => a.tags.length.compareTo(b.tags.length));
 
     return result.reversed.toList();
+  }
+
+  // TODO implement proper + test
+  Future<void> createRecipe(String name, String? imagePhoto) async {
+    await recipes.insertOne(RecipesCompanion.insert(name: name, type: Source.photo, imagePhoto: Value.ofNullable(imagePhoto)));
   }
 
   Future<List<int>> _getRecipeIdsHavingTags(List<int> tagIds) async {

@@ -6,6 +6,8 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:lunch_me/pages/home/widgets/recipe_list.dart';
 import 'package:lunch_me/pages/home/widgets/tag_group_list.dart';
 import 'dart:math' as math;
+import 'package:lunch_me/util/recipe_change_notifier.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -22,7 +24,13 @@ class _HomePageState extends State<HomePage> {
           title: Text(AppLocalizations.of(context)!.titleHome),
         ),
         body: Column(children: [
-          const Flexible(child: RecipeList()),
+          Flexible(
+              child: Consumer<RecipeChangeNotifier>(
+                  builder: (context, notifier, child) {
+                    return RecipeList();
+                  }
+              )
+          ),
           ExpandableNotifier(
               initialExpanded: true,
               child: ExpandablePanel(
