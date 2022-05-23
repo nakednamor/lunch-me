@@ -65,6 +65,10 @@ class Recipes extends Table {
   TextColumn get url => text().withLength(max: 255).nullable()();
 
   TextColumn get image => text().withLength(max: 255).nullable()();
+
+  TextColumn get imagePhoto => text().withLength(max: 50).nullable()();
+
+  TextColumn get contentPhoto => text().withLength(max: 50).nullable()();
 }
 
 enum Source { web, video, photo, memory }
