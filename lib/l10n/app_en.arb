@@ -10,5 +10,6 @@
     "navigationBack": "Back",
     "error": "Ooops. Some error occured.",
     "errorNoTagsFound": "Sorry, we could not find any tags.",
-    "errorNoRecipesFound": "Sorry, we could not find any recipes."
+    "errorNoRecipesFound": "Sorry, we could not find any recipes.",
+    "titleFilterRecipes": "Filter recipes"
 }
