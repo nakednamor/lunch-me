@@ -10,5 +10,6 @@
     "navigationBack": "Zurück",
     "error": "Ups. Es ist ein Fehler aufgetreten.",
     "errorNoTagsFound": "Es konnten leider keine Tags gefunden werden.",
-    "errorNoRecipesFound": "Es konnten leider keine Rezepte gefunden werden."
+    "errorNoRecipesFound": "Es konnten leider keine Rezepte gefunden werden.",
+    "titleFilterRecipes": "Rezepte filtern"
 }
