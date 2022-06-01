@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:lunch_me/data/database.dart';
+import 'package:lunch_me/pages/add_recipe/add_recipe_page.dart';
 import 'package:lunch_me/pages/edit_recipes/edit_recipes_page.dart';
 import 'package:lunch_me/pages/edit_tags/edit_tags_page.dart';
 import 'package:lunch_me/pages/home/home_page.dart';
@@ -55,6 +56,7 @@ class MyApp extends StatelessWidget {
               '/': (context) => const HomePage(),
               '/edit-tags': (context) => const EditTagsPage(),
               '/edit-recipes': (context) => EditRecipesPage(),
+              '/add-recipe' : (context) => const AddRecipePage(),
             },
           );
         });

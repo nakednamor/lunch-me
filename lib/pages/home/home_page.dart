@@ -87,7 +87,7 @@ class _HomePageState extends State<HomePage> {
               child: const Icon(Icons.article),
               label: AppLocalizations.of(context)!.floatingMenuRecipes,
               onTap: () {
-                Navigator.pushNamed(context, '/edit-recipes');
+                Navigator.pushNamed(context, '/add-recipe');
               }),
           SpeedDialChild(
               child: const Icon(Icons.local_offer),

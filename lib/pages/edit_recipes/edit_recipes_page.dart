@@ -80,7 +80,7 @@ class EditRecipesPage extends StatelessWidget {
 
   _createRecipe() async {
     var recipeName = randomAlpha(10);
-    await database.createRecipe('A-$recipeName', _imagePhoto);
+  //  await database.createRecipe('A-$recipeName', _imagePhoto);
     Fluttertoast.showToast(
         msg: 'recipe created: $recipeName  - $_imagePhoto',
         toastLength: Toast.LENGTH_SHORT,

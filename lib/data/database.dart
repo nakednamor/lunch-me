@@ -109,8 +109,8 @@ class MyDatabase extends _$MyDatabase {
   }
 
   // TODO implement proper + test
-  Future<void> createRecipe(String name, String? imagePhoto) async {
-    await recipes.insertOne(RecipesCompanion.insert(name: name, type: Source.photo, imagePhoto: Value.ofNullable(imagePhoto)));
+  Future<void> createRecipe(String name, String imagePhoto, String contentPhoto) async {
+    await recipes.insertOne(RecipesCompanion.insert(name: name, type: Source.photo, imagePhoto: Value(imagePhoto), contentPhoto: Value(contentPhoto)));
   }
 
   Future<List<int>> _getRecipeIdsHavingTags(List<int> tagIds) async {
