@@ -1,13 +1,17 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:lunch_me/data/database.dart';
+import 'package:lunch_me/pages/home/widgets/exceptions.dart';
+import 'package:lunch_me/util/image_util.dart';
+import 'package:lunch_me/util/lunch_me_cache_manager.dart';
+import 'package:lunch_me/widgets/custom_loader.dart';
+import 'package:lunch_me/widgets/error_message.dart';
 import 'package:provider/provider.dart';
-import 'package:transparent_image/transparent_image.dart';
-
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:lunch_me/data/database.dart';
-import 'package:lunch_me/widgets/error_message.dart';
-import 'package:lunch_me/widgets/custom_loader.dart';
+import '../../../data/tables.dart';
 
 class RecipeList extends StatefulWidget {
   const RecipeList({super.key});
@@ -19,6 +23,8 @@ class RecipeList extends StatefulWidget {
 class _RecipeListState extends State<RecipeList> {
   late final Future<List<RecipeWithTags>> _getAllRecipes;
   late final MyDatabase database;
+
+  BaseCacheManager cacheManager = LunchMeCacheManager();
 
   void initializeData() {
     database = Provider.of<MyDatabase>(context, listen: false);
@@ -59,16 +65,22 @@ class _RecipeListState extends State<RecipeList> {
               ),
               clipBehavior: Clip.antiAlias,
               height: 50,
-              // child: Text(recipeWithTags.recipe.image ?? "no image selected")),
-              child: recipeWithTags.recipe.image != null
-                  ? FadeInImage.memoryNetwork(
-                      width: MediaQuery.of(context).size.width * 0.2,
-                      fit: BoxFit.cover,
-                      placeholder: kTransparentImage,
-                      image: recipeWithTags.recipe.image!,
+              child: _hasImage(recipeWithTags.recipe)
+                  ? CachedNetworkImage(
+                      cacheManager: cacheManager,
+                      progressIndicatorBuilder: (context, url, progress) => Center(
+                        child: CircularProgressIndicator(
+                          value: progress.progress,
+                        ),
+                      ),
+                      key: Key(recipeWithTags.recipe.id.toString()),
+                      imageUrl: _getImageUrl(recipeWithTags.recipe),
+                      errorWidget: (context, url, error) => Image.asset('assets/images/recipe/error.png'),
+                      fadeOutDuration: const Duration(seconds: 1),
+                      fadeInDuration: const Duration(seconds: 1),
                     )
-                  : Container(color: Colors.grey.shade300, width: MediaQuery.of(context).size.width * 0.2),
-            ), // TODO replace Container with placeholder image
+                  : Image.asset('assets/images/recipe/not_available.png'),
+            ),
             Positioned.fill(
               child: Material(
                 color: Colors.transparent,
@@ -99,6 +111,26 @@ class _RecipeListState extends State<RecipeList> {
         builder: (BuildContext context, AsyncSnapshot recipesSnapshot) {
           return recipesSnapshot.connectionState == ConnectionState.waiting ? buildCustomLoader() : _buildRecipeListView(recipesSnapshot);
         });
+  }
+
+  bool _hasImage(Recipe recipe) {
+    if (recipe.type == Source.photo) {
+      return recipe.imagePhoto != null;
+    } else {
+      return recipe.image != null;
+    }
+  }
+
+  String _getImageUrl(Recipe recipe) {
+    if (!_hasImage(recipe)) {
+      throw NoImageException();
+    }
+
+    if (recipe.type == Source.photo) {
+      return buildImageUrl(recipe.imagePhoto!);
+    } else {
+      return recipe.image!;
+    }
   }
 }
 

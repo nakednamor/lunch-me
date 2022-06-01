@@ -58,6 +58,10 @@ dependencies:
   collection: ^1.16.0
   expandable: ^5.0.1
 
+  flutter_cache_manager: ^3.3.0
+  cached_network_image: ^3.2.1
+  file: ^6.1.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -117,3 +121,5 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
   assets:
     - assets/db/lunch_me_db
+    - assets/images/recipe/not_available.png
+    - assets/images/recipe/error.png
