@@ -13,78 +13,37 @@ class _AddRecipePageState extends State<AddRecipePage> {
 
   Source? _recipeType = Source.web;
 
+  late final TextEditingController _recipeNameController;
+  late final TextEditingController _recipeUrlController;
+
+  @override
+  void initState() {
+    super.initState();
+    _recipeNameController = TextEditingController();
+    _recipeUrlController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _recipeNameController.dispose();
+    _recipeUrlController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           title: const Text("Add recipe"), // TODO global string
         ),
-        body: Column(children: [
-          Expanded(
-              child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextFormField(
-              validator: (String? value) {
-                if (value == null || value.isEmpty) {
-                  return 'Should not be empty!'; // TODO validation + messages
-                }
-                return null;
-              },
-              decoration: const InputDecoration(
-                border: UnderlineInputBorder(),
-//                    labelText: AppLocalizations.of(context)!.addTagGroup,
-                labelText: "Recipe name", // TODO global string
-              ),
-              onSaved: (String? value) async {},
-            ),
-          )),
-          Row(
-            children: [
-              Radio<Source>(
-                  value: Source.web,
-                  groupValue: _recipeType,
-                  onChanged: (Source? type) {
-                    setState(() {
-                      _recipeType = type;
-                    });
-                  }),
-              const Text("Web"),
-              Radio<Source>(
-                  value: Source.photo,
-                  groupValue: _recipeType,
-                  onChanged: (Source? type) {
-                    setState(() {
-                      _recipeType = type;
-                    });
-                  }),
-              const Text("Photo"),
-              Radio<Source>(
-                  value: Source.video,
-                  groupValue: _recipeType,
-                  onChanged: (Source? type) {
-                    setState(() {
-                      _recipeType = type;
-                    });
-                  }),
-              const Text("Video"),
-              Radio<Source>(
-                  value: Source.memory,
-                  groupValue: _recipeType,
-                  onChanged: (Source? type) {
-                    setState(() {
-                      _recipeType = type;
-                    });
-                  }),
-              const Text("Memory"),
-            ],
-          ),
-          Row(children: [
-            Visibility(
-              visible: _showImagePicker(),
-              child: Expanded(
+        body: Form(
+            key: _formKey,
+            child: Column(children: [
+              Expanded(
                   child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: TextFormField(
+                  controller: _recipeNameController,
                   validator: (String? value) {
                     if (value == null || value.isEmpty) {
                       return 'Should not be empty!'; // TODO validation + messages
@@ -94,55 +53,119 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   decoration: const InputDecoration(
                     border: UnderlineInputBorder(),
 //                    labelText: AppLocalizations.of(context)!.addTagGroup,
-                    labelText: "Recipe URL", // TODO global string
+                    labelText: "Recipe name", // TODO global string
                   ),
                   onSaved: (String? value) async {},
                 ),
               )),
-            ),
-            Visibility(
-              visible: !_showImagePicker(),
-              child: ElevatedButton(
+              Row(
+                children: [
+                  Radio<Source>(
+                      value: Source.web,
+                      groupValue: _recipeType,
+                      onChanged: (Source? type) {
+                        setState(() {
+                          _recipeType = type;
+                        });
+                      }),
+                  const Text("Web"),
+                  Radio<Source>(
+                      value: Source.photo,
+                      groupValue: _recipeType,
+                      onChanged: (Source? type) {
+                        setState(() {
+                          _recipeType = type;
+                        });
+                      }),
+                  const Text("Photo"),
+                  Radio<Source>(
+                      value: Source.video,
+                      groupValue: _recipeType,
+                      onChanged: (Source? type) {
+                        setState(() {
+                          _recipeType = type;
+                        });
+                      }),
+                  const Text("Video"),
+                  Radio<Source>(
+                      value: Source.memory,
+                      groupValue: _recipeType,
+                      onChanged: (Source? type) {
+                        setState(() {
+                          _recipeType = type;
+                        });
+                      }),
+                  const Text("Memory"),
+                ],
+              ),
+              Row(children: [
+                Visibility(
+                  visible: _showImagePicker(),
+                  child: Expanded(
+                      child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: TextFormField(
+                      controller: _recipeUrlController,
+                      validator: (String? value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Should not be empty!'; // TODO validation + messages
+                        }
+                        return null;
+                      },
+                      decoration: const InputDecoration(
+                        border: UnderlineInputBorder(),
+//                    labelText: AppLocalizations.of(context)!.addTagGroup,
+                        labelText: "Recipe URL", // TODO global string
+                      ),
+                      onSaved: (String? value) async {},
+                    ),
+                  )),
+                ),
+                Visibility(
+                  visible: !_showImagePicker(),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      print("button pressed");
+                    },
+                    child: const Text('image'),
+                  ),
+                ),
+              ]),
+              Row(children: [
+                ElevatedButton(
+                  onPressed: () {
+                    print("button pressed");
+                  },
+                  child: const Text('thumbnail'),
+                ),
+                Expanded(
+                    child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: TextFormField(
+                    validator: (String? value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Should not be empty!'; // TODO validation + messages
+                      }
+                      return null;
+                    },
+                    decoration: const InputDecoration(
+                      border: UnderlineInputBorder(),
+//                    labelText: AppLocalizations.of(context)!.addTagGroup,
+                      labelText: "or from URL", // TODO global string
+                    ),
+                    onSaved: (String? value) async {},
+                  ),
+                )),
+              ]),
+              ElevatedButton(
                 onPressed: () {
+                  _formKey.currentState!.validate();
+
                   print("button pressed");
                 },
-                child: const Text('image'),
+                child: const Text('Add recipe'),
               ),
-            ),
-          ]),
-          Row(children: [
-            ElevatedButton(
-              onPressed: () {
-                print("button pressed");
-              },
-              child: const Text('thumbnail'),
-            ),
-            Expanded(
-                child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: TextFormField(
-                validator: (String? value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Should not be empty!'; // TODO validation + messages
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-//                    labelText: AppLocalizations.of(context)!.addTagGroup,
-                  labelText: "or from URL", // TODO global string
-                ),
-                onSaved: (String? value) async {},
-              ),
-            )),
-          ]),
-          ElevatedButton(
-            onPressed: () {
-              print("button pressed");
-            },
-            child: const Text('Add recipe'),
-          ),
-        ]));
+            ])));
   }
 
   bool _showImagePicker() {
