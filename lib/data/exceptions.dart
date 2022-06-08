@@ -33,3 +33,15 @@ class TagNotFoundException implements Exception {
 
   TagNotFoundException(this.cause);
 }
+
+class MissingValueException implements Exception {
+  String field;
+
+  MissingValueException(this.field);
+}
+
+class InvalidUrlException implements Exception {
+  String url;
+
+  InvalidUrlException(this.url);
+}

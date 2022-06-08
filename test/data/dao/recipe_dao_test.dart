@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lunch_me/data/dao/recipe_dao.dart';
 import 'package:lunch_me/data/exceptions.dart';
 import 'package:lunch_me/data/tables.dart';
+import 'package:random_string/random_string.dart';
 
 import '../flutter_test_config.dart';
 
@@ -104,6 +105,59 @@ void main() {
   group("should insert recipe with existing name but different type", () {
     for (var type in Source.values) {
       _testRecipeCreationWithSameNameDifferentType(type);
+    }
+  });
+
+  group("should throw exception when inserting recipe without url", () {
+    for (var type in [Source.web, Source.video]) {
+      test("type: $type", () async {
+        // expect
+        expect(() => dao.createRecipe("some name", type, null, null, null, null), throwsA(isA<MissingValueException>()));
+      });
+    }
+  });
+
+  group("should throw exception when inserting recipe with empty name", () {
+    for (var type in Source.values) {
+      test("type: $type", () async {
+        // expect
+        expect(() => dao.createRecipe("", type, null, null, null, null), throwsA(isA<MissingValueException>()));
+      });
+    }
+  });
+
+  group("should throw exception when inserting recipe with name longer than 50 characters", () {
+    var tooLongName = randomString(51);
+    for (var type in Source.values) {
+      test("type: $type", () async {
+        // expect
+        expect(() => dao.createRecipe(tooLongName, type, null, null, null, null), throwsA(isA<MissingValueException>()));
+      });
+    }
+  });
+
+  test("should throw exception when inserting recipe with type photo but no content photo", () {
+    // expect
+    expect(() => dao.createRecipe("some name", Source.photo, null, null, null, null), throwsA(isA<MissingValueException>()));
+  });
+
+  group("should throw exception when inserting recipe with non valid URL", () {
+    var nonValidUrls = ["not a url at all", "ftp://wrong.protocol.com", "//no.protocol.com"];
+    var types = [Source.web, Source.video];
+    for (var invalidUrl in nonValidUrls) {
+      for (var type in types) {
+        test("type: $type, field: url, value: '$invalidUrl'", () async {
+          expect(() => dao.createRecipe("recipe name", type, invalidUrl, null, null, null), throwsA(isA<InvalidUrlException>()));
+        });
+      }
+    }
+
+    for (var invalidUrl in nonValidUrls) {
+      for (var type in types) {
+        test("type: $type, field: image, value: '$invalidUrl'", () async {
+          expect(() => dao.createRecipe("recipe name", type, "http://valid.url.com", invalidUrl, null, null), throwsA(isA<InvalidUrlException>()));
+        });
+      }
     }
   });
 }
