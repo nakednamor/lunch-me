@@ -121,7 +121,7 @@ void main() {
     for (var type in Source.values) {
       test("type: $type", () async {
         // expect
-        expect(() => dao.createRecipe("", type, null, null, null, null), throwsA(isA<MissingValueException>()));
+        expect(() => dao.createRecipe("", type, null, null, null, null), throwsA(isA<EmptyNameException>()));
       });
     }
   });
@@ -131,7 +131,7 @@ void main() {
     for (var type in Source.values) {
       test("type: $type", () async {
         // expect
-        expect(() => dao.createRecipe(tooLongName, type, null, null, null, null), throwsA(isA<MissingValueException>()));
+        expect(() => dao.createRecipe(tooLongName, type, null, null, null, null), throwsA(isA<NameTooLongException>()));
       });
     }
   });
