@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:lunch_me/data/database.dart';
+import 'package:lunch_me/data/exceptions.dart';
 import 'package:lunch_me/data/tables.dart';
 
 part 'recipe_dao.g.dart';
@@ -9,8 +10,9 @@ class RecipeDao extends DatabaseAccessor<MyDatabase> with _$RecipeDaoMixin {
   RecipeDao(MyDatabase db) : super(db);
 
   Future<void> createRecipe(String name, Source type, String? url, String? imageUrl, String? photoContent, String? photoImage) async {
-    late Insertable<Recipe> record;
+    await _validateRecipe(name, type);
 
+    late Insertable<Recipe> record;
     switch (type) {
       case Source.web:
       case Source.video:
@@ -25,5 +27,12 @@ class RecipeDao extends DatabaseAccessor<MyDatabase> with _$RecipeDaoMixin {
     }
 
     await recipes.insertOne(record);
+  }
+
+  Future<void> _validateRecipe(String name, Source type) async {
+    var recipeCount = await _countRecipesWithNameAndType(name, type).getSingle();
+    if (recipeCount != 0) {
+      throw NameAlreadyExistsException(name);
+    }
   }
 }

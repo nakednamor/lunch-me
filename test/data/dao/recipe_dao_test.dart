@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lunch_me/data/dao/recipe_dao.dart';
+import 'package:lunch_me/data/exceptions.dart';
 import 'package:lunch_me/data/tables.dart';
 
 import '../flutter_test_config.dart';
@@ -68,6 +69,21 @@ void main() {
     });
   }
 
+  void _testRecipeCreationWithSameNameSameType(Source type) async {
+    test(type, () async {
+      // given recipes with same name and same type
+      var name = "some recipe name";
+      var url = "http://some.url";
+      var imageUrl = "http://some.image";
+      var photoContent = "some content photo";
+      var photoImage = "some image photo";
+      await dao.createRecipe(name, type, url, imageUrl, photoContent, photoImage);
+
+      // expect
+      expect(() => dao.createRecipe(name, type, url, imageUrl, photoContent, photoImage), throwsA(isA<NameAlreadyExistsException>()));
+    });
+  }
+
   group("should insert recipe", () {
     _testRecipeCreation("new web", Source.web, "http://web.test", "http://web.image", null, null);
     _testRecipeCreation("new web without image", Source.web, "http://web.test", null, null, null);
@@ -79,7 +95,11 @@ void main() {
     _testRecipeCreation("new memory without image", Source.memory, null, null, null, null);
   });
 
-  group("should throw exception when new name and type already exists", () {});
+  group("should throw exception when new name and type already exists", () {
+    for (var type in Source.values) {
+      _testRecipeCreationWithSameNameSameType(type);
+    }
+  });
 
   group("should insert recipe with existing name but different type", () {
     for (var type in Source.values) {
