@@ -6,6 +6,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:lunch_me/data/dao/language_dao.dart';
+import 'package:lunch_me/data/dao/recipe_dao.dart';
 import 'package:lunch_me/data/dao/tag_dao.dart';
 import 'package:lunch_me/data/dao/taggroup_dao.dart';
 import 'package:path/path.dart';
@@ -33,7 +34,7 @@ LazyDatabase _openConnection() {
   });
 }
 
-@DriftDatabase(tables: [Languages, TagGroups, LocalizedTagGroups, Tags, LocalizedTags, Recipes, RecipeTags], daos: [LanguageDao, TagDao, TagGroupDao], include: {'queries.drift'})
+@DriftDatabase(tables: [Languages, TagGroups, LocalizedTagGroups, Tags, LocalizedTags, Recipes, RecipeTags], daos: [LanguageDao, TagDao, TagGroupDao, RecipeDao], include: {'queries.drift'})
 class MyDatabase extends _$MyDatabase {
   MyDatabase() : super(_openConnection());
 
