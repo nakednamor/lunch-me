@@ -45,6 +45,29 @@ void main() {
     });
   }
 
+  void _testRecipeCreationWithSameNameDifferentType(Source type) async {
+    test(type, () async {
+      // given recipes with same name but different types
+      var name = "some recipe name";
+      var url = "http://some.url";
+      var imageUrl = "http://some.image";
+      var photoContent = "some content photo";
+      var photoImage = "some image photo";
+      var differentTypes = Source.values.where((element) => element != type).toList();
+      for (var type in differentTypes) {
+        await dao.createRecipe(name, type, url, imageUrl, photoContent, photoImage);
+      }
+
+      // when
+      await dao.createRecipe(name, type, url, imageUrl, photoContent, photoImage);
+
+      // then
+      var actualRecipes = await testDatabase.getAllRecipeWithTags();
+      var actualCreated = actualRecipes.where((e) => e.recipe.name == name && e.recipe.type == type).toList();
+      expect(actualCreated.length, 1);
+    });
+  }
+
   group("should insert recipe", () {
     _testRecipeCreation("new web", Source.web, "http://web.test", "http://web.image", null, null);
     _testRecipeCreation("new web without image", Source.web, "http://web.test", null, null, null);
@@ -54,5 +77,13 @@ void main() {
     _testRecipeCreation("new photo without image", Source.photo, null, null, "content photo", null);
     _testRecipeCreation("new memory", Source.memory, null, null, null, "memory image");
     _testRecipeCreation("new memory without image", Source.memory, null, null, null, null);
+  });
+
+  group("should throw exception when new name and type already exists", () {});
+
+  group("should insert recipe with existing name but different type", () {
+    for (var type in Source.values) {
+      _testRecipeCreationWithSameNameDifferentType(type);
+    }
   });
 }
