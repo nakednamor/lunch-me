@@ -18,7 +18,7 @@ class _TagGroupListState extends State<TagGroupList> {
   late final MyDatabase database;
   late final Locale locale;
 
-  final List<String> _selectedTags = <String>[];
+  final List<int> _selectedTags = <int>[];
 
   void initializeData() {
     database = Provider.of<MyDatabase>(context, listen: false);
@@ -62,16 +62,16 @@ class _TagGroupListState extends State<TagGroupList> {
                   padding: const EdgeInsets.all(4.0),
                   child: FilterChip(
                     label: Text(tag.label),
-                    selected: _selectedTags.contains(tag.label),
+                    selected: _selectedTags.contains(tag.tag),
                     backgroundColor: Colors.blueGrey.withAlpha(50),
                     selectedColor: Colors.lime,
                     onSelected: (bool value) {
                       setState(() {
                         if (value) {
-                          _selectedTags.add(tag.label);
+                          _selectedTags.add(tag.tag);
                         } else {
-                          _selectedTags.removeWhere((String label) {
-                            return label == tag.label;
+                          _selectedTags.removeWhere((int tagId) {
+                            return tagId == tag.tag;
                           });
                         }
                       });
