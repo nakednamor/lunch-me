@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:lunch_me/model/RecipeFilters.dart';
 import 'package:provider/provider.dart';
 
 import 'package:lunch_me/data/database.dart';
@@ -69,10 +70,12 @@ class _TagGroupListState extends State<TagGroupList> {
                       setState(() {
                         if (value) {
                           _selectedTags.add(tag.tag);
+                          Provider.of<RecipeFilters>(context, listen: false).addTagFilter(tag.tag);
                         } else {
                           _selectedTags.removeWhere((int tagId) {
                             return tagId == tag.tag;
                           });
+                          Provider.of<RecipeFilters>(context, listen: false).removeTagFilter(tag.tag);
                         }
                       });
                     },
