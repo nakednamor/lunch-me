@@ -7,13 +7,9 @@ class RecipeFilters extends ChangeNotifier {
 
   UnmodifiableListView<int> get tagIds => UnmodifiableListView(_tagIds);
 
-  void addTagFilter(int id) {
-    _tagIds.add(id);
-    notifyListeners();
-  }
-
-  void removeTagFilter(int id) {
-    _tagIds.removeWhere((element) => element == id);
+  void setTagFilters(List<int> tagIds) {
+    _tagIds.clear();
+    _tagIds.addAll(tagIds);
     notifyListeners();
   }
 }

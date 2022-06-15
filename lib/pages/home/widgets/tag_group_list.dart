@@ -70,13 +70,12 @@ class _TagGroupListState extends State<TagGroupList> {
                       setState(() {
                         if (value) {
                           _selectedTags.add(tag.tag);
-                          Provider.of<RecipeFilters>(context, listen: false).addTagFilter(tag.tag);
                         } else {
                           _selectedTags.removeWhere((int tagId) {
                             return tagId == tag.tag;
                           });
-                          Provider.of<RecipeFilters>(context, listen: false).removeTagFilter(tag.tag);
                         }
+                        Provider.of<RecipeFilters>(context, listen: false).setTagFilters(_selectedTags);
                       });
                     },
                   ),
