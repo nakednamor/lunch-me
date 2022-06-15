@@ -80,6 +80,10 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Future<List<RecipeWithTags>> filterRecipeByTags(List<int> tagIds) async {
+    if(tagIds.isEmpty){
+      return getAllRecipeWithTags();
+    }
+
     var recipeIds = await _getRecipeIdsHavingTags(tagIds);
 
     var query = select(recipes).join([
