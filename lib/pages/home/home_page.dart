@@ -2,7 +2,7 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:lunch_me/model/RecipeFilters.dart';
+import 'package:lunch_me/model/recipe_filters.dart';
 
 import 'package:lunch_me/pages/home/widgets/recipe_list.dart';
 import 'package:lunch_me/pages/home/widgets/tag_group_list.dart';

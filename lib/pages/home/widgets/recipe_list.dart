@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lunch_me/data/database.dart';
-import 'package:lunch_me/model/RecipeFilters.dart';
+import 'package:lunch_me/model/recipe_filters.dart';
 import 'package:lunch_me/pages/home/widgets/exceptions.dart';
 import 'package:lunch_me/util/image_util.dart';
 import 'package:lunch_me/util/lunch_me_cache_manager.dart';

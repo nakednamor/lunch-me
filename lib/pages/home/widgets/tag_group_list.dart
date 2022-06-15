@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:lunch_me/model/RecipeFilters.dart';
+import 'package:lunch_me/model/recipe_filters.dart';
 import 'package:provider/provider.dart';
 
 import 'package:lunch_me/data/database.dart';
