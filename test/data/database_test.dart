@@ -57,6 +57,7 @@ void main() {
     await _filteringRecipes([2], [2,3], {2: [2,4,6], 3: [2]});
     await _filteringRecipes([6], [2], {2: [2,4,6]});
     await _filteringRecipes([6,2], [2,3], {2: [2,4,6], 3: [2]});
+    await _filteringRecipes([], [3,2,1], {1: [], 2: [2,4,6], 3: [2]});
   });
 }
 
@@ -74,6 +75,9 @@ _filteringRecipes(List<int> tagIds, List<int> expectedRecipeIds,
     var actualRecipe =
     actual.firstWhere((element) => element.recipe.id == recipeId);
     var actualTagIds = actualRecipe.tags.map((e) => e.id);
-    expect(actualTagIds, containsAllInOrder(tagIds));
+    expect(actualTagIds.length, tagIds.length);
+    if (tagIds.isNotEmpty) {
+      expect(actualTagIds, containsAllInOrder(tagIds));
+    }
   });
 }
