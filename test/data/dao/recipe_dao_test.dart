@@ -160,4 +160,9 @@ void main() {
       }
     }
   });
+
+  test("should throw exception when deleting recipe by not existing ID", () {
+    // expect
+    expect(() => dao.deleteRecipe(666), throwsA(isA<RecipeNotFoundException>()));
+  });
 }
