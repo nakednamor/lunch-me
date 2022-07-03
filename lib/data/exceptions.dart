@@ -45,3 +45,9 @@ class InvalidUrlException implements Exception {
 
   InvalidUrlException(this.url);
 }
+
+class RecipeNotFoundException implements Exception {
+  int cause;
+
+  RecipeNotFoundException(this.cause);
+}

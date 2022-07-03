@@ -1,6 +1,9 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lunch_me/data/dao/recipe_dao.dart';
+import 'package:lunch_me/data/dao/tag_dao.dart';
+import 'package:lunch_me/data/database.dart';
 import 'package:lunch_me/data/exceptions.dart';
 import 'package:lunch_me/data/tables.dart';
 import 'package:random_string/random_string.dart';
@@ -9,10 +12,12 @@ import '../flutter_test_config.dart';
 
 void main() {
   late RecipeDao dao;
+  late TagDao tagDao;
 
   setUp(() async {
     debugPrint('test: setup started');
     dao = testDatabase.recipeDao;
+    tagDao = testDatabase.tagDao;
     debugPrint('test: setup finished');
   });
 
@@ -159,5 +164,83 @@ void main() {
         });
       }
     }
+  });
+
+  test("should throw exception when deleting recipe by not existing ID", () async {
+    // expect
+    expect(() => dao.deleteRecipe(666), throwsA(isA<RecipeNotFoundException>()));
+  });
+
+  Future<Recipe> _createRecipe(String name) async {
+    await dao.createRecipe(name, Source.memory, null, null, null, null);
+
+    var recipesAfter = await testDatabase.getAllRecipeWithTags();
+    var actualCreated = recipesAfter.where((e) => e.recipe.name == name && e.recipe.type == Source.memory).toList();
+    expect(actualCreated.length, 1);
+
+    return actualCreated.first.recipe;
+  }
+
+  test("should delete recipe properly", () async {
+    // given recipe with tags
+    var tags = await tagDao.getAllTags();
+    var tagIds = [tags.first.id, tags.last.id];
+    var recipe = await _createRecipe("my new recipe");
+    await dao.assignTags(recipe.id, tagIds);
+
+    var allRecipes = await testDatabase.getAllRecipeWithTags();
+    allRecipes.firstWhere((element) => element.recipe.id == recipe.id);
+
+    // when
+    await dao.deleteRecipe(recipe.id);
+
+    // then
+    allRecipes = await testDatabase.getAllRecipeWithTags();
+    expect(allRecipes.firstWhereOrNull((element) => element.recipe.id == recipe.id), null);
+  });
+
+  test("should throw exception when assigning tags to non existing recipe", () async {
+    // given
+    var tags = await tagDao.getAllTags();
+    var tagIds = [tags.first.id, tags.last.id];
+
+    // expect
+    expect(() => dao.assignTags(666, tagIds), throwsA(isA<RecipeNotFoundException>()));
+  });
+
+  test("should throw exception when assigning non existing tag to recipe", () async {
+    // given
+    var tags = await tagDao.getAllTags();
+    var tagIds = [tags.first.id, tags.last.id, 666];
+    var recipe = await _createRecipe("my new recipe");
+
+    // expect
+    expect(() => dao.assignTags(recipe.id, tagIds), throwsA(isA<TagNotFoundException>()));
+  });
+
+  test("should assign tags to recipe properly", () async {
+    //given recipe without tags
+    var tags = await tagDao.getAllTags();
+    var tagIds = [tags.first.id, tags.last.id];
+    var recipe = await _createRecipe("my new recipe");
+
+    // when tags are assigned
+    await dao.assignTags(recipe.id, tagIds);
+
+    // then recipe should have only the specified tags
+    var allRecipes = await testDatabase.getAllRecipeWithTags();
+    var actualRecipe = allRecipes.firstWhere((element) => element.recipe.id == recipe.id);
+    expect(actualRecipe.tags.length, tagIds.length);
+    expect(actualRecipe.tags.map((e) => e.id), containsAll(tagIds));
+
+    // when different tags are assigned to recipe
+    var differentTagIds = [tagIds.first, tags[1].id, tags[2].id];
+    await dao.assignTags(recipe.id, differentTagIds);
+
+    // then recipe should have only tags from last assignment
+    allRecipes = await testDatabase.getAllRecipeWithTags();
+    actualRecipe = allRecipes.firstWhere((element) => element.recipe.id == recipe.id);
+    expect(actualRecipe.tags.length, differentTagIds.length);
+    expect(actualRecipe.tags.map((e) => e.id), containsAll(differentTagIds));
   });
 }
