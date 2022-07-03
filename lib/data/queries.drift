@@ -56,3 +56,4 @@ _renameTagGroupLabel: UPDATE localized_tag_groups SET label = :label WHERE tag_g
 _countRecipesWithNameAndType: SELECT COUNT(*) AS recipeCount FROM recipes WHERE name = :name AND type = :type;
 _getRecipeById: SELECT * FROM recipes WHERE id = :recipeId;
 _deleteRecipeHasTagsByRecipeId: DELETE FROM recipe_has_tag WHERE recipe = :recipeId;
+_deleteRecipeById: DELETE FROM recipes WHERE id = :id;

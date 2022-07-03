@@ -34,9 +34,14 @@ class RecipeDao extends DatabaseAccessor<MyDatabase> with _$RecipeDaoMixin {
 
   Future<void> deleteRecipe(int recipeId) async {
     var recipe = await _getRecipeById(recipeId).getSingleOrNull();
-    if(recipe == null) {
+    if (recipe == null) {
       throw RecipeNotFoundException(recipeId);
     }
+
+    transaction(() async {
+      await _deleteRecipeHasTagsByRecipeId(recipeId);
+      await _deleteRecipeById(recipeId);
+    });
   }
 
   Future<void> assignTags(int recipeId, List<int> tagIds) async {

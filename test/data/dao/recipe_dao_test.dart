@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lunch_me/data/dao/recipe_dao.dart';
@@ -179,6 +180,24 @@ void main() {
 
     return actualCreated.first.recipe;
   }
+
+  test("should delete recipe properly", () async {
+    // given recipe with tags
+    var tags = await tagDao.getAllTags();
+    var tagIds = [tags.first.id, tags.last.id];
+    var recipe = await _createRecipe("my new recipe");
+    await dao.assignTags(recipe.id, tagIds);
+
+    var allRecipes = await testDatabase.getAllRecipeWithTags();
+    allRecipes.firstWhere((element) => element.recipe.id == recipe.id);
+
+    // when
+    await dao.deleteRecipe(recipe.id);
+
+    // then
+    allRecipes = await testDatabase.getAllRecipeWithTags();
+    expect(allRecipes.firstWhereOrNull((element) => element.recipe.id == recipe.id), null);
+  });
 
   test("should throw exception when assigning tags to non existing recipe", () async {
     // given
