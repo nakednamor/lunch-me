@@ -39,6 +39,24 @@ class RecipeDao extends DatabaseAccessor<MyDatabase> with _$RecipeDaoMixin {
     }
   }
 
+  Future<void> assignTags(int recipeId, List<int> tagIds) async {
+    var recipe = await _getRecipeById(recipeId).getSingleOrNull();
+    if (recipe == null) {
+      throw RecipeNotFoundException(recipeId);
+    }
+
+    var allTagIds = (await _allTags().get()).map((e) => e.id);
+    var notExistingTagIds = tagIds.where((tagId) => allTagIds.contains(tagId) == false);
+    if (notExistingTagIds.isNotEmpty) {
+      throw TagNotFoundException(notExistingTagIds.first);
+    }
+
+    await _deleteRecipeHasTagsByRecipeId(recipeId);
+
+    var batches = tagIds.map((tagId) => RecipeTagsCompanion.insert(recipe: recipeId, tag: tagId));
+    await batch((batch) => batch.insertAll(recipeTags, batches));
+  }
+
   Future<void> _validateRecipe(String name, Source type) async {
     if (name.isEmpty) {
       throw EmptyNameException(name);
