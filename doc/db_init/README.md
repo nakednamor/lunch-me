@@ -25,8 +25,12 @@ The database file ('lunch_me_db') needs to be stored in the 'assets/db' director
 also need to execute the following command on the project root level - this will generate necessary
 classes to work with the database (using drift).
 
-`flutter packages pub run build_runner build`
+```bash
+flutter packages pub run build_runner build
+```
 
 Tests can be executed by using:
 
-`flutter test -j, --concurrency=1`
+```bash
+flutter test -j, --concurrency=1
+```
