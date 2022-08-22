@@ -114,9 +114,86 @@ class MyDatabase extends _$MyDatabase {
     return result.reversed.toList();
   }
 
-  Future<List<int>> _getRecipeIdsHavingTags(List<int> tagIds) async {
-    var query = select(recipeTags)..where((tbl) => tbl.tag.isIn(tagIds));
+  Future<List<RecipeWithTags>> filterRecipeByTagsXXX(List<int> tagIds) async {
+    if(tagIds.isEmpty){
+      return getAllRecipeWithTags();
+    }
+
+    var tagIdsByTagGroupId = await _getTagIdsByTagGroupId(tagIds);
+
+//    var recipeIds = await _getRecipeIdsHavingTags(tagIds);
+    var recipeIds = await _getRecipeIdsHavingTagsXXX(tagIdsByTagGroupId);
+
+    var query = select(recipes).join([
+      leftOuterJoin(recipeTags, recipeTags.recipe.equalsExp(recipes.id)),
+      leftOuterJoin(tags, tags.id.equalsExp(recipeTags.tag)),
+    ])
+      ..where(recipes.id.isIn(recipeIds))
+      ..orderBy([OrderingTerm(expression: recipes.name)]);
+
+    var queryResult = query.map((row) {
+      var recipe = row.readTable(recipes);
+      var tag = row.readTableOrNull(tags);
+
+      return _RecipeWithTag(recipe, tag);
+    });
+
+    var tagsGroupedByRecipe =
+    (await queryResult.get()).groupListsBy((element) => element.recipe);
+
+    var result = tagsGroupedByRecipe.entries.map((entry) {
+      var recipe = entry.key;
+      var tags = entry.value.map((e) => e.tag).whereType<Tag>().toList();
+      return RecipeWithTags(recipe, tags);
+    }).toList();
+
+//    result.sort((a, b) => a.tags.length.compareTo(b.tags.length));
+    result.sort((a, b) => a.recipe.name.toLowerCase().compareTo(b.recipe.name.toLowerCase()));
+
+
+    return result.toList();
+  }
+
+  Future<Map<int, List<int>>> _getTagIdsByTagGroupId(List<int> tagIds) async {
+    var query =  select(tags)..where((tbl) => tbl.id.isIn(tagIds));
+    return (await query.get()).groupListsBy((element) => element.tagGroup).map((key, value) => MapEntry(key, value.map((e) => e.id).toList()));
+  }
+
+  Future<List<int>> _getRecipeIdsHavingTags(List<int> tagIds) async {    
+    var query = select(recipeTags)..where((tbl) => tbl.tag.isIn(tagIds) );
     return query.map((row) => row.recipe).get();
+  }
+
+  // https://drift.simonbinder.eu/docs/using-sql/custom_queries/
+  Future<List<int>> _getRecipeIdsHavingTagsXXX(Map<int, List<int>> tagIdsByTagGroupId) async {
+    var xxxx = tagIdsByTagGroupId.values.map((tagIdsOfGroup) =>
+    selectOnly(recipeTags)
+      ..addColumns([recipeTags.recipe])
+      ..where(recipeTags.tag.isIn(tagIdsOfGroup))).toList();
+
+    var queryStringBuffer = StringBuffer();
+    queryStringBuffer.write( "SELECT rch.recipe FROM recipe_has_tag rch JOIN tag t on rch.tag = t.id WHERE 1 = 1");
+    /*   var aaaa = tagIdsByTagGroupId.values.toList();
+    for (var tagIds in aaaa) {
+      queryStringBuffer.write(" AND tag IN (${tagIds.join(",")})");
+    }
+*/
+
+    tagIdsByTagGroupId.forEach((tagGroupId, tagIds) {
+      queryStringBuffer.write(" AND (t.tag_group = ");
+    });
+
+
+    queryStringBuffer.write(";");
+
+
+
+    var query = queryStringBuffer.toString();
+
+    var zzz = customSelect(query, readsFrom: {recipeTags}).map((row) => row.read<int>("recipe")).get();
+
+    return zzz;
+
   }
 }
 
