@@ -63,22 +63,26 @@ class _RecipeListState extends State<RecipeList> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
               ),
               clipBehavior: Clip.antiAlias,
-              height: 50,
-              child: _hasImage(recipeWithTags.recipe)
-                  ? CachedNetworkImage(
-                      cacheManager: cacheManager,
-                      progressIndicatorBuilder: (context, url, progress) => Center(
-                        child: CircularProgressIndicator(
-                          value: progress.progress,
-                        ),
-                      ),
-                      key: Key(recipeWithTags.recipe.id.toString()),
-                      imageUrl: _getImageUrl(recipeWithTags.recipe),
-                      errorWidget: (context, url, error) => Image.asset('assets/images/recipe/error.png'),
-                      fadeOutDuration: const Duration(seconds: 1),
-                      fadeInDuration: const Duration(seconds: 1),
-                    )
-                  : Image.asset('assets/images/recipe/not_available.png'),
+              width: MediaQuery.of(context).size.width * 0.2,
+              constraints: const BoxConstraints(maxWidth: 160),
+              child: AspectRatio(
+                  aspectRatio: 4 / 3,
+                  child: _hasImage(recipeWithTags.recipe)
+                      ? CachedNetworkImage(
+                          cacheManager: cacheManager,
+                          progressIndicatorBuilder: (context, url, progress) => Center(
+                            child: CircularProgressIndicator(
+                              value: progress.progress,
+                            ),
+                          ),
+                          fit: BoxFit.cover,
+                          key: Key(recipeWithTags.recipe.id.toString()),
+                          imageUrl: _getImageUrl(recipeWithTags.recipe),
+                          errorWidget: (context, url, error) => Image.asset('assets/images/recipe/error.jpg'),
+                          fadeOutDuration: const Duration(seconds: 1),
+                          fadeInDuration: const Duration(seconds: 1),
+                        )
+                      : const Image(image: AssetImage('assets/images/recipe/not-available.jpg'), fit: BoxFit.cover)),
             ),
             Positioned.fill(
               child: Material(
