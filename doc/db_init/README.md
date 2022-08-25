@@ -19,7 +19,7 @@ Execute the following commands to create the application database:
 By this you'll also start the sqlite3 console where you can work with the database e.g. querying
 like:
 
-`select ltg.label, lt.label from tags t join localized_tags lt on lt.tag = t.id join tag_groups tg on tg.id = t.tag_group join localized_tag_groups ltg on ltg.tag_group = tg.id where ltg.lang = "en" and lt.lang = "en";`
+`select tg.label, t.label from tags t join tag_groups tg on tg.id = t.tag_group;`
 
 The database file ('lunch_me_db') needs to be stored in the 'assets/db' directory. In addition you
 also need to execute the following command on the project root level - this will generate necessary
