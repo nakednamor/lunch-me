@@ -1,8 +1,5 @@
-import 'dart:ui';
-
-import 'package:lunch_me/data/database.dart';
-
 import 'package:drift/drift.dart';
+import 'package:lunch_me/data/database.dart';
 import 'package:lunch_me/data/tables.dart';
 
 import '../exceptions.dart';
@@ -25,15 +22,9 @@ class TagDao extends DatabaseAccessor<MyDatabase> with _$TagDaoMixin {
     var lastOrdering = await _getMaxTagOrdering(tagGroupId).getSingleOrNull();
     var newOrdering = lastOrdering == null ? 0 : lastOrdering + 1;
 
-    var newTagId = await into(tags).insert(TagsCompanion.insert(tagGroup: tagGroupId, ordering: newOrdering));
+    var newTagId = await into(tags).insert(TagsCompanion.insert(tagGroup: tagGroupId, ordering: newOrdering, label: name));
 
-    var availableLanguages = await attachedDatabase.languageDao.getAllLanguages();
-    var languageIds = availableLanguages.map((e) => e.id);
-
-    var batches = languageIds.map((language) => LocalizedTagsCompanion.insert(tag: newTagId, lang: language, label: name));
-    await batch((batch) => batch.insertAll(localizedTags, batches));
-
-    return Tag(id: newTagId, tagGroup: tagGroupId, ordering: newOrdering);
+    return Tag(id: newTagId, tagGroup: tagGroupId, ordering: newOrdering, label: name);
   }
 
   Future<void> deleteTag(int id) async {
@@ -43,13 +34,12 @@ class TagDao extends DatabaseAccessor<MyDatabase> with _$TagDaoMixin {
     }
   }
 
-  Future<void> renameTag(int id, String name, Locale locale) async {
+  Future<void> renameTag(int id, String name) async {
     _validateTagName(name);
     var tag = await _getTagById(id).getSingle();
     await _validateTagNameDoesNotExist(tag.tagGroup, name);
 
-    var language = await attachedDatabase.languageDao.getLanguage(locale);
-    await _renameTag(name, tag.id, language.id);
+    await _renameTag(name, tag.id);
   }
 
   Future<void> changeTagOrdering(int id, int newOrdering) async {

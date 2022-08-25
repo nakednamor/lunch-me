@@ -32,16 +32,16 @@ void main() {
 
   test('should return tag-groups and tags ordered by order-column', () async {
     //when
-    var actual = await testDatabase.getAllTagsWithGroups(const Locale("en"));
+    var actual = await testDatabase.getAllTagsWithGroups();
 
     // then tag-groups should be ordered
-    var tagGroupIds = actual.map((e) => e.tagGroup.tagGroup);
+    var tagGroupIds = actual.map((e) => e.tagGroup.id);
     expect(tagGroupIds, containsAllInOrder([2, 1, 3]));
 
     // and tags should be ordered as well
-    expect(actual[0].tags.map((e) => e.id), containsAllInOrder([12, 11]));
-    expect(actual[1].tags.map((e) => e.id), containsAllInOrder([7, 9, 8]));
-    expect(actual[2].tags.map((e) => e.id), containsAllInOrder([10]));
+    expect(actual[0].tags.map((e) => e.id), containsAllInOrder([2, 1]));
+    expect(actual[1].tags.map((e) => e.id), containsAllInOrder([3, 5, 4]));
+    expect(actual[2].tags.map((e) => e.id), containsAllInOrder([6]));
   });
 
   test('filter recipes by tags should return empty list', () async {

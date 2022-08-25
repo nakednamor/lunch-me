@@ -1,8 +1,5 @@
-import 'dart:ui';
-
-import 'package:lunch_me/data/database.dart';
-
 import 'package:drift/drift.dart';
+import 'package:lunch_me/data/database.dart';
 import 'package:lunch_me/data/tables.dart';
 
 import '../exceptions.dart';
@@ -20,24 +17,16 @@ class TagGroupDao extends DatabaseAccessor<MyDatabase> with _$TagGroupDaoMixin {
 
     var newOrdering = lastOrdering == null ? 0 : lastOrdering + 1;
 
-    var newTagGroupId = await into(tagGroups).insert(TagGroupsCompanion.insert(ordering: newOrdering));
+    var newTagGroupId = await into(tagGroups).insert(TagGroupsCompanion.insert(ordering: newOrdering, label: name));
 
     var newTagGroup = await _getTagGroupById(newTagGroupId).getSingle();
-
-    var availableLanguages = await attachedDatabase.languageDao.getAllLanguages();
-    var languageIds = availableLanguages.map((e) => e.id);
-
-    var batches = languageIds.map((language) => LocalizedTagGroupsCompanion.insert(tagGroup: newTagGroup.id, lang: language, label: name));
-
-    await batch((batch) => batch.insertAll(localizedTagGroups, batches));
 
     return newTagGroup;
   }
 
-  Future<void> renameTagGroup(int tagGroupId, String newName, Locale locale) async {
+  Future<void> renameTagGroup(int tagGroupId, String newName) async {
     await _validateTagGroupName(newName);
-    var language = await attachedDatabase.languageDao.getLanguage(locale);
-    await _renameTagGroupLabel(newName, tagGroupId, language.id);
+    await _renameTagGroupLabel(newName, tagGroupId);
   }
 
   Future<void> deleteTagGroup(int tagGroupId) async {

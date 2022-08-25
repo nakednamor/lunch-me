@@ -17,14 +17,12 @@ class TagGroupList extends StatefulWidget {
 class _TagGroupListState extends State<TagGroupList> {
   late final Stream<List<TagGroupWithTags>> _watchTagGroupsWithTags;
   late final MyDatabase database;
-  late final Locale locale;
 
   final List<int> _selectedTags = <int>[];
 
   void initializeData() {
     database = Provider.of<MyDatabase>(context, listen: false);
-    locale = Localizations.localeOf(context);
-    _watchTagGroupsWithTags = database.watchAllTagsWithGroups(locale);
+    _watchTagGroupsWithTags = database.watchAllTagsWithGroups();
   }
 
   @override
@@ -58,21 +56,21 @@ class _TagGroupListState extends State<TagGroupList> {
           children: <Widget>[
             Text(tagGroupWithTags.tagGroup.label),
             Wrap(
-              children: tagGroupWithTags.tags.map<Widget>((LocalizedTag tag) {
+              children: tagGroupWithTags.tags.map<Widget>((Tag tag) {
                 return Padding(
                   padding: const EdgeInsets.all(4.0),
                   child: FilterChip(
                     label: Text(tag.label),
-                    selected: _selectedTags.contains(tag.tag),
+                    selected: _selectedTags.contains(tag.id),
                     backgroundColor: Colors.blueGrey.withAlpha(50),
                     selectedColor: Colors.lime,
                     onSelected: (bool value) {
                       setState(() {
                         if (value) {
-                          _selectedTags.add(tag.tag);
+                          _selectedTags.add(tag.id);
                         } else {
                           _selectedTags.removeWhere((int tagId) {
-                            return tagId == tag.tag;
+                            return tagId == tag.id;
                           });
                         }
                         Provider.of<RecipeFilters>(context, listen: false).setTagFilters(_selectedTags);

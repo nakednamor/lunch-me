@@ -48,7 +48,7 @@ void main() {
     var newTagName = 'a new tag';
     await dao.addTag(tagGroupId, newTagName);
 
-    await dao.attachedDatabase.getAllTagsWithGroups(const Locale("en"));
+    await dao.attachedDatabase.getAllTagsWithGroups();
 
     // when
     expect(() => dao.addTag(tagGroupId, newTagName), throwsA(isA<NameAlreadyExistsException>()));
@@ -58,10 +58,9 @@ void main() {
     // given
     var tagGroupId = 3;
     var newTagName = 'new tag';
-    var locale = const Locale("en");
 
-    var tagGroupsWithTagsBefore = await dao.attachedDatabase.getAllTagsWithGroups(locale);
-    var lastTagOrderingBefore = tagGroupsWithTagsBefore.firstWhere((element) => element.tagGroup.tagGroup == tagGroupId).tags.length - 1;
+    var tagGroupsWithTagsBefore = await dao.attachedDatabase.getAllTagsWithGroups();
+    var lastTagOrderingBefore = tagGroupsWithTagsBefore.firstWhere((element) => element.tagGroup.id == tagGroupId).tags.length - 1;
 
     // when
     var actual = await dao.addTag(tagGroupId, newTagName);
@@ -69,31 +68,6 @@ void main() {
     // then
     expect(actual.tagGroup, tagGroupId);
     expect(actual.ordering, lastTagOrderingBefore + 1);
-  });
-
-  test('should add new tag with same value for all languages', () async {
-    // given
-    var englishLocale = const Locale("en");
-    var germanLocale = const Locale("de");
-
-    var tagGroupId = 3;
-    var newTagName = 'new tag';
-
-    var tagGroupsWithTagsBefore = await dao.attachedDatabase.getAllTagsWithGroups(englishLocale);
-    expect(tagGroupsWithTagsBefore.where((tagGroup) => tagGroup.tags.any((tag) => tag.label == newTagName)).length, 0);
-
-    tagGroupsWithTagsBefore = await dao.attachedDatabase.getAllTagsWithGroups(germanLocale);
-    expect(tagGroupsWithTagsBefore.where((tagGroup) => tagGroup.tags.any((tag) => tag.label == newTagName)).length, 0);
-
-    // when
-    await dao.addTag(tagGroupId, newTagName);
-
-    // then
-    tagGroupsWithTagsBefore = await dao.attachedDatabase.getAllTagsWithGroups(englishLocale);
-    expect(tagGroupsWithTagsBefore.where((tagGroup) => tagGroup.tags.any((tag) => tag.label == newTagName)).length, 1);
-
-    tagGroupsWithTagsBefore = await dao.attachedDatabase.getAllTagsWithGroups(germanLocale);
-    expect(tagGroupsWithTagsBefore.where((tagGroup) => tagGroup.tags.any((tag) => tag.label == newTagName)).length, 1);
   });
 
   test('should allow tags with same name in different tag-groups', () async {
@@ -113,7 +87,7 @@ void main() {
     await dao.addTag(3, tagName);
 
     // expect
-    expect(() => dao.renameTag(tagToRename.id, tagName, const Locale("en")), throwsA(isA<NameAlreadyExistsException>()));
+    expect(() => dao.renameTag(tagToRename.id, tagName), throwsA(isA<NameAlreadyExistsException>()));
   });
 
   test('rename tag should throw exception when name is empty', () async {
@@ -121,7 +95,7 @@ void main() {
     var tag = await dao.addTag(3, 'a tag');
 
     // expect
-    expect(() => dao.renameTag(tag.id, '', const Locale("en")), throwsA(isA<EmptyNameException>()));
+    expect(() => dao.renameTag(tag.id, ''), throwsA(isA<EmptyNameException>()));
   });
 
   test('rename tag should throw exception when name > 50 chars', () async {
@@ -129,29 +103,23 @@ void main() {
     var tag = await dao.addTag(3, 'a tag');
 
     // expect
-    expect(() => dao.renameTag(tag.id, '012345678901234567890123456789012345678901234567890', const Locale("en")), throwsA(isA<NameTooLongException>()));
+    expect(() => dao.renameTag(tag.id, '012345678901234567890123456789012345678901234567890'), throwsA(isA<NameTooLongException>()));
   });
 
   test('should rename tag', () async {
     // given
     var tagGroupId = 3;
     var previousTagName = 'previous name';
-    var localeForRenaming = const Locale("en");
     var tag = await dao.addTag(tagGroupId, previousTagName);
 
     // when
     var newTagName = 'this is new';
-    await dao.renameTag(tag.id, newTagName, localeForRenaming);
+    await dao.renameTag(tag.id, newTagName);
 
     // then
-    var tagGroupsWithTags = await dao.attachedDatabase.getAllTagsWithGroups(localeForRenaming);
-    var renamedTag = tagGroupsWithTags.firstWhere((tagGroup) => tagGroup.tagGroup.tagGroup == tagGroupId).tags.firstWhere((t) => t.tag == tag.id);
+    var tagGroupsWithTags = await dao.attachedDatabase.getAllTagsWithGroups();
+    var renamedTag = tagGroupsWithTags.firstWhere((tagGroup) => tagGroup.tagGroup.id == tagGroupId).tags.firstWhere((t) => t.id == tag.id);
     expect(renamedTag.label, newTagName);
-
-    // other locales still have old name
-    tagGroupsWithTags = await dao.attachedDatabase.getAllTagsWithGroups(const Locale("de"));
-    renamedTag = tagGroupsWithTags.firstWhere((tagGroup) => tagGroup.tagGroup.tagGroup == tagGroupId).tags.firstWhere((t) => t.tag == tag.id);
-    expect(renamedTag.label, previousTagName);
   });
 
   test('reordering should throw exception when there is no tag with given id', () async {
@@ -180,12 +148,12 @@ void main() {
     allTagIds = (await dao.getAllTags()).map((e) => e.id);
     expect(allTagIds.contains(tagToDelete.id), isFalse);
 
-    var tagGroupsWithTags = await dao.attachedDatabase.getAllTagsWithGroups(const Locale("en"));
-    var localizedTags = tagGroupsWithTags.where((tagGroup) => tagGroup.tags.map((tag) => tag.tag).contains(tagToDelete.id)).length;
+    var tagGroupsWithTags = await dao.attachedDatabase.getAllTagsWithGroups();
+    var localizedTags = tagGroupsWithTags.where((tagGroup) => tagGroup.tags.map((tag) => tag.id).contains(tagToDelete.id)).length;
     expect(localizedTags, 0);
 
-    tagGroupsWithTags = await dao.attachedDatabase.getAllTagsWithGroups(const Locale("de"));
-    localizedTags = tagGroupsWithTags.where((tagGroup) => tagGroup.tags.map((tag) => tag.tag).contains(tagToDelete.id)).length;
+    tagGroupsWithTags = await dao.attachedDatabase.getAllTagsWithGroups();
+    localizedTags = tagGroupsWithTags.where((tagGroup) => tagGroup.tags.map((tag) => tag.id).contains(tagToDelete.id)).length;
     expect(localizedTags, 0);
   });
 

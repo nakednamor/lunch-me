@@ -23,8 +23,7 @@ class _EditableTagGroupListState extends State<EditableTagGroupList> {
 
   void initializeData() {
     database = Provider.of<MyDatabase>(context, listen: false);
-    locale = Localizations.localeOf(context);
-    _watchTagGroupsWithTags = database.watchAllTagsWithGroups(locale);
+    _watchTagGroupsWithTags = database.watchAllTagsWithGroups();
     _tagGroupDao = database.tagGroupDao;
     _tagDao = database.tagDao;
   }
@@ -68,19 +67,19 @@ class _EditableTagGroupListState extends State<EditableTagGroupList> {
                 ),
               ]),
               onPressed: () async {
-                await _tagGroupDao.deleteTagGroup(tagGroupWithTags.tagGroup.tagGroup);
+                await _tagGroupDao.deleteTagGroup(tagGroupWithTags.tagGroup.id);
               },
             ),
             Wrap(
               children: [
-                ...tagGroupWithTags.tags.map<Widget>((LocalizedTag tag) {
+                ...tagGroupWithTags.tags.map<Widget>((Tag tag) {
                   return Padding(
                     padding: const EdgeInsets.all(4.0),
                     child: Chip(
                       label: Text(tag.label),
                       backgroundColor: Colors.blueGrey.withAlpha(50),
                       onDeleted: () async {
-                        await _tagDao.deleteTag(tag.tag);
+                        await _tagDao.deleteTag(tag.id);
                       },
                     ),
                   );
@@ -104,7 +103,7 @@ class _EditableTagGroupListState extends State<EditableTagGroupList> {
                         ),
                         onSaved: (String? value) async {
                           if (value != null) {
-                            await _tagDao.addTag(tagGroupWithTags.tagGroup.tagGroup, value);
+                            await _tagDao.addTag(tagGroupWithTags.tagGroup.id, value);
                             tagGroupFormKey.currentState?.reset();
                           }
                         },
