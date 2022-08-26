@@ -1,11 +1,9 @@
 import 'dart:io';
-import 'dart:ui';
 
 import "package:collection/collection.dart";
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:lunch_me/data/dao/language_dao.dart';
 import 'package:lunch_me/data/dao/recipe_dao.dart';
 import 'package:lunch_me/data/dao/tag_dao.dart';
 import 'package:lunch_me/data/dao/taggroup_dao.dart';
@@ -34,7 +32,7 @@ LazyDatabase _openConnection() {
   });
 }
 
-@DriftDatabase(tables: [Languages, TagGroups, LocalizedTagGroups, Tags, LocalizedTags, Recipes, RecipeTags], daos: [LanguageDao, TagDao, TagGroupDao, RecipeDao], include: {'queries.drift'})
+@DriftDatabase(tables: [TagGroups, Tags, Recipes, RecipeTags], daos: [TagDao, TagGroupDao, RecipeDao], include: {'queries.drift'})
 class MyDatabase extends _$MyDatabase {
   MyDatabase() : super(_openConnection());
 
@@ -48,12 +46,12 @@ class MyDatabase extends _$MyDatabase {
         await customStatement('PRAGMA foreign_keys = ON');
       });
 
-  Future<List<TagGroupWithTags>> getAllTagsWithGroups(Locale locale) async {
-    return _allTagGroupsWithTags(locale.languageCode).get();
+  Future<List<TagGroupWithTags>> getAllTagsWithGroups() async {
+    return _allTagGroupsWithTags().get();
   }
 
-  Stream<List<TagGroupWithTags>> watchAllTagsWithGroups(Locale locale) {
-    return _allTagGroupsWithTags(locale.languageCode).watch();
+  Stream<List<TagGroupWithTags>> watchAllTagsWithGroups() {
+    return _allTagGroupsWithTags().watch();
   }
 
   Future<List<RecipeWithTags>> getAllRecipeWithTags() async {

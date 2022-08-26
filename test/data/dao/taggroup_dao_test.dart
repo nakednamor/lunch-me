@@ -36,26 +36,17 @@ void main() {
     expect(() => dao.addTagGroup(newTagGroupName), throwsA(isA<NameTooLongException>()));
   });
 
-  test('should add new tag-group with same value for all languages', () async {
+  test('should add new tag-group', () async {
     // given
-    var englishLocale = const Locale("en");
-    var germanLocale = const Locale("de");
+    var tagGroupsBefore = await testDatabase.getAllTagsWithGroups();
+    expect(tagGroupsBefore.map((e) => e.tagGroup.label), containsAllInOrder(["A", "B", "C"]));
 
-    var tagGroupsBefore = await testDatabase.getAllTagsWithGroups(englishLocale);
-    expect(tagGroupsBefore.map((e) => e.tagGroup.label), containsAllInOrder(["B en", "A en", "C en"]));
-
-    tagGroupsBefore = await testDatabase.getAllTagsWithGroups(germanLocale);
-    expect(tagGroupsBefore.map((e) => e.tagGroup.label), containsAllInOrder(["B de", "A de", "C de"]));
-
-    //when
-    await dao.addTagGroup("D en");
+    // when
+    await dao.addTagGroup("D");
 
     // then
-    var tagGroupsAfter = await testDatabase.getAllTagsWithGroups(englishLocale);
-    expect(tagGroupsAfter.map((e) => e.tagGroup.label), containsAllInOrder(["B en", "A en", "C en", "D en"]));
-
-    tagGroupsAfter = await testDatabase.getAllTagsWithGroups(germanLocale);
-    expect(tagGroupsAfter.map((e) => e.tagGroup.label), containsAllInOrder(["B de", "A de", "C de", "D en"]));
+    var tagGroupsAfter = await testDatabase.getAllTagsWithGroups();
+    expect(tagGroupsAfter.map((e) => e.tagGroup.label), containsAllInOrder(["A", "B", "C", "D"]));
   });
 
   test('should throw exception when adding tag-group with already existing name', () async {
@@ -69,51 +60,42 @@ void main() {
 
   test('should rename tag-group', () async {
     // given
-    var localeEnglish = const Locale("en");
-    var localeGerman = const Locale("de");
     var tagGroupName = 'this should be renamed';
     var tagGroup = await dao.addTagGroup(tagGroupName);
 
     // when
     var newTagGroupName = 'updated name!';
-    await testDatabase.tagGroupDao.renameTagGroup(tagGroup.id, newTagGroupName, localeEnglish);
+    await testDatabase.tagGroupDao.renameTagGroup(tagGroup.id, newTagGroupName);
 
-    // then name from other locales should not be renamed
-    var tagGroupsGerman = await testDatabase.getAllTagsWithGroups(localeGerman);
-    expect(tagGroupsGerman.where((e) => e.tagGroup.tagGroup == tagGroup.id).map((e) => e.tagGroup.label).first, tagGroupName);
-
-    // and name for english should be renamed
-    var tagGroupsEnglish = await testDatabase.getAllTagsWithGroups(localeEnglish);
-    expect(tagGroupsEnglish.where((e) => e.tagGroup.tagGroup == tagGroup.id).map((e) => e.tagGroup.label).first, newTagGroupName);
+    // thenn
+    var tagGroups = await testDatabase.getAllTagsWithGroups();
+    expect(tagGroups.where((e) => e.tagGroup.id == tagGroup.id).map((e) => e.tagGroup.label).first, newTagGroupName);
   });
 
   test('rename tag-group should throw exception when new tag-group name is empty', () async {
     // given
-    var localeEnglish = const Locale("en");
     var tagGroup = await dao.addTagGroup('a tag-group');
 
     // expect
-    expect(() => dao.renameTagGroup(tagGroup.id, '', localeEnglish), throwsA(isA<EmptyNameException>()));
+    expect(() => dao.renameTagGroup(tagGroup.id, ''), throwsA(isA<EmptyNameException>()));
   });
 
   test('rename tag-group should throw exception when new tag-group name > 50 chars', () async {
     // given
-    var localeEnglish = const Locale("en");
     var tagGroup = await dao.addTagGroup('a tag-group');
     var newTagGroupName = '012345678901234567890123456789012345678901234567890';
 
     // expect
-    expect(() => dao.renameTagGroup(tagGroup.id, newTagGroupName, localeEnglish), throwsA(isA<NameTooLongException>()));
+    expect(() => dao.renameTagGroup(tagGroup.id, newTagGroupName), throwsA(isA<NameTooLongException>()));
   });
 
   test('rename tag-group should throw exception when there is already tag-group with same name', () async {
     // given
-    var localeEnglish = const Locale("en");
     await dao.addTagGroup('first tag-group');
     var tagGroup = await dao.addTagGroup('second tag-group');
 
     // expect
-    expect(() => dao.renameTagGroup(tagGroup.id, 'first tag-group', localeEnglish), throwsA(isA<NameAlreadyExistsException>()));
+    expect(() => dao.renameTagGroup(tagGroup.id, 'first tag-group'), throwsA(isA<NameAlreadyExistsException>()));
   });
 
   test('should throw exception when tag-group not found by id while changing tag-group ordering', () async {
