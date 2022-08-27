@@ -7,6 +7,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:lunch_me/data/dao/recipe_dao.dart';
 import 'package:lunch_me/data/dao/tag_dao.dart';
 import 'package:lunch_me/data/dao/taggroup_dao.dart';
+import 'package:lunch_me/model/recipe_filters.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -75,6 +76,10 @@ class MyDatabase extends _$MyDatabase {
       var tags = entry.value.map((e) => e.tag).whereType<Tag>().toList();
       return RecipeWithTags(recipe, tags);
     }).toList();
+  }
+
+  Future<List<RecipeWithTags>> filterRecipes(List<RecipeFilter> filterList) async {
+    return getAllRecipeWithTags();
   }
 
   Future<List<RecipeWithTags>> filterRecipeByTags(List<int> tagIds) async {
