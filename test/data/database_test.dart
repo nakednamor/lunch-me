@@ -63,24 +63,19 @@ void main() {
   test('should filter recipes by tags', () async {
     await _clearDatabase();
     await _prepareDatabaseForFiltering();
-/*
+
     await _filteringRecipes([1, 5], [1], {1: false, 2: false});
     await _filteringRecipes([1, 5], [1], {1: true, 2: true});
     await _filteringRecipes([1, 2], [1, 2], {1: false});
     await _filteringRecipes([1, 2], [1], {1: true});
     await _filteringRecipes([2, 3], [2, 1, 3], {1: false});
-
-
     await _filteringRecipes([2, 3], [2], {1: true});
     await _filteringRecipes([2, 5], [1, 2], {1: false, 2: false});
     await _filteringRecipes([2, 5], [1, 2], {1: true, 2: true});
     await _filteringRecipes([1, 2, 4], [2], {1: false, 2: false});
     await _filteringRecipes([1, 2, 4], [], {1: true, 2: true});
-
-
     await _filteringRecipes([2, 3, 5, 6], [2, 1, 3], {1: false, 2: false});
     await _filteringRecipes([2, 3, 5, 6], [], {1: true, 2: true});
-    */
     await _filteringRecipes([10], [], {3: false});
     await _filteringRecipes([10], [], {3: true});
   });
