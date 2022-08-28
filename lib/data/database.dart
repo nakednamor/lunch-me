@@ -84,35 +84,7 @@ class MyDatabase extends _$MyDatabase {
       return getAllRecipeWithTags();
     }
 
-    var futures = filterList.where((filter) => filter.tags.isNotEmpty).map((filter) async {
-
-      List<int> result;
-
-      if(filter.allMatch) {
-        result = [];
-
-        var tagString = filter.tags.join(",");
-        var tagCount = filter.tags.length;
-        var xxxxxxxxxx = await customSelect('SELECT recipe FROM recipe_has_tag WHERE tag IN ($tagString) GROUP BY recipe HAVING COUNT(*) = $tagCount;', readsFrom: {recipeTags})
-        .map((row) => row.read<int>('recipe')).get();
-
-        result = xxxxxxxxxx;
-
-      } else {
-        result = await _getRecipeIdsHavingTags(filter.tags);
-      }
-
-      return result;
-
-    }).toList();
-
-    var recipeIdsOfGroups = await Future.wait(futures);
-
-    var recipeIds = recipeIdsOfGroups.map((e) => e.toSet())
-        .reduce((a, b) => a.intersection(b))
-        .toList();
-
-
+    var recipeIds = await _getRecipeIds(filterList);
 
     var query = select(recipes).join([
       leftOuterJoin(recipeTags, recipeTags.recipe.equalsExp(recipes.id)),
@@ -137,7 +109,13 @@ class MyDatabase extends _$MyDatabase {
       return RecipeWithTags(recipe, tags);
     }).toList();
 
-    result.sort((a, b) {
+    _sortRecipesByMatchingTagsAndName(result, selectedTagIds);
+
+    return result;
+  }
+
+  void _sortRecipesByMatchingTagsAndName(List<RecipeWithTags> recipes, List<int> selectedTagIds) {
+    recipes.sort((a, b) {
       var matchingTagsA = a.tags.where((tag) => selectedTagIds.contains(tag.id)).length;
       var matchingTagsB = b.tags.where((tag) => selectedTagIds.contains(tag.id)).length;
 
@@ -149,13 +127,39 @@ class MyDatabase extends _$MyDatabase {
         return a.recipe.name.compareTo(b.recipe.name);
       }
     });
+  }
 
-    return result;
+  Future<List<int>> _getRecipeIds(List<RecipeFilter> filterList) async {
+    var futures = filterList.where((filter) => filter.tags.isNotEmpty).map((filter) async {
+      List<int> result;
+      if (filter.allMatch) {
+        result = await _getRecipeIdsHavingAllTags(filter);
+      } else {
+        result = await _getRecipeIdsHavingTags(filter.tags);
+      }
+
+      return result;
+    }).toList();
+
+    var recipeIdsOfGroups = await Future.wait(futures);
+    var recipeIds = recipeIdsOfGroups.map((e) => e.toSet()).reduce((a, b) => a.intersection(b)).toList();
+
+    return recipeIds;
   }
 
   Future<List<int>> _getRecipeIdsHavingTags(List<int> tagIds) async {
     var query = select(recipeTags)..where((tbl) => tbl.tag.isIn(tagIds));
     return query.map((row) => row.recipe).get();
+  }
+
+  Future<List<int>> _getRecipeIdsHavingAllTags(RecipeFilter filter) async {
+    var tagString = filter.tags.join(",");
+    var tagCount = filter.tags.length;
+    var result = await customSelect('SELECT recipe FROM recipe_has_tag WHERE tag IN ($tagString) GROUP BY recipe HAVING COUNT(*) = $tagCount;', readsFrom: {recipeTags})
+        .map((row) => row.read<int>('recipe'))
+        .get();
+
+    return result;
   }
 }
 
