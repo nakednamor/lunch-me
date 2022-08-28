@@ -63,21 +63,26 @@ void main() {
   test('should filter recipes by tags', () async {
     await _clearDatabase();
     await _prepareDatabaseForFiltering();
-
+/*
     await _filteringRecipes([1, 5], [1], {1: false, 2: false});
-    await _filteringRecipes([1, 5], [], {1: true, 2: true});
+    await _filteringRecipes([1, 5], [1], {1: true, 2: true});
     await _filteringRecipes([1, 2], [1, 2], {1: false});
     await _filteringRecipes([1, 2], [1], {1: true});
-    await _filteringRecipes([2, 3], [1, 2, 3], {1: false});
+    await _filteringRecipes([2, 3], [2, 1, 3], {1: false});
+
+
     await _filteringRecipes([2, 3], [2], {1: true});
     await _filteringRecipes([2, 5], [1, 2], {1: false, 2: false});
     await _filteringRecipes([2, 5], [1, 2], {1: true, 2: true});
     await _filteringRecipes([1, 2, 4], [2], {1: false, 2: false});
     await _filteringRecipes([1, 2, 4], [], {1: true, 2: true});
-    await _filteringRecipes([2, 3, 5, 6], [1, 3], {1: false, 2: false});
+
+
+    await _filteringRecipes([2, 3, 5, 6], [2, 1, 3], {1: false, 2: false});
     await _filteringRecipes([2, 3, 5, 6], [], {1: true, 2: true});
-    await _filteringRecipes([8], [], {3: false});
-    await _filteringRecipes([8], [], {3: true});
+    */
+    await _filteringRecipes([10], [], {3: false});
+    await _filteringRecipes([10], [], {3: true});
   });
 }
 
@@ -122,6 +127,9 @@ _prepareDatabaseForFiltering() async {
     await testDatabase.tagDao.addTag(tagGroupId, "tag #$i");
   }
 
+  // tag group #3 has one additional tag
+  await testDatabase.tagDao.addTag(group_3.id, "tag #10");
+
   // create 3 recipes
   await testDatabase.recipeDao.createRecipe("recipe #1", Source.memory, null, null, null, null);
   await testDatabase.recipeDao.createRecipe("recipe #2", Source.memory, null, null, null, null);
@@ -134,17 +142,17 @@ _prepareDatabaseForFiltering() async {
 
   // assign tags to recipes
   var allTagGroupsWithTags = await testDatabase.getAllTagsWithGroups();
-  var tagsRecipe_1 = allTagGroupsWithTags.map((e) => e.tags).flattened.where((tag) => tag.label.contains(RegExp("[1,2,5,8,9]"))).map((tag) => tag.id).toList();
+  var tagsRecipe_1 = allTagGroupsWithTags.map((e) => e.tags).flattened.where((tag) => tag.label.contains(RegExp("[1,2,5,8,9]\$"))).map((tag) => tag.id).toList();
   await testDatabase.recipeDao.assignTags(recipe_1.id, tagsRecipe_1);
 
-  var tagsRecipe_2 = allTagGroupsWithTags.map((e) => e.tags).flattened.where((tag) => tag.label.contains(RegExp("[2,3,4,5,7]"))).map((tag) => tag.id).toList();
+  var tagsRecipe_2 = allTagGroupsWithTags.map((e) => e.tags).flattened.where((tag) => tag.label.contains(RegExp("[2,3,4,5,7]\$"))).map((tag) => tag.id).toList();
   await testDatabase.recipeDao.assignTags(recipe_2.id, tagsRecipe_2);
 
-  var tagsRecipe_3 = allTagGroupsWithTags.map((e) => e.tags).flattened.where((tag) => tag.label.contains(RegExp("[3,6]"))).map((tag) => tag.id).toList();
+  var tagsRecipe_3 = allTagGroupsWithTags.map((e) => e.tags).flattened.where((tag) => tag.label.contains(RegExp("[3,6]\$"))).map((tag) => tag.id).toList();
   await testDatabase.recipeDao.assignTags(recipe_3.id, tagsRecipe_3);
 }
 
-_filteringRecipes(List<int> tagNumbers, List<int> expectedRecipeNumbers, Map<int, bool> tagGroupRelation) async {
+_filteringRecipes(List<int> tagNumbers, List<int> expectedRecipeNumbers, Map<int, bool> matchRelationByTagGroupNumber) async {
   var allTags = (await testDatabase.getAllTagsWithGroups()).map((e) => e.tags).flattened;
   var selectedTags = tagNumbers.map((tagNumber) => allTags.firstWhere((tag) => tag.label.contains(tagNumber.toString()))).toList();
 
@@ -152,7 +160,13 @@ _filteringRecipes(List<int> tagNumbers, List<int> expectedRecipeNumbers, Map<int
   var expectedRecipes = expectedRecipeNumbers.map((recipeNumber) => allRecipes.firstWhere((recipe) => recipe.name.contains(recipeNumber.toString()))).toList();
   var expectedRecipeIds = expectedRecipes.map((recipe) => recipe.id).toList();
 
-  var recipeFilters = tagGroupRelation.entries.map((e) {
+  var allTagGroups = await testDatabase.tagGroupDao.getAllTagGroups();
+  var matchRelationsByTagGroupId = Map.fromEntries(matchRelationByTagGroupNumber.entries.map((e) {
+    var tagGroup = allTagGroups.firstWhere((tagGroup) => tagGroup.label.contains(e.key.toString()));
+    return MapEntry(tagGroup.id, e.value);
+  }));
+
+  var recipeFilters = matchRelationsByTagGroupId.entries.map((e) {
     var tagGroupId = e.key;
     var tagGroupMatchRelation = e.value;
     var tags = selectedTags.where((tag) => tag.tagGroup == tagGroupId).map((tag) => tag.id).toList();
@@ -165,8 +179,10 @@ _filteringRecipes(List<int> tagNumbers, List<int> expectedRecipeNumbers, Map<int
   // then
   var selectedTagNames = selectedTags.map((tag) => tag.label).toList().join(",");
   var expectedRecipeNames = expectedRecipes.map((recipe) => recipe.name).toList().join(",");
-  debugPrint('selected tagNames: $selectedTagNames, expected recipes: $expectedRecipeNames, tagGroupRelations: $tagGroupRelation');
+  debugPrint('selected tagNames: $selectedTagNames, expected recipes: $expectedRecipeNames, tagGroupRelations: $matchRelationByTagGroupNumber');
 
   expect(actual.length, expectedRecipeIds.length);
-  expect(actual.map((e) => e.recipe.id), containsAllInOrder(expectedRecipeIds));
+  if (expectedRecipeIds.isNotEmpty) {
+    expect(actual.map((e) => e.recipe.id), containsAllInOrder(expectedRecipeIds));
+  }
 }

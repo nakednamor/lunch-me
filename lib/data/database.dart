@@ -79,8 +79,92 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Future<List<RecipeWithTags>> filterRecipes(List<RecipeFilter> filterList) async {
-    return getAllRecipeWithTags();
+    var selectedTagIds = filterList.map((filter) => filter.tags).flattened.toList();
+    if (filterList.isEmpty || selectedTagIds.isEmpty) {
+      return getAllRecipeWithTags();
+    }
+
+    var futures = filterList.where((filter) => filter.tags.isNotEmpty).map((filter) async {
+
+      List<int> result;
+
+      if(filter.allMatch) {
+        result = [];
+
+        var tagString = filter.tags.join(",");
+        var tagCount = filter.tags.length;
+        var xxxxxxxxxx = await customSelect('SELECT recipe FROM recipe_has_tag WHERE tag IN ($tagString) GROUP BY recipe HAVING COUNT(*) = $tagCount;', readsFrom: {recipeTags})
+        .map((row) => row.read<int>('recipe')).get();
+
+        result = xxxxxxxxxx;
+
+      } else {
+        result = await _getRecipeIdsHavingTags(filter.tags);
+      }
+
+      return result;
+
+    }).toList();
+
+    var recipeIdsOfGroups = await Future.wait(futures);
+
+    var recipeIds = recipeIdsOfGroups.map((e) => e.toSet())
+        .reduce((a, b) => a.intersection(b))
+        .toList();
+
+
+
+    var query = select(recipes).join([
+      leftOuterJoin(recipeTags, recipeTags.recipe.equalsExp(recipes.id)),
+      leftOuterJoin(tags, tags.id.equalsExp(recipeTags.tag)),
+    ])
+      ..where(recipes.id.isIn(recipeIds))
+      ..orderBy([OrderingTerm(expression: recipes.name)]);
+
+    var queryResult = query.map((row) {
+      var recipe = row.readTable(recipes);
+      var tag = row.readTableOrNull(tags);
+
+      return _RecipeWithTag(recipe, tag);
+    });
+
+    var tagsGroupedByRecipe =
+    (await queryResult.get()).groupListsBy((element) => element.recipe);
+
+    var result = tagsGroupedByRecipe.entries.map((entry) {
+      var recipe = entry.key;
+      var tags = entry.value.map((e) => e.tag).whereType<Tag>().toList();
+      return RecipeWithTags(recipe, tags);
+    }).toList();
+
+    result.sort((a, b) {
+      var matchingTagsA = a.tags.where((tag) => selectedTagIds.contains(tag.id)).length;
+      var matchingTagsB = b.tags.where((tag) => selectedTagIds.contains(tag.id)).length;
+
+      if (matchingTagsA > matchingTagsB) {
+        return -1;
+      } else if (matchingTagsA < matchingTagsB) {
+        return 1;
+      } else {
+        return a.recipe.name.compareTo(b.recipe.name);
+      }
+    });
+
+    /*
+
+    result.sort((a, b) => a.tags.length.compareTo(b.tags.length));  // TODO sorting
+
+    return result.reversed.toList();
+
+
+     */
+
+    return result;
   }
+
+
+
+
 
   Future<List<RecipeWithTags>> filterRecipeByTags(List<int> tagIds) async {
     if(tagIds.isEmpty){
