@@ -121,7 +121,7 @@ class _RecipeListState extends State<RecipeList> {
     return Consumer<RecipeFilters>(
       builder: (context, recipeFilters, child) {
         return FutureBuilder<List<RecipeWithTags>>(
-            future: database.filterRecipeByTags(recipeFilters.tagIds),
+            future: database.filterRecipes(recipeFilters.filter),
             builder: (BuildContext context, AsyncSnapshot recipesSnapshot) {
               return recipesSnapshot.connectionState == ConnectionState.waiting
                   ? buildCustomLoader()

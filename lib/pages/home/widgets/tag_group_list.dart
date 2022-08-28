@@ -1,11 +1,11 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:lunch_me/model/recipe_filters.dart';
-import 'package:provider/provider.dart';
-
 import 'package:lunch_me/data/database.dart';
-import 'package:lunch_me/widgets/error_message.dart';
+import 'package:lunch_me/model/recipe_filters.dart';
 import 'package:lunch_me/widgets/custom_loader.dart';
+import 'package:lunch_me/widgets/error_message.dart';
+import 'package:provider/provider.dart';
 
 class TagGroupList extends StatefulWidget {
   const TagGroupList({super.key});
@@ -18,7 +18,7 @@ class _TagGroupListState extends State<TagGroupList> {
   late final Stream<List<TagGroupWithTags>> _watchTagGroupsWithTags;
   late final MyDatabase database;
 
-  final List<int> _selectedTags = <int>[];
+  final List<RecipeFilter> _selectedTags = <RecipeFilter>[];
 
   void initializeData() {
     database = Provider.of<MyDatabase>(context, listen: false);
@@ -61,19 +61,17 @@ class _TagGroupListState extends State<TagGroupList> {
                   padding: const EdgeInsets.all(4.0),
                   child: FilterChip(
                     label: Text(tag.label),
-                    selected: _selectedTags.contains(tag.id),
+                    selected: _isTagSelected(_selectedTags, tag),
                     backgroundColor: Colors.blueGrey.withAlpha(50),
                     selectedColor: Colors.lime,
                     onSelected: (bool value) {
                       setState(() {
                         if (value) {
-                          _selectedTags.add(tag.id);
+                          _addRecipeFilter(_selectedTags, true, tag);
                         } else {
-                          _selectedTags.removeWhere((int tagId) {
-                            return tagId == tag.id;
-                          });
+                          _removeRecipeFilter(_selectedTags, tag);
                         }
-                        Provider.of<RecipeFilters>(context, listen: false).setTagFilters(_selectedTags);
+                        Provider.of<RecipeFilters>(context, listen: false).setFilter(_selectedTags);
                       });
                     },
                   ),
@@ -82,6 +80,30 @@ class _TagGroupListState extends State<TagGroupList> {
             )
           ],
         ));
+  }
+
+  bool _isTagSelected(List<RecipeFilter> filterList, Tag tag) {
+    return filterList.firstWhereOrNull((filter) => filter.tags.contains(tag.id)) != null;
+  }
+
+  void _addRecipeFilter(List<RecipeFilter> filterList, bool allMatch, Tag tag) {
+    var filter = filterList.firstWhereOrNull((filter) => filter.tagGroup == tag.tagGroup);
+    bool firstTimeFilter = false;
+    if (filter == null) {
+      filter = RecipeFilter(tag.tagGroup, allMatch, []);
+      firstTimeFilter = true;
+    }
+
+    filter.tags.add(tag.id);
+
+    if (firstTimeFilter) {
+      filterList.add(filter);
+    }
+  }
+
+  void _removeRecipeFilter(List<RecipeFilter> filterList, Tag tag) {
+    var filter = filterList.firstWhere((filter) => filter.tagGroup == tag.tagGroup);
+    filter.tags.remove(tag.id);
   }
 
   @override
