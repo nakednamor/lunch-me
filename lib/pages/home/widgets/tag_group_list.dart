@@ -83,13 +83,22 @@ class _TagGroupListState extends State<TagGroupList> {
   }
 
   bool _isTagSelected(List<RecipeFilter> filterList, Tag tag) {
-    filterList.firstWhereOrNull((filter) => filter.tags.contains(tag.id)) != null;
-    return true;
+    return filterList.firstWhereOrNull((filter) => filter.tags.contains(tag.id)) != null;
   }
 
   void _addRecipeFilter(List<RecipeFilter> filterList, bool allMatch, Tag tag) {
-    var filter = filterList.firstWhereOrNull((filter) => filter.tagGroup == tag.tagGroup) ?? RecipeFilter(tag.tagGroup, allMatch, []);
+    var filter = filterList.firstWhereOrNull((filter) => filter.tagGroup == tag.tagGroup);
+    bool firstTimeFilter = false;
+    if (filter == null) {
+      filter = RecipeFilter(tag.tagGroup, allMatch, []);
+      firstTimeFilter = true;
+    }
+
     filter.tags.add(tag.id);
+
+    if (firstTimeFilter) {
+      filterList.add(filter);
+    }
   }
 
   void _removeRecipeFilter(List<RecipeFilter> filterList, Tag tag) {
