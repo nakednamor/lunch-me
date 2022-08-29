@@ -5,7 +5,7 @@ import 'package:lunch_me/data/dao/tag_dao.dart';
 import 'package:lunch_me/data/database.dart';
 import 'package:lunch_me/data/exceptions.dart';
 
-import '../flutter_test_config.dart';
+import '../../flutter_test_config.dart';
 
 void main() {
   late TagDao dao;
@@ -21,45 +21,12 @@ void main() {
     debugPrint('test: teardown finished');
   });
 
-  test('should throw exception when new tag name is empty', () async {
-    // given
-    var newTagName = '';
-
-    // expect
-    expect(() => dao.addTag(3, newTagName), throwsA(isA<EmptyNameException>()));
-  });
-
-  test('should throw exception when new tag name > 50 chars', () async {
-    // given
-    var newTagName = '012345678901234567890123456789012345678901234567890';
-
-    // expect
-    expect(() => dao.addTag(3, newTagName), throwsA(isA<NameTooLongException>()));
-  });
-
-  test('should throw exception when tag-group not found by given id', () async {
-    // expect
-    expect(() => dao.addTag(666, "some tag name"), throwsA(isA<TagGroupNotFoundException>()));
-  });
-
-  test('should throw exception when adding tag with existing name', () async {
-    // given
-    var tagGroupId = 3;
-    var newTagName = 'a new tag';
-    await dao.addTag(tagGroupId, newTagName);
-
-    await dao.attachedDatabase.getAllTagsWithGroups();
-
-    // when
-    expect(() => dao.addTag(tagGroupId, newTagName), throwsA(isA<NameAlreadyExistsException>()));
-  });
-
   test('should add new tag at the last position within tag-group', () async {
     // given
     var tagGroupId = 3;
     var newTagName = 'new tag';
 
-    var tagGroupsWithTagsBefore = await dao.attachedDatabase.getAllTagsWithGroups();
+    var tagGroupsWithTagsBefore = await dao.getAllTagsWithGroups();
     var lastTagOrderingBefore = tagGroupsWithTagsBefore.firstWhere((element) => element.tagGroup.id == tagGroupId).tags.length - 1;
 
     // when
@@ -80,32 +47,6 @@ void main() {
     await dao.addTag(3, newTagName);
   });
 
-  test('rename tag should throw exception when name already exists', () async {
-    // given
-    var tagToRename = await dao.addTag(3, 'this should be renamed');
-    var tagName = 'a different tag name';
-    await dao.addTag(3, tagName);
-
-    // expect
-    expect(() => dao.renameTag(tagToRename.id, tagName), throwsA(isA<NameAlreadyExistsException>()));
-  });
-
-  test('rename tag should throw exception when name is empty', () async {
-    // given
-    var tag = await dao.addTag(3, 'a tag');
-
-    // expect
-    expect(() => dao.renameTag(tag.id, ''), throwsA(isA<EmptyNameException>()));
-  });
-
-  test('rename tag should throw exception when name > 50 chars', () async {
-    // given
-    var tag = await dao.addTag(3, 'a tag');
-
-    // expect
-    expect(() => dao.renameTag(tag.id, '012345678901234567890123456789012345678901234567890'), throwsA(isA<NameTooLongException>()));
-  });
-
   test('should rename tag', () async {
     // given
     var tagGroupId = 3;
@@ -117,22 +58,9 @@ void main() {
     await dao.renameTag(tag.id, newTagName);
 
     // then
-    var tagGroupsWithTags = await dao.attachedDatabase.getAllTagsWithGroups();
+    var tagGroupsWithTags = await dao.getAllTagsWithGroups();
     var renamedTag = tagGroupsWithTags.firstWhere((tagGroup) => tagGroup.tagGroup.id == tagGroupId).tags.firstWhere((t) => t.id == tag.id);
     expect(renamedTag.label, newTagName);
-  });
-
-  test('reordering should throw exception when there is no tag with given id', () async {
-    // expect
-    expect(() => dao.changeTagOrdering(666, 5), throwsA(isA<TagNotFoundException>()));
-  });
-
-  test('reordering should throw exception when new position is negative', () async {
-    // given
-    var tag = await dao.addTag(2, 'some tag');
-
-    // expect
-    expect(() => dao.changeTagOrdering(tag.id, -1), throwsA(isA<NegativeValueException>()));
   });
 
   test('should remove tag properly', () async {
@@ -148,11 +76,11 @@ void main() {
     allTagIds = (await dao.getAllTags()).map((e) => e.id);
     expect(allTagIds.contains(tagToDelete.id), isFalse);
 
-    var tagGroupsWithTags = await dao.attachedDatabase.getAllTagsWithGroups();
+    var tagGroupsWithTags = await dao.getAllTagsWithGroups();
     var localizedTags = tagGroupsWithTags.where((tagGroup) => tagGroup.tags.map((tag) => tag.id).contains(tagToDelete.id)).length;
     expect(localizedTags, 0);
 
-    tagGroupsWithTags = await dao.attachedDatabase.getAllTagsWithGroups();
+    tagGroupsWithTags = await dao.getAllTagsWithGroups();
     localizedTags = tagGroupsWithTags.where((tagGroup) => tagGroup.tags.map((tag) => tag.id).contains(tagToDelete.id)).length;
     expect(localizedTags, 0);
   });
@@ -206,5 +134,19 @@ void main() {
     // then order should be the same
     tags = (await dao.getAllTags()).groupListsBy((element) => element.tagGroup)[tagGroupId] ?? (throw Exception("no tags with group $tagGroupId"));
     expect(tags.map((e) => e.id), containsAllInOrder([3, 5, 4, 7, 8, 9, 10]));
+  });
+
+  test('should return tag-groups and tags ordered by order-column', () async {
+    //when
+    var actual = await dao.getAllTagsWithGroups();
+
+    // then tag-groups should be ordered
+    var tagGroupIds = actual.map((e) => e.tagGroup.id);
+    expect(tagGroupIds, containsAllInOrder([2, 1, 3]));
+
+    // and tags should be ordered as well
+    expect(actual[0].tags.map((e) => e.id), containsAllInOrder([2, 1]));
+    expect(actual[1].tags.map((e) => e.id), containsAllInOrder([3, 5, 4]));
+    expect(actual[2].tags.map((e) => e.id), containsAllInOrder([6]));
   });
 }

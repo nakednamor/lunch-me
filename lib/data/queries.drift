@@ -42,3 +42,10 @@ _countRecipesWithNameAndType: SELECT COUNT(*) AS recipeCount FROM recipes WHERE 
 _getRecipeById: SELECT * FROM recipes WHERE id = :recipeId;
 _deleteRecipeHasTagsByRecipeId: DELETE FROM recipe_has_tag WHERE recipe = :recipeId;
 _deleteRecipeById: DELETE FROM recipes WHERE id = :id;
+_countRecipeById: SELECT COUNT(id) FROM recipes WHERE id =:id;
+
+-- photos
+_getPhotoByUuid: SELECT * FROM photo WHERE uuid = :uuid;
+_countPhotoByRecipeIdAndContentPhoto: SELECT COUNT(id) FROM photo WHERE recipe = :recipeId AND content_photo = :contentPhoto;
+_countPhotoByRecipeIdAndContentPhotoAndOrdering:  SELECT COUNT(id) FROM photo WHERE recipe = :recipeId AND content_photo = :contentPhoto AND ordering =:ordering;
+_getPhotosByRecipeId: SELECT * FROM photo WHERE recipe IN :recipeIds ORDER BY recipe, ordering;

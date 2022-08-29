@@ -1,17 +1,23 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lunch_me/data/dao/recipe_dao.dart';
+import 'package:lunch_me/data/dao/tag_dao.dart';
 import 'package:lunch_me/data/dao/taggroup_dao.dart';
 import 'package:lunch_me/data/database.dart';
 import 'package:lunch_me/data/exceptions.dart';
 
-import '../flutter_test_config.dart';
+import '../../flutter_test_config.dart';
 
 void main() {
   late TagGroupDao dao;
+  late TagDao tagDao;
+  late RecipeDao recipeDao;
 
   setUp(() async {
     debugPrint('test: setup started');
     dao = testDatabase.tagGroupDao;
+    tagDao = testDatabase.tagDao;
+    recipeDao = testDatabase.recipeDao;
     debugPrint('test: setup finished');
   });
 
@@ -20,42 +26,17 @@ void main() {
     debugPrint('test: teardown finished');
   });
 
-  test('should throw exception when new tag-group name is empty', () async {
-    // given
-    var newTagGroupName = '';
-
-    // expect
-    expect(() => dao.addTagGroup(newTagGroupName), throwsA(isA<EmptyNameException>()));
-  });
-
-  test('should throw exception when new tag-group name > 50 chars', () async {
-    // given
-    var newTagGroupName = '012345678901234567890123456789012345678901234567890';
-
-    // expect
-    expect(() => dao.addTagGroup(newTagGroupName), throwsA(isA<NameTooLongException>()));
-  });
-
   test('should add new tag-group', () async {
     // given
-    var tagGroupsBefore = await testDatabase.getAllTagsWithGroups();
+    var tagGroupsBefore = await tagDao.getAllTagsWithGroups();
     expect(tagGroupsBefore.map((e) => e.tagGroup.label), containsAllInOrder(["A", "B", "C"]));
 
     // when
     await dao.addTagGroup("D");
 
     // then
-    var tagGroupsAfter = await testDatabase.getAllTagsWithGroups();
+    var tagGroupsAfter = await tagDao.getAllTagsWithGroups();
     expect(tagGroupsAfter.map((e) => e.tagGroup.label), containsAllInOrder(["A", "B", "C", "D"]));
-  });
-
-  test('should throw exception when adding tag-group with already existing name', () async {
-    // given
-    var newTagGroupName = 'new tag-group name';
-    await dao.addTagGroup(newTagGroupName);
-
-    // expect
-    expect(() => dao.addTagGroup(newTagGroupName), throwsA(isA<NameAlreadyExistsException>()));
   });
 
   test('should rename tag-group', () async {
@@ -68,44 +49,13 @@ void main() {
     await testDatabase.tagGroupDao.renameTagGroup(tagGroup.id, newTagGroupName);
 
     // thenn
-    var tagGroups = await testDatabase.getAllTagsWithGroups();
+    var tagGroups = await tagDao.getAllTagsWithGroups();
     expect(tagGroups.where((e) => e.tagGroup.id == tagGroup.id).map((e) => e.tagGroup.label).first, newTagGroupName);
-  });
-
-  test('rename tag-group should throw exception when new tag-group name is empty', () async {
-    // given
-    var tagGroup = await dao.addTagGroup('a tag-group');
-
-    // expect
-    expect(() => dao.renameTagGroup(tagGroup.id, ''), throwsA(isA<EmptyNameException>()));
-  });
-
-  test('rename tag-group should throw exception when new tag-group name > 50 chars', () async {
-    // given
-    var tagGroup = await dao.addTagGroup('a tag-group');
-    var newTagGroupName = '012345678901234567890123456789012345678901234567890';
-
-    // expect
-    expect(() => dao.renameTagGroup(tagGroup.id, newTagGroupName), throwsA(isA<NameTooLongException>()));
-  });
-
-  test('rename tag-group should throw exception when there is already tag-group with same name', () async {
-    // given
-    await dao.addTagGroup('first tag-group');
-    var tagGroup = await dao.addTagGroup('second tag-group');
-
-    // expect
-    expect(() => dao.renameTagGroup(tagGroup.id, 'first tag-group'), throwsA(isA<NameAlreadyExistsException>()));
   });
 
   test('should throw exception when tag-group not found by id while changing tag-group ordering', () async {
     // expect
     expect(() => dao.changeTagGroupOrdering(999, 1), throwsA(isA<TagGroupNotFoundException>()));
-  });
-
-  test('should throw exception when new ordering value negative', () async {
-    // expect
-    expect(() => dao.changeTagGroupOrdering(1, -1), throwsA(isA<NegativeValueException>()));
   });
 
   test('should proper remove tag-groups', () async {
@@ -120,7 +70,7 @@ void main() {
     var tagsBefore = await testDatabase.tagDao.getAllTags();
     expect(tagsBefore.map((e) => e.id), containsAll(affectedTagIds));
 
-    var recipesBefore = (await testDatabase.getAllRecipeWithTags()).where((element) => element.tags.any((tag) => affectedTagIds.contains(tag.id)));
+    var recipesBefore = (await recipeDao.getAllRecipeWithTags()).where((element) => element.tags.any((tag) => affectedTagIds.contains(tag.id)));
     expect(recipesBefore.map((e) => e.recipe.id), containsAll(affectedRecipeIds));
 
     // when
@@ -133,7 +83,7 @@ void main() {
     var tagsAfter = await testDatabase.tagDao.getAllTags();
     expect(tagsAfter.map((e) => e.id), isNot(containsAll(affectedTagIds)));
 
-    var recipesAfter = (await testDatabase.getAllRecipeWithTags()).where((element) => element.tags.any((tag) => affectedTagIds.contains(tag.id)));
+    var recipesAfter = (await recipeDao.getAllRecipeWithTags()).where((element) => element.tags.any((tag) => affectedTagIds.contains(tag.id)));
     expect(recipesAfter.map((e) => e.recipe.id), isNot(containsAll(affectedRecipeIds)));
   });
 

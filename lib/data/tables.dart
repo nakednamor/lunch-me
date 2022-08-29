@@ -35,10 +35,6 @@ class Recipes extends Table {
   TextColumn get url => text().withLength(max: 255).nullable()();
 
   TextColumn get image => text().withLength(max: 255).nullable()();
-
-  TextColumn get imagePhoto => text().withLength(max: 50).nullable()();
-
-  TextColumn get contentPhoto => text().withLength(max: 50).nullable()();
 }
 
 enum Source { web, video, photo, memory }
@@ -55,4 +51,20 @@ class RecipeTags extends Table {
 
   @override
   String get tableName => "recipe_has_tag";
+}
+
+class Photo extends Table {
+  @override
+  String get tableName => 'photo';
+
+  IntColumn get id => integer().autoIncrement()();
+
+  TextColumn get uuid => text().withLength(min: 36, max: 36)();
+
+  IntColumn get ordering => integer()();
+
+  BoolColumn get contentPhoto => boolean()();
+
+  IntColumn get recipe =>
+      integer().references(Recipes, #id, onDelete: KeyAction.cascade)();
 }

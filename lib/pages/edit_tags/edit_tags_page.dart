@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:lunch_me/data/database.dart';
-import 'package:lunch_me/data/dao/taggroup_dao.dart';
+import 'package:lunch_me/model/recipe_manager.dart';
 import 'package:lunch_me/pages/edit_tags/widgets/editable_tag_group_list.dart';
 import 'package:provider/provider.dart';
 
@@ -14,12 +13,10 @@ class EditTagsPage extends StatefulWidget {
 
 class _EditTagsPageState extends State<EditTagsPage> {
   final _tagGroupFormKey = GlobalKey<FormState>();
-  late final MyDatabase database;
-  late TagGroupDao _tagGroupDao;
+  late final RecipeManager recipeManager;
 
   void initializeData() {
-    database = Provider.of<MyDatabase>(context, listen: false);
-    _tagGroupDao = database.tagGroupDao;
+    recipeManager = Provider.of<RecipeManager>(context, listen: false);
   }
 
   @override
@@ -58,7 +55,7 @@ class _EditTagsPageState extends State<EditTagsPage> {
                         ),
                         onSaved: (String? value) async {
                           if (value != null) {
-                            await _tagGroupDao.addTagGroup(value);
+                            await recipeManager.addTagGroup(value);
                             _tagGroupFormKey.currentState?.reset();
                           }
                         },

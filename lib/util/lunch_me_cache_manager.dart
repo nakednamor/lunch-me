@@ -13,6 +13,14 @@ class LunchMeCacheManager implements BaseCacheManager {
     Config(key, stalePeriod: const Duration(days: 1000), maxNrOfCacheObjects: 20, repo: JsonCacheInfoRepository(databaseName: key), fileService: LunchMeCacheFileService()),
   );
 
+  static final LunchMeCacheManager _lunchMeCacheManager = LunchMeCacheManager._internal();
+
+  factory LunchMeCacheManager(){
+    return _lunchMeCacheManager;
+  }
+
+  LunchMeCacheManager._internal();
+
   @override
   Future<void> dispose() {
     return instance.dispose();

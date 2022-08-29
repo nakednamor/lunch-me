@@ -1,3 +1,15 @@
+class TagException implements Exception {
+  String cause;
+
+  TagException(this.cause);
+}
+
+class TagGroupException implements Exception {
+  String cause;
+
+  TagGroupException(this.cause);
+}
+
 class NameAlreadyExistsException implements Exception {
   String cause;
 
@@ -14,6 +26,12 @@ class NameTooLongException implements Exception {
   String cause;
 
   NameTooLongException(this.cause);
+}
+
+class NameNotUUIDException implements Exception {
+  String cause;
+
+  NameNotUUIDException(this.cause);
 }
 
 class TagGroupNotFoundException implements Exception {
@@ -51,3 +69,11 @@ class RecipeNotFoundException implements Exception {
 
   RecipeNotFoundException(this.cause);
 }
+
+class RecipeAlreadyExistsException implements Exception {
+  int cause;
+
+  RecipeAlreadyExistsException(this.cause);
+}
+
+class PhotoAlreadyExistsException implements Exception {}
