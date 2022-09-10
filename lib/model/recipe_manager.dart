@@ -43,6 +43,10 @@ class RecipeManager {
         // TODO validate if all fields of model are proper
         await _saveWebRecipe(recipeModel.name, recipeModel.url!, recipeModel.thumbnailUrl, recipeModel.thumbnailFile, recipeModel.tagIds);
         break;
+      case Source.memory:
+      case Source.video:
+      case Source.photo:
+        throw ("not yet supported");
     }
   }
 

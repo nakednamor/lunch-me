@@ -34,31 +34,29 @@ class EditRecipesPage extends StatelessWidget {
                 takenPhoto = x;
               }
             },
-            child: Text("camera"),
+            child: const Text("camera"),
           ),
           ElevatedButton(
-            onPressed: () {
-              var x = photoManager.selectPhotoFromGallery();
-              //Navigator.pop(context);
+            onPressed: () async {
+              var x = await photoManager.selectPhotoFromGallery();
+              if(x != null) {
+                takenPhoto = x;
+              }
             },
-            child: Text("gallery"),
+            child: const Text("gallery"),
           ),
           ElevatedButton(
             onPressed: () {
               var uuid = const Uuid();
               var name = uuid.v4();
               var url = "http://recipes-lunch.me/${uuid.v4()}";
-              String? thumbnail;
-              if(takenPhoto == null){
-                thumbnail = "http://recipes-lunch.me/images/${uuid.v4()}";
-              }
               var model = RecipeModel(name, Source.web);
               model.url = url;
               model.thumbnailFile = takenPhoto;
 
               recipeManager.createRecipe(model);
             },
-            child: Text("create web recipe with image url"),
+            child: const Text("create web recipe with image url"),
           ),
         ],
       ),
