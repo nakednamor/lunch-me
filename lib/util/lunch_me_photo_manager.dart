@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:lunch_me/util/image_util.dart';
 import 'package:path/path.dart';
 
-class LunchMePhotoManager {
+class LunchMePhotoManager { // TODO move all 'manager' classes to same directory
   late ImagePicker _picker;
 
   static final LunchMePhotoManager _instance = LunchMePhotoManager._internal();

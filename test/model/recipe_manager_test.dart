@@ -5,14 +5,17 @@ import 'package:lunch_me/data/dao/photo_dao.dart';
 import 'package:lunch_me/data/dao/recipe_dao.dart';
 import 'package:lunch_me/data/dao/tag_dao.dart';
 import 'package:lunch_me/data/dao/taggroup_dao.dart';
+import 'package:lunch_me/data/database.dart';
 import 'package:lunch_me/data/exceptions.dart';
 import 'package:lunch_me/data/tables.dart';
+import 'package:lunch_me/model/recipe_filters.dart';
 import 'package:lunch_me/model/recipe_manager.dart';
 import 'package:lunch_me/model/recipe_model.dart';
 import 'package:lunch_me/util/lunch_me_photo_manager.dart';
+import 'package:mockito/mockito.dart';
 import 'package:uuid/uuid.dart';
 
-import '../flutter_test_config.dart';
+import '../data/dao/dao_mocks.dart';
 
 void main() {
   late RecipeDao recipeDao;
@@ -25,10 +28,10 @@ void main() {
 
   setUp(() async {
     debugPrint('test: setup started');
-    recipeDao = testDatabase.recipeDao;
-    photoDao = testDatabase.photoDao;
-    tagDao = testDatabase.tagDao;
-    tagGroupDao = testDatabase.tagGroupDao;
+    recipeDao = RecipeDaoMock();
+    photoDao = PhotoDaoMock();
+    tagDao = TagDaoMock();
+    tagGroupDao = TagGroupDaoMock();
     uuid = const Uuid();
     photoManager = LunchMePhotoManager(ImagePicker());
     recipeManager = RecipeManager(recipeDao, photoDao, tagDao, tagGroupDao, uuid, photoManager);
@@ -38,6 +41,23 @@ void main() {
   tearDown(() async {
     debugPrint('test: teardown started');
     debugPrint('test: teardown finished');
+  });
+
+  group('filterRecipes ', () {
+    test('should just by-pass to recipe-dao', () async {
+      // given
+      List<RecipeFilter> filterList = [];
+      List<RecipeWithTags> expected = [];
+
+      when(recipeDao.filterRecipes(filterList)).thenAnswer((_) async => expected);
+
+      // when
+      var actual = await recipeManager.filterRecipes(filterList);
+
+      // then
+      expect(actual, same(expected));
+      verify(recipeDao.filterRecipes(filterList)).called(1);
+    });
   });
 
   group('createRecipe  for type "web"', () {
@@ -87,6 +107,7 @@ void main() {
 
       // expect
       expect(() => recipeManager.addTag(3, newTagName), throwsA(isA<EmptyNameException>()));
+      verifyZeroInteractions(tagDao);
     });
 
     test('should throw exception when new tag name > 50 chars', () async {
@@ -95,71 +116,113 @@ void main() {
 
       // expect
       expect(() => recipeManager.addTag(3, newTagName), throwsA(isA<NameTooLongException>()));
+      verifyZeroInteractions(tagDao);
     });
 
-    test('should throw exception when tag-group does not exit', () async {
-      // expect
-      expect(() => recipeManager.addTag(666, "some tag name"), throwsA(isA<TagException>()));
-    });
-
-    test('should throw exception when name already exists', () async {
+    test('should by-pass to tag-dao', () async {
       // given
-      var tagGroupId = 3;
-      var newTagName = 'a new tag';
-      await recipeManager.addTag(tagGroupId, newTagName);
+      var tagGroupId = 422;
+      var newTagName = 'new tag name';
+      var expected = Tag(id: 999, tagGroup: tagGroupId, ordering: 8, label: newTagName);
+
+      when(tagDao.addTag(tagGroupId, newTagName)).thenAnswer((_) async => expected);
 
       // when
+      var actual = await recipeManager.addTag(tagGroupId, newTagName);
+
+      // then
+      expect(actual, same(expected));
+      verify(tagDao.addTag(tagGroupId, newTagName)).called(1);
+    });
+
+    test('should catch exceptions from tag-dao and throw TagException', () async {
+      // given
+      var tagGroupId = 422;
+      var newTagName = 'new tag name';
+      when(tagDao.addTag(tagGroupId, newTagName)).thenThrow(Exception('some exception from dao or DB'));
+
+      // expect
       expect(() => recipeManager.addTag(tagGroupId, newTagName), throwsA(isA<TagException>()));
     });
   });
 
   group('renaming tag ', () {
     test('should throw exception when name is empty', () async {
-      // given
-      var tag = await recipeManager.addTag(3, 'a tag');
-
       // expect
-      expect(() => recipeManager.renameTag(tag.id, ''), throwsA(isA<EmptyNameException>()));
+      expect(() => recipeManager.renameTag(432, ''), throwsA(isA<EmptyNameException>()));
+      verifyZeroInteractions(tagDao);
     });
 
     test('should throw exception when name > 50 chars', () async {
-      // given
-      var tag = await recipeManager.addTag(3, 'a tag');
-
       // expect
-      expect(() => recipeManager.renameTag(tag.id, '012345678901234567890123456789012345678901234567890'), throwsA(isA<NameTooLongException>()));
+      expect(() => recipeManager.renameTag(432, '012345678901234567890123456789012345678901234567890'), throwsA(isA<NameTooLongException>()));
     });
 
-    test('throw exception when name already exists', () async {
+    test('should by-pass to tag-dao', () async {
       // given
-      var tagToRename = await recipeManager.addTag(3, 'this should be renamed');
-      var tagName = 'a different tag name';
-      await recipeManager.addTag(3, tagName);
+      var tagId = 422;
+      var newTagName = 'new tag name';
+
+      when(tagDao.renameTag(tagId, newTagName)).thenAnswer((_) async => {});
+
+      // when
+      await recipeManager.renameTag(tagId, newTagName);
+
+      // then
+      verify(tagDao.renameTag(tagId, newTagName)).called(1);
+    });
+
+    test('should catch exceptions from tag-dao and throw TagException', () async {
+      // given
+      var tagId = 422;
+      var newTagName = 'new tag name';
+      when(tagDao.renameTag(tagId, newTagName)).thenThrow(Exception('some exception from dao or DB'));
 
       // expect
-      expect(() => recipeManager.renameTag(tagToRename.id, tagName), throwsA(isA<TagException>()));
+      expect(() => recipeManager.renameTag(tagId, newTagName), throwsA(isA<TagException>()));
     });
   });
 
-  group('reordering tag ', (){
-    test('should throw exception when there is no tag with given id', () async {
-      // expect
-      expect(() => recipeManager.changeTagOrdering(666, 5), throwsA(isA<TagException>()));
-    });
-
+  group('reordering tag ', () {
     test('should throw exception when new position is negative', () async {
       // expect
       expect(() => recipeManager.changeTagOrdering(1, -1), throwsA(isA<TagException>()));
+      verifyZeroInteractions(tagDao);
+    });
+
+    test('should by-pass to tag-dao', () async {
+      // given
+      var tagId = 422;
+      var newOrdering = 93;
+
+      when(tagDao.changeTagOrdering(tagId, newOrdering)).thenAnswer((_) async => {});
+
+      // when
+      await recipeManager.changeTagOrdering(tagId, newOrdering);
+
+      // then
+      verify(tagDao.changeTagOrdering(tagId, newOrdering)).called(1);
+    });
+
+    test('should catch exceptions from tag-dao and throw TagException', () async {
+      // given
+      var tagId = 422;
+      var newOrdering = 93;
+      when(tagDao.changeTagOrdering(tagId, newOrdering)).thenThrow(Exception('some exception from dao or DB'));
+
+      // expect
+      expect(() => recipeManager.changeTagOrdering(tagId, newOrdering), throwsA(isA<TagException>()));
     });
   });
 
-  group('adding tag-group ', (){
+  group('adding tag-group ', () {
     test('should throw exception when new tag-group name is empty', () async {
       // given
       var newTagGroupName = '';
 
       // expect
       expect(() => recipeManager.addTagGroup(newTagGroupName), throwsA(isA<EmptyNameException>()));
+      verifyZeroInteractions(tagGroupDao);
     });
 
     test('should throw exception when new tag-group name > 50 chars', () async {
@@ -168,50 +231,111 @@ void main() {
 
       // expect
       expect(() => recipeManager.addTagGroup(newTagGroupName), throwsA(isA<NameTooLongException>()));
+      verifyZeroInteractions(tagGroupDao);
     });
 
-    test('should throw exception when adding tag-group with already existing name', () async {
+    test('should by-pass to tagGroup-dao', () async {
       // given
-      var newTagGroupName = 'new tag-group name';
-      await recipeManager.addTagGroup(newTagGroupName);
+      var newName = 'new tagGroup name';
+      var expected = TagGroup(id: 554, ordering: 8, label: newName);
+
+      when(tagGroupDao.addTagGroup(newName)).thenAnswer((_) async => expected);
+
+      // when
+      var actual = await recipeManager.addTagGroup(newName);
+
+      // then
+      expect(actual, same(expected));
+      verify(tagGroupDao.addTagGroup(newName)).called(1);
+    });
+
+    test('should catch exceptions from tagGroup-dao and throw TagException', () async {
+      // given
+      var newName = 'new tagGroup name';
+      when(tagGroupDao.addTagGroup(newName)).thenThrow(Exception('some exception from dao or DB'));
 
       // expect
-      expect(() => recipeManager.addTagGroup(newTagGroupName), throwsA(isA<TagGroupException>()));
+      expect(() => recipeManager.addTagGroup(newName), throwsA(isA<TagGroupException>()));
     });
   });
 
-  group('renaming tag-group ', (){
+  group('renaming tag-group ', () {
     test('should throw exception when new tag-group name is empty', () async {
       // given
-      var tagGroup = await recipeManager.addTagGroup('a tag-group');
+      var tagGroupId = 533;
+      var newName = '';
 
       // expect
-      expect(() => recipeManager.renameTagGroup(tagGroup.id, ''), throwsA(isA<EmptyNameException>()));
+      expect(() => recipeManager.renameTagGroup(tagGroupId, newName), throwsA(isA<EmptyNameException>()));
+      verifyZeroInteractions(tagGroupDao);
     });
 
     test('should throw exception when new tag-group name > 50 chars', () async {
       // given
-      var tagGroup = await recipeManager.addTagGroup('a tag-group');
-      var newTagGroupName = '012345678901234567890123456789012345678901234567890';
+      var tagGroupId = 533;
+      var newName = '012345678901234567890123456789012345678901234567890';
 
       // expect
-      expect(() => recipeManager.renameTagGroup(tagGroup.id, newTagGroupName), throwsA(isA<NameTooLongException>()));
+      expect(() => recipeManager.renameTagGroup(tagGroupId, newName), throwsA(isA<NameTooLongException>()));
+      verifyZeroInteractions(tagGroupDao);
     });
 
-    test('should throw exception when there is already tag-group with same name', () async {
+    test('should by-pass to tagGroup-dao', () async {
       // given
-      await recipeManager.addTagGroup('first tag-group');
-      var tagGroup = await recipeManager.addTagGroup('second tag-group');
+      var tagGroupId = 533;
+      var newName = 'new tagGroup name';
 
-      // expect
-      expect(() => recipeManager.renameTagGroup(tagGroup.id, 'first tag-group'), throwsA(isA<TagGroupException>()));
+      when(tagGroupDao.renameTagGroup(tagGroupId, newName)).thenAnswer((_) async => {});
+
+      // when
+      await recipeManager.renameTagGroup(tagGroupId, newName);
+
+      // then
+      verify(tagGroupDao.renameTagGroup(tagGroupId, newName)).called(1);
     });
 
-    group('reordering tag-group', (){
-      test('should throw exception when new ordering value negative', () async {
-        // expect
-        expect(() => recipeManager.changeTagGroupOrdering(1, -1), throwsA(isA<TagGroupException>()));
-      });
+    test('should catch exceptions from tagGroup-dao and throw TagException', () async {
+      // given
+      var tagGroupId = 533;
+      var newName = 'new tagGroup name';
+
+      when(tagGroupDao.renameTagGroup(tagGroupId, newName)).thenThrow(Exception('some exception from dao or DB'));
+
+      // expect
+      expect(() => recipeManager.renameTagGroup(tagGroupId, newName), throwsA(isA<TagGroupException>()));
+    });
+  });
+
+  group('reordering tag-group', () {
+    test('should throw exception when new ordering value negative', () async {
+      // expect
+      expect(() => recipeManager.changeTagGroupOrdering(1, -1), throwsA(isA<TagGroupException>()));
+      verifyZeroInteractions(tagGroupDao);
+    });
+
+    test('should by-pass to tagGroup-dao', () async {
+      // given
+      var tagGroupId = 533;
+      var newOrder = 24;
+
+      when(tagGroupDao.changeTagGroupOrdering(tagGroupId, newOrder)).thenAnswer((_) async => {});
+
+      // when
+      await recipeManager.changeTagGroupOrdering(tagGroupId, newOrder);
+
+      // then
+      verify(tagGroupDao.changeTagGroupOrdering(tagGroupId, newOrder)).called(1);
+    });
+
+    test('should catch exceptions from tagGroup-dao and throw TagException', () async {
+      // given
+      var tagGroupId = 533;
+      var newOrder = 24;
+
+      when(tagGroupDao.changeTagGroupOrdering(tagGroupId, newOrder)).thenThrow(Exception('some exception from dao or DB'));
+
+      // expect
+      expect(() => recipeManager.changeTagGroupOrdering(tagGroupId, newOrder), throwsA(isA<TagGroupException>()));
     });
   });
 }

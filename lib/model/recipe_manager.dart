@@ -14,7 +14,7 @@ import '../data/dao/photo_dao.dart';
 import '../data/dao/recipe_dao.dart';
 import '../util/lunch_me_photo_manager.dart';
 
-class RecipeManager {
+class RecipeManager { // TODO move all 'manager' classes to same directory
   late RecipeDao recipeDao;
   late PhotoDao photoDao;
   late tag_dao.TagDao tagDao;
@@ -50,7 +50,6 @@ class RecipeManager {
     }
   }
 
-  // TODO test that method is just passing by
   Future<List<RecipeWithTags>> filterRecipes(List<RecipeFilter> filterList) async {
     return recipeDao.filterRecipes(filterList);
   }
@@ -70,7 +69,6 @@ class RecipeManager {
     return tagDao.deleteTag(id);
   }
 
-  // TODO test that method is just passing by
   Future<Tag> addTag(int tagGroupId, String name) async {
     _validateNameLength(name, 50);
     try {
@@ -80,7 +78,6 @@ class RecipeManager {
     }
   }
 
-  // TODO test that method is just passing by
   Future<TagGroup> addTagGroup(String name) async {
     _validateNameLength(name, 50);
     try {
@@ -90,7 +87,6 @@ class RecipeManager {
     }
   }
 
-  // TODO test that method is just passing by
   Future<void> renameTag(int id, String name) async {
     _validateNameLength(name, 50);
     try {
@@ -100,7 +96,6 @@ class RecipeManager {
     }
   }
 
-  // TODO test that method is just passing by
   Future<void> changeTagOrdering(int id, int newOrdering) async {
     if (newOrdering < 0) {
       throw TagException("newOrdering is negative");
@@ -112,7 +107,7 @@ class RecipeManager {
       throw TagException('cannot change tag order: $e');
     }
   }
-  // TODO test that method is just passing by
+
   Future<void> renameTagGroup(int tagGroupId, String newName) async {
     _validateNameLength(newName, 50);
     try {
@@ -121,12 +116,17 @@ class RecipeManager {
       throw TagGroupException('cannot add tag-group: $e');
     }
   }
-  // TODO test that method is just passing by
+
   Future<void> changeTagGroupOrdering(int tagGroupId, int newOrder) async {
     if (newOrder < 0) {
       throw TagGroupException("newOrdering is negative");
     }
-    return await tagGroupDao.changeTagGroupOrdering(tagGroupId, newOrder);
+
+    try {
+      return await tagGroupDao.changeTagGroupOrdering(tagGroupId, newOrder);
+    } on Exception catch (e) {
+      throw TagGroupException('cannot add tag-group: $e');
+    }
   }
 
   Future<void> _saveWebRecipe(String name, String url, String? thumbnailUrl, File? thumbnailFile, List<int> tagIds) async {

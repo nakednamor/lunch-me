@@ -7,7 +7,7 @@ import 'package:lunch_me/util/image_util.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
-class LunchMeCacheManager implements BaseCacheManager {
+class LunchMeCacheManager implements BaseCacheManager { // TODO move all 'manager' classes to same directory
   static const key = 'lunchMeCustomCache';
   static CacheManager instance = CacheManager(
     Config(key, stalePeriod: const Duration(days: 1000), maxNrOfCacheObjects: 20, repo: JsonCacheInfoRepository(databaseName: key), fileService: LunchMeCacheFileService()),

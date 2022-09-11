@@ -71,6 +71,8 @@ dev_dependencies:
 
   random_string: ^2.3.1
 
+  mockito: ^5.3.0
+
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
