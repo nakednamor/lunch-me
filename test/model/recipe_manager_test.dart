@@ -63,6 +63,7 @@ void main() {
   group('createRecipe  for type "web"', () {
     var recipeType = Source.web;
 
+
     test('should create recipe of type with image url', () async {
       // given
       var tagGroups = await tagDao.getAllTagsWithGroups();
@@ -86,7 +87,7 @@ void main() {
       expect(actualCreated.length, 1);
 
       expect(actualCreated.first.tags.map((t) => t.id), firstTagOfEachTagGroup.map((t) => t.id));
-    });
+    }, skip: "re-write to use mocks and check only workflow");
 
     /*  TODO test this
     test('should create recipe of type with image photo', () async {

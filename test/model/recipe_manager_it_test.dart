@@ -12,7 +12,7 @@ import 'package:uuid/uuid.dart';
 
 import '../flutter_test_config.dart';
 
-// TODO this should call real daos
+// TODO this should call real daos and test happy paths
 void main() {
   late RecipeDao recipeDao;
   late PhotoDao photoDao;
