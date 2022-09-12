@@ -1,18 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lunch_me/data/database.dart';
 import 'package:lunch_me/model/recipe_filters.dart';
+import 'package:lunch_me/model/recipe_manager.dart';
 import 'package:lunch_me/pages/home/widgets/exceptions.dart';
-import 'package:lunch_me/util/image_util.dart';
 import 'package:lunch_me/util/lunch_me_cache_manager.dart';
 import 'package:lunch_me/widgets/custom_loader.dart';
 import 'package:lunch_me/widgets/error_message.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../data/tables.dart';
+import '../../../data/dao/recipe_dao.dart';
+import '../../../util/image_util.dart';
 
 class RecipeList extends StatefulWidget {
   const RecipeList({super.key});
@@ -22,12 +22,12 @@ class RecipeList extends StatefulWidget {
 }
 
 class _RecipeListState extends State<RecipeList> {
-  late final MyDatabase database;
-
-  BaseCacheManager cacheManager = LunchMeCacheManager();
+  late final RecipeManager recipeManager;
+  late final LunchMeCacheManager cacheManager;
 
   void initializeData() {
-    database = Provider.of<MyDatabase>(context, listen: false);
+    recipeManager = Provider.of<RecipeManager>(context, listen: false);
+    cacheManager = Provider.of<LunchMeCacheManager>(context, listen: false);
   }
 
   @override
@@ -68,7 +68,7 @@ class _RecipeListState extends State<RecipeList> {
               constraints: const BoxConstraints(maxWidth: 160),
               child: AspectRatio(
                   aspectRatio: 4 / 3,
-                  child: _hasImage(recipeWithTags.recipe)
+                  child: _hasImage(recipeWithTags.recipe, recipeWithTags.thumbnail) // TODO pass recipeWithTags
                       ? CachedNetworkImage(
                           cacheManager: cacheManager,
                           progressIndicatorBuilder: (context, url, progress) =>
@@ -79,7 +79,7 @@ class _RecipeListState extends State<RecipeList> {
                           ),
                           fit: BoxFit.cover,
                           key: Key(recipeWithTags.recipe.id.toString()),
-                          imageUrl: _getImageUrl(recipeWithTags.recipe),
+                          imageUrl: _getImageUrl(recipeWithTags.recipe, recipeWithTags.thumbnail), // TODO pass recipeWithTags
                           errorWidget: (context, url, error) =>
                               Image.asset('assets/images/recipe/error.jpg'),
                           fadeOutDuration: const Duration(seconds: 1),
@@ -121,7 +121,7 @@ class _RecipeListState extends State<RecipeList> {
     return Consumer<RecipeFilters>(
       builder: (context, recipeFilters, child) {
         return FutureBuilder<List<RecipeWithTags>>(
-            future: database.filterRecipes(recipeFilters.filter),
+            future: recipeManager.filterRecipes(recipeFilters.filter),
             builder: (BuildContext context, AsyncSnapshot recipesSnapshot) {
               return recipesSnapshot.connectionState == ConnectionState.waiting
                   ? buildCustomLoader()
@@ -131,21 +131,17 @@ class _RecipeListState extends State<RecipeList> {
     );
   }
 
-  bool _hasImage(Recipe recipe) {
-    if (recipe.type == Source.photo) {
-      return recipe.imagePhoto != null;
-    } else {
-      return recipe.image != null;
-    }
+  bool _hasImage(Recipe recipe, String? thumbnailPhoto) {
+    return thumbnailPhoto != null || recipe.image != null;
   }
 
-  String _getImageUrl(Recipe recipe) {
-    if (!_hasImage(recipe)) {
+  String _getImageUrl(Recipe recipe, String? thumbnail) {
+    if (!_hasImage(recipe, thumbnail)) {
       throw NoImageException();
     }
 
-    if (recipe.type == Source.photo) {
-      return buildImageUrl(recipe.imagePhoto!);
+    if(thumbnail != null) {
+      return buildImageUrl(thumbnail);
     } else {
       return recipe.image!;
     }

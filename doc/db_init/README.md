@@ -13,8 +13,6 @@ Execute the following commands to create the application database:
 1. sqlite3 lunch_me_db < create_database.sql
 2. sqlite3 lunch_me_db 'UPDATE recipes SET url = null WHERE url = "";'
 3. sqlite3 lunch_me_db 'UPDATE recipes SET image = null WHERE image = "";'
-4. sqlite3 lunch_me_db 'UPDATE recipes SET image_photo = null WHERE image_photo = "";'
-5. sqlite3 lunch_me_db 'UPDATE recipes SET content_photo = null WHERE content_photo = "";'
 
 By this you'll also start the sqlite3 console where you can work with the database e.g. querying
 like:

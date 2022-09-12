@@ -1,19 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:lunch_me/pages/edit_recipes/edit_recipes_page.dart';
 import 'package:lunch_me/pages/edit_tags/edit_tags_page.dart';
+import 'package:lunch_me/util/lunch_me_cache_manager.dart';
+import 'package:lunch_me/util/lunch_me_photo_manager.dart';
 import 'package:provider/provider.dart';
 
 import 'package:lunch_me/data/database.dart';
 import 'package:lunch_me/pages/home/home_page.dart';
+import 'package:uuid/uuid.dart';
+
+import 'model/recipe_manager.dart';
 
 void main() {
+  MyDatabase db = MyDatabase();
+  ImagePicker imagePicker = ImagePicker();
   runApp(
-    Provider<MyDatabase>(
-      create: (context) => MyDatabase(),
+    MultiProvider(
+      providers: [
+        Provider<RecipeManager>(create: (context) => RecipeManager(db.recipeDao, db.photoDao, db.tagDao, db.tagGroupDao, const Uuid(), LunchMePhotoManager(imagePicker))),
+        Provider<LunchMePhotoManager>(create: (context) => LunchMePhotoManager(imagePicker)),
+        Provider<LunchMeCacheManager>(create: (context) => LunchMeCacheManager()),
+      ],
       child: const MyApp(),
-      dispose: (context, db) => db.close(),
     ),
   );
 }

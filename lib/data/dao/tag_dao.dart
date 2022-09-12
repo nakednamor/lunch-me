@@ -14,11 +14,15 @@ class TagDao extends DatabaseAccessor<MyDatabase> with _$TagDaoMixin {
     return _allTags().get();
   }
 
-  Future<Tag> addTag(int tagGroupId, String name) async {
-    _validateTagName(name);
-    await _validateTagGroupExists(tagGroupId);
-    await _validateTagNameDoesNotExist(tagGroupId, name);
+  Future<List<TagGroupWithTags>> getAllTagsWithGroups() async {
+    return _allTagGroupsWithTags().get();
+  }
 
+  Stream<List<TagGroupWithTags>> watchAllTagsWithGroups() {
+    return _allTagGroupsWithTags().watch();
+  }
+
+  Future<Tag> addTag(int tagGroupId, String name) async {
     var lastOrdering = await _getMaxTagOrdering(tagGroupId).getSingleOrNull();
     var newOrdering = lastOrdering == null ? 0 : lastOrdering + 1;
 
@@ -35,18 +39,12 @@ class TagDao extends DatabaseAccessor<MyDatabase> with _$TagDaoMixin {
   }
 
   Future<void> renameTag(int id, String name) async {
-    _validateTagName(name);
     var tag = await _getTagById(id).getSingle();
-    await _validateTagNameDoesNotExist(tag.tagGroup, name);
 
     await _renameTag(name, tag.id);
   }
 
   Future<void> changeTagOrdering(int id, int newOrdering) async {
-    if (newOrdering < 0) {
-      throw NegativeValueException(newOrdering);
-    }
-
     var target = await _getTagById(id).getSingleOrNull();
     if (target == null) {
       throw TagNotFoundException(id);
@@ -71,29 +69,5 @@ class TagDao extends DatabaseAccessor<MyDatabase> with _$TagDaoMixin {
     }
 
     await _updateOrderingOfTag(newOrdering, target.id);
-  }
-
-  _validateTagName(String name) {
-    if (name.isEmpty) {
-      throw EmptyNameException(name);
-    }
-
-    if (name.length > 50) {
-      throw NameTooLongException(name);
-    }
-  }
-
-  Future<void> _validateTagGroupExists(int tagGroup) async {
-    var tagGroupExists = await attachedDatabase.tagGroupDao.tagGroupExists(tagGroup);
-    if (!tagGroupExists) {
-      throw TagGroupNotFoundException(tagGroup);
-    }
-  }
-
-  Future<void> _validateTagNameDoesNotExist(int tagGroupId, String name) async {
-    var tagCount = await _countByTagGroupAndName(tagGroupId, name).getSingle();
-    if (tagCount != 0) {
-      throw NameAlreadyExistsException(name);
-    }
   }
 }

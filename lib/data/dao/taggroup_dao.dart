@@ -37,10 +37,6 @@ class TagGroupDao extends DatabaseAccessor<MyDatabase> with _$TagGroupDaoMixin {
   }
 
   Future<void> changeTagGroupOrdering(int tagGroupId, int newOrder) async {
-    if (newOrder < 0) {
-      throw NegativeValueException(newOrder);
-    }
-
     var target = await _getTagGroupById(tagGroupId).getSingleOrNull();
     if (target == null) {
       throw TagGroupNotFoundException(tagGroupId);
@@ -75,14 +71,6 @@ class TagGroupDao extends DatabaseAccessor<MyDatabase> with _$TagGroupDaoMixin {
   }
 
   Future<void> _validateTagGroupName(String name) async {
-    if (name.isEmpty) {
-      throw EmptyNameException(name);
-    }
-
-    if (name.length > 50) {
-      throw NameTooLongException(name);
-    }
-
     var groupCountWithSameName = await _countTagGroupsWithName(name);
     if (groupCountWithSameName != 0) {
       throw NameAlreadyExistsException(name);

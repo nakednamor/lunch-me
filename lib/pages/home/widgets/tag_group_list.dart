@@ -2,7 +2,9 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lunch_me/data/database.dart';
+import 'package:lunch_me/data/dao/tag_dao.dart' as tag_dao; // TODO workaround unambigous imports
 import 'package:lunch_me/model/recipe_filters.dart';
+import 'package:lunch_me/model/recipe_manager.dart';
 import 'package:lunch_me/widgets/custom_loader.dart';
 import 'package:lunch_me/widgets/error_message.dart';
 import 'package:provider/provider.dart';
@@ -15,14 +17,14 @@ class TagGroupList extends StatefulWidget {
 }
 
 class _TagGroupListState extends State<TagGroupList> {
-  late final Stream<List<TagGroupWithTags>> _watchTagGroupsWithTags;
-  late final MyDatabase database;
+  late final Stream<List<tag_dao.TagGroupWithTags>> _watchTagGroupsWithTags;
+  late final RecipeManager recipeManager;
 
   final List<RecipeFilter> _selectedTags = <RecipeFilter>[];
 
   void initializeData() {
-    database = Provider.of<MyDatabase>(context, listen: false);
-    _watchTagGroupsWithTags = database.watchAllTagsWithGroups();
+    recipeManager = Provider.of<RecipeManager>(context, listen: false);
+    _watchTagGroupsWithTags = recipeManager.watchAllTagsWithGroups();
   }
 
   @override
@@ -37,18 +39,18 @@ class _TagGroupListState extends State<TagGroupList> {
       return errorMessage(AppLocalizations.of(context)!.errorNoTagsFound);
     }
 
-    final List<TagGroupWithTags> tagGroupsWithTags = snapshot.data!;
+    final List<tag_dao.TagGroupWithTags> tagGroupsWithTags = snapshot.data!;
     return ListView(
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
       children:
-          tagGroupsWithTags.map<Widget>((TagGroupWithTags tagGroupWithTags) {
+          tagGroupsWithTags.map<Widget>((tag_dao.TagGroupWithTags tagGroupWithTags) {
         return _buildTagGroupRow(tagGroupWithTags);
       }).toList(),
     );
   }
 
-  Widget _buildTagGroupRow(TagGroupWithTags tagGroupWithTags) {
+  Widget _buildTagGroupRow(tag_dao.TagGroupWithTags tagGroupWithTags) {
     return Container(
         margin: const EdgeInsets.all(8.0),
         child: Column(
@@ -108,7 +110,7 @@ class _TagGroupListState extends State<TagGroupList> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<TagGroupWithTags>>(
+    return StreamBuilder<List<tag_dao.TagGroupWithTags>>(
         stream: _watchTagGroupsWithTags,
         builder: (BuildContext context, AsyncSnapshot tagsSnapshot) {
           return tagsSnapshot.connectionState == ConnectionState.waiting

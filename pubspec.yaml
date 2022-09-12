@@ -60,6 +60,8 @@ dependencies:
 
   flutter_cache_manager: ^3.3.0
   cached_network_image: ^3.2.1
+  image_picker: ^0.8.5+3
+  uuid: ^3.0.6
   file: ^6.1.2
   validators: ^3.0.0
 
@@ -68,6 +70,8 @@ dev_dependencies:
     sdk: flutter
 
   random_string: ^2.3.1
+
+  mockito: ^5.3.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
