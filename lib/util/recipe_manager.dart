@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:lunch_me/data/dao/photo_dao.dart';
+import 'package:lunch_me/data/dao/recipe_dao.dart';
 import 'package:lunch_me/data/dao/tag_dao.dart' as tag_dao; // TODO is this needed ??
 import 'package:lunch_me/data/dao/taggroup_dao.dart';
 import 'package:lunch_me/data/database.dart';
@@ -8,13 +10,10 @@ import 'package:lunch_me/data/exceptions.dart';
 import 'package:lunch_me/data/tables.dart';
 import 'package:lunch_me/model/recipe_filters.dart';
 import 'package:lunch_me/model/recipe_model.dart';
+import 'package:lunch_me/util/lunch_me_photo_manager.dart';
 import 'package:uuid/uuid.dart';
 
-import '../data/dao/photo_dao.dart';
-import '../data/dao/recipe_dao.dart';
-import '../util/lunch_me_photo_manager.dart';
-
-class RecipeManager { // TODO move all 'manager' classes to same directory
+class RecipeManager {
   late RecipeDao recipeDao;
   late PhotoDao photoDao;
   late tag_dao.TagDao tagDao;

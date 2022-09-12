@@ -1,18 +1,17 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:lunch_me/data/dao/recipe_dao.dart';
 import 'package:lunch_me/data/database.dart';
 import 'package:lunch_me/model/recipe_filters.dart';
-import 'package:lunch_me/model/recipe_manager.dart';
+import 'package:lunch_me/util/recipe_manager.dart';
 import 'package:lunch_me/pages/home/widgets/exceptions.dart';
+import 'package:lunch_me/util/image_util.dart';
 import 'package:lunch_me/util/lunch_me_cache_manager.dart';
 import 'package:lunch_me/widgets/custom_loader.dart';
 import 'package:lunch_me/widgets/error_message.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../../../data/dao/recipe_dao.dart';
-import '../../../util/image_util.dart';
 
 class RecipeList extends StatefulWidget {
   const RecipeList({super.key});

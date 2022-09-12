@@ -2,13 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:lunch_me/model/recipe_manager.dart';
+import 'package:lunch_me/data/tables.dart';
+import 'package:lunch_me/util/recipe_manager.dart';
 import 'package:lunch_me/model/recipe_model.dart';
 import 'package:lunch_me/util/lunch_me_photo_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
-
-import '../../data/tables.dart';
 
 class EditRecipesPage extends StatelessWidget {
   const EditRecipesPage({Key? key}) : super(key: key);

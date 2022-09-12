@@ -3,9 +3,8 @@ import 'package:drift/drift.dart';
 import 'package:lunch_me/data/database.dart';
 import 'package:lunch_me/data/exceptions.dart';
 import 'package:lunch_me/data/tables.dart';
+import 'package:lunch_me/model/recipe_filters.dart';
 import 'package:validators/validators.dart';
-
-import '../../model/recipe_filters.dart';
 
 part 'recipe_dao.g.dart';
 

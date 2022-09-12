@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lunch_me/data/dao/tag_dao.dart' as tag_dao; // TODO workaround unambigous imports
 import 'package:lunch_me/data/database.dart';
-import 'package:lunch_me/model/recipe_manager.dart';
+import 'package:lunch_me/util/recipe_manager.dart';
 import 'package:lunch_me/widgets/custom_loader.dart';
 import 'package:lunch_me/widgets/error_message.dart';
 import 'package:provider/provider.dart';

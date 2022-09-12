@@ -9,9 +9,9 @@ import 'package:lunch_me/data/database.dart';
 import 'package:lunch_me/data/exceptions.dart';
 import 'package:lunch_me/data/tables.dart';
 import 'package:lunch_me/model/recipe_filters.dart';
-import 'package:lunch_me/model/recipe_manager.dart';
 import 'package:lunch_me/model/recipe_model.dart';
 import 'package:lunch_me/util/lunch_me_photo_manager.dart';
+import 'package:lunch_me/util/recipe_manager.dart';
 import 'package:mockito/mockito.dart';
 import 'package:uuid/uuid.dart';
 

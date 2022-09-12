@@ -6,7 +6,7 @@ import 'package:lunch_me/data/dao/recipe_dao.dart';
 import 'package:lunch_me/data/dao/tag_dao.dart';
 import 'package:lunch_me/data/dao/taggroup_dao.dart';
 import 'package:lunch_me/data/exceptions.dart';
-import 'package:lunch_me/model/recipe_manager.dart';
+import 'package:lunch_me/util/recipe_manager.dart';
 import 'package:lunch_me/util/lunch_me_photo_manager.dart';
 import 'package:uuid/uuid.dart';
 

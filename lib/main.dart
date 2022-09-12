@@ -12,7 +12,7 @@ import 'package:lunch_me/data/database.dart';
 import 'package:lunch_me/pages/home/home_page.dart';
 import 'package:uuid/uuid.dart';
 
-import 'model/recipe_manager.dart';
+import 'util/recipe_manager.dart';
 
 void main() {
   MyDatabase db = MyDatabase();

@@ -1,8 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:lunch_me/data/database.dart';
+import 'package:lunch_me/data/exceptions.dart';
 import 'package:lunch_me/data/tables.dart';
-
-import '../exceptions.dart';
 
 part 'taggroup_dao.g.dart';
 

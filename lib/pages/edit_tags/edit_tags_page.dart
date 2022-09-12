@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:lunch_me/model/recipe_manager.dart';
+import 'package:lunch_me/util/recipe_manager.dart';
 import 'package:lunch_me/pages/edit_tags/widgets/editable_tag_group_list.dart';
 import 'package:provider/provider.dart';
 
