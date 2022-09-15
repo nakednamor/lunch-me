@@ -35,6 +35,9 @@ class TagGroupDaoMock extends Mock implements TagGroupDao {
 
   @override
   Future<void> changeTagGroupOrdering(int? id, int? newOrder) => super.noSuchMethod(Invocation.method(#changeTagGroupOrdering, [id, newOrder]), returnValue: Future.value());
+
+  @override
+  Future<void> deleteTagGroup(int? tagGroupId) => super.noSuchMethod(Invocation.method(#deleteTagGroup, [tagGroupId]), returnValue: Future.value());
 }
 
 class PhotoDaoMock extends Mock implements PhotoDao {}

@@ -48,7 +48,7 @@ void main() {
     var newTagGroupName = 'updated name!';
     await testDatabase.tagGroupDao.renameTagGroup(tagGroup.id, newTagGroupName);
 
-    // thenn
+    //
     var tagGroups = await tagDao.getAllTagsWithGroups();
     expect(tagGroups.where((e) => e.tagGroup.id == tagGroup.id).map((e) => e.tagGroup.label).first, newTagGroupName);
   });

@@ -62,7 +62,7 @@ void main() {
   });
 
   group('watchAllTagsWithGroups ', () {
-    test('should just by-pass to tag-dao', () async {
+    test('should just by-pass to tagGroup-dao', () async {
       // given
       Stream<List<tag_dao.TagGroupWithTags>> expected = const Stream.empty();
 
@@ -74,6 +74,29 @@ void main() {
       // then
       expect(actual, same(expected));
       verify(tagDao.watchAllTagsWithGroups()).called(1);
+    });
+  });
+
+  group('deleteTagGroup ', () {
+    test('should just by-pass to tagGroup-dao', () async {
+      // given
+      var tagGroupId = 32;
+      when(tagGroupDao.deleteTagGroup(tagGroupId)).thenAnswer((_) async => {});
+
+      // when
+      await recipeManager.deleteTagGroup(tagGroupId);
+
+      // then
+      verify(tagGroupDao.deleteTagGroup(tagGroupId)).called(1);
+    });
+
+    test('should catch exceptions from tagGroupDao and throw TagGroupException', () async {
+      // given
+      var tagGroupId = 65;
+      when(tagGroupDao.deleteTagGroup(tagGroupId)).thenThrow(Exception('some exception from dao or DB'));
+
+      // expect
+      expect(() => recipeManager.deleteTagGroup(tagGroupId), throwsA(isA<TagGroupException>()));
     });
   });
 

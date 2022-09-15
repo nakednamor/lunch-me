@@ -57,9 +57,12 @@ class RecipeManager {
     return tagDao.watchAllTagsWithGroups();
   }
 
-  // TODO test that method is just passing by
   Future<void> deleteTagGroup(int tagGroupId) async {
-    return tagGroupDao.deleteTagGroup(tagGroupId);
+    try {
+      return tagGroupDao.deleteTagGroup(tagGroupId);
+    } on Exception catch (e) {
+      throw TagGroupException('cannot delete tag-group: $e');
+    }
   }
 
   // TODO test that method is just passing by
@@ -111,7 +114,7 @@ class RecipeManager {
     try {
       return await tagGroupDao.renameTagGroup(tagGroupId, newName);
     } on Exception catch (e) {
-      throw TagGroupException('cannot add tag-group: $e');
+      throw TagGroupException('cannot rename tag-group: $e');
     }
   }
 
@@ -123,7 +126,7 @@ class RecipeManager {
     try {
       return await tagGroupDao.changeTagGroupOrdering(tagGroupId, newOrder);
     } on Exception catch (e) {
-      throw TagGroupException('cannot add tag-group: $e');
+      throw TagGroupException('cannot change tag-group order: $e');
     }
   }
 
