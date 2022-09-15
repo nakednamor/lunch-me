@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:lunch_me/data/dao/photo_dao.dart';
 import 'package:lunch_me/data/dao/recipe_dao.dart';
 import 'package:lunch_me/data/dao/tag_dao.dart';
+import 'package:lunch_me/data/dao/tag_dao.dart' as tag_dao;
 import 'package:lunch_me/data/dao/taggroup_dao.dart';
 import 'package:lunch_me/data/database.dart';
 import 'package:lunch_me/data/exceptions.dart';
@@ -60,9 +61,70 @@ void main() {
     });
   });
 
+  group('watchAllTagsWithGroups ', () {
+    test('should just by-pass to tagGroup-dao', () async {
+      // given
+      Stream<List<tag_dao.TagGroupWithTags>> expected = const Stream.empty();
+
+      when(tagDao.watchAllTagsWithGroups()).thenAnswer((_) => expected);
+
+      // when
+      var actual = tagDao.watchAllTagsWithGroups();
+
+      // then
+      expect(actual, same(expected));
+      verify(tagDao.watchAllTagsWithGroups()).called(1);
+    });
+  });
+
+  group('deleteTagGroup ', () {
+    test('should just by-pass to tagGroup-dao', () async {
+      // given
+      var tagGroupId = 32;
+      when(tagGroupDao.deleteTagGroup(tagGroupId)).thenAnswer((_) async => {});
+
+      // when
+      await recipeManager.deleteTagGroup(tagGroupId);
+
+      // then
+      verify(tagGroupDao.deleteTagGroup(tagGroupId)).called(1);
+    });
+
+    test('should catch exceptions from tagGroupDao and throw TagGroupException', () async {
+      // given
+      var tagGroupId = 65;
+      when(tagGroupDao.deleteTagGroup(tagGroupId)).thenThrow(Exception('some exception from dao or DB'));
+
+      // expect
+      expect(() => recipeManager.deleteTagGroup(tagGroupId), throwsA(isA<TagGroupException>()));
+    });
+  });
+
+  group('deleteTag ', () {
+    test('should just by-pass to tag-dao', () async {
+      // given
+      var tagId = 112;
+      when(tagDao.deleteTag(tagId)).thenAnswer((_) async => {});
+
+      // when
+      await recipeManager.deleteTag(tagId);
+
+      // then
+      verify(tagDao.deleteTag(tagId)).called(1);
+    });
+
+    test('should catch exceptions from tagDao and throw TagException', () async {
+      // given
+      var tagId = 873;
+      when(tagDao.deleteTag(tagId)).thenThrow(Exception('some exception from dao or DB'));
+
+      // expect
+      expect(() => recipeManager.deleteTag(tagId), throwsA(isA<TagException>()));
+    });
+  });
+
   group('createRecipe  for type "web"', () {
     var recipeType = Source.web;
-
 
     test('should create recipe of type with image url', () async {
       // given
