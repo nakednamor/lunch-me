@@ -53,7 +53,6 @@ class RecipeManager {
     return recipeDao.filterRecipes(filterList);
   }
 
-  // TODO test that method is just passing by
   Stream<List<tag_dao.TagGroupWithTags>> watchAllTagsWithGroups() {
     return tagDao.watchAllTagsWithGroups();
   }

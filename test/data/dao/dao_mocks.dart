@@ -1,12 +1,12 @@
 import 'package:lunch_me/data/dao/photo_dao.dart';
 import 'package:lunch_me/data/dao/recipe_dao.dart';
-import 'package:lunch_me/data/dao/tag_dao.dart';
+import 'package:lunch_me/data/dao/tag_dao.dart' as tag_dao;
 import 'package:lunch_me/data/dao/taggroup_dao.dart';
 import 'package:lunch_me/data/database.dart';
 import 'package:lunch_me/model/recipe_filters.dart';
 import 'package:mockito/mockito.dart';
 
-class TagDaoMock extends Mock implements TagDao {
+class TagDaoMock extends Mock implements tag_dao.TagDao {
   @override
   Future<Tag> addTag(int? tagGroupId, String? name) =>
       super.noSuchMethod(Invocation.method(#addTag, [tagGroupId, name]), returnValue: Future.value(Tag(id: 999, tagGroup: 422, ordering: 8, label: 'new tag name')));
@@ -16,6 +16,9 @@ class TagDaoMock extends Mock implements TagDao {
 
   @override
   Future<void> changeTagOrdering(int? id, int? newOrdering) => super.noSuchMethod(Invocation.method(#changeTagOrdering, [id, newOrdering]), returnValue: Future.value());
+
+  @override
+  Stream<List<tag_dao.TagGroupWithTags>> watchAllTagsWithGroups() => super.noSuchMethod(Invocation.method(#watchAllTagsWithGroups, []), returnValue: const Stream<List<tag_dao.TagGroupWithTags>>.empty());
 }
 
 class RecipeDaoMock extends Mock implements RecipeDao {
