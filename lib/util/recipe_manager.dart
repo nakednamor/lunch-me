@@ -65,9 +65,12 @@ class RecipeManager {
     }
   }
 
-  // TODO test that method is just passing by
   Future<void> deleteTag(int id) async {
-    return tagDao.deleteTag(id);
+    try {
+      return tagDao.deleteTag(id);
+    } on Exception catch (e) {
+      throw TagException('cannot delete tag-group: $e');
+    }
   }
 
   Future<Tag> addTag(int tagGroupId, String name) async {

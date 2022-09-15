@@ -19,6 +19,9 @@ class TagDaoMock extends Mock implements tag_dao.TagDao {
 
   @override
   Stream<List<tag_dao.TagGroupWithTags>> watchAllTagsWithGroups() => super.noSuchMethod(Invocation.method(#watchAllTagsWithGroups, []), returnValue: const Stream<List<tag_dao.TagGroupWithTags>>.empty());
+
+  @override
+  Future<void> deleteTag(int? tagId) => super.noSuchMethod(Invocation.method(#deleteTag, [tagId]), returnValue: Future.value());
 }
 
 class RecipeDaoMock extends Mock implements RecipeDao {

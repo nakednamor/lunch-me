@@ -100,6 +100,29 @@ void main() {
     });
   });
 
+  group('deleteTag ', () {
+    test('should just by-pass to tag-dao', () async {
+      // given
+      var tagId = 112;
+      when(tagDao.deleteTag(tagId)).thenAnswer((_) async => {});
+
+      // when
+      await recipeManager.deleteTag(tagId);
+
+      // then
+      verify(tagDao.deleteTag(tagId)).called(1);
+    });
+
+    test('should catch exceptions from tagDao and throw TagException', () async {
+      // given
+      var tagId = 873;
+      when(tagDao.deleteTag(tagId)).thenThrow(Exception('some exception from dao or DB'));
+
+      // expect
+      expect(() => recipeManager.deleteTag(tagId), throwsA(isA<TagException>()));
+    });
+  });
+
   group('createRecipe  for type "web"', () {
     var recipeType = Source.web;
 
