@@ -7,6 +7,9 @@ import 'package:path/path.dart';
 class LunchMePhotoManager {
   late ImagePicker _picker;
 
+  static const int lunchmeImageQuality = 30;
+  static const double lunchmeMaxWidth = 300;
+
   static final LunchMePhotoManager _instance = LunchMePhotoManager._internal();
 
   LunchMePhotoManager._internal();
@@ -57,6 +60,6 @@ class LunchMePhotoManager {
   }
 
   Future<XFile?> _getXImage(ImageSource source) async {
-    return await _picker.pickImage(source: source);
+    return await _picker.pickImage(source: source, maxWidth: lunchmeMaxWidth, imageQuality: lunchmeImageQuality);
   }
 }
