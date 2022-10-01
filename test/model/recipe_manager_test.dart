@@ -131,7 +131,7 @@ void main() {
       var tagGroups = await tagDao.getAllTagsWithGroups();
       var firstTagOfEachTagGroup = tagGroups.expand((tagGroup) => [tagGroup.tags.first]).toList();
 
-      var model = RecipeModel("new recipe", recipeType);
+      var model = RecipeModel.newRecipe("new recipe", recipeType);
       model.url = "https://some-url.com";
       model.thumbnailUrl = "https://some-image-url.com";
       model.tagIds = firstTagOfEachTagGroup.map((tag) => tag.id).toList();

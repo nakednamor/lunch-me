@@ -49,7 +49,7 @@ class EditRecipesPage extends StatelessWidget {
               var uuid = const Uuid();
               var name = uuid.v4();
               var url = "http://recipes-lunch.me/${uuid.v4()}";
-              var model = RecipeModel(name, Source.web);
+              var model = RecipeModel.newRecipe(name, Source.web);
               model.url = url;
               model.thumbnailFile = takenPhoto;
 
