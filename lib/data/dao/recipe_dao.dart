@@ -270,8 +270,8 @@ class RecipeDao extends DatabaseAccessor<MyDatabase> with _$RecipeDaoMixin {
 class RecipeWithTags {
   final Recipe recipe;
   final List<Tag> tags;
-  final String? thumbnail;
-  final List<String> images;
+  final String? thumbnail;  // name of taken thumbnail photo
+  final List<String> images;  // name of taken recipe photos
 
   RecipeWithTags(this.recipe, this.tags, this.thumbnail, this.images);
 }

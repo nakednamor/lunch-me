@@ -49,14 +49,18 @@ class RecipeManager {
     }
   }
 
-  Future<RecipeModel?> getRecipeModel(int recipeId) async {
+  Future<RecipeModel> getRecipeModel(int recipeId) async {
     try {
-      var recipe = await recipeDao.getRecipeById(recipeId);
+      var recipeWithTags = await recipeDao.getRecipeById(recipeId);
+      var recipeModel = RecipeModel.existingRecipe(recipeWithTags.recipe.id, recipeWithTags.recipe.name, recipeWithTags.recipe.type);
+      recipeModel.url = recipeWithTags.recipe.url;
+      recipeModel.thumbnailUrl = recipeWithTags.recipe.image;
+      recipeModel.tagIds = recipeWithTags.tags.map((e) => e.id).toList();
+
+      return recipeModel;
     } on Exception catch (e) {
       throw RecipeException('error while getting recipe-model: $e');
     }
-
-    return null;
   }
 
   Future<List<RecipeWithTags>> filterRecipes(List<RecipeFilter> filterList) async {

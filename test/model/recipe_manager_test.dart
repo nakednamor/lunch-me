@@ -411,5 +411,36 @@ void main() {
       // expect
       expect(() => recipeManager.getRecipeModel(recipeId), throwsA(isA<RecipeException>()));
     });
+
+    // TODO add more tests for other types
+    group('should return recipe-model of type web', () {
+      test('with thumbnail photo', () async {
+        throw Exception("not yet implemented");
+      });
+
+      test('with thumbnail url', () async {
+        // given
+        var recipeTags = [
+          Tag(id: 33, tagGroup: 1, ordering: 0, label: 'tag #1'),
+          Tag(id: 34, tagGroup: 1, ordering: 1, label: 'tag #1'),
+          Tag(id: 35, tagGroup: 2, ordering: 0, label: 'tag #1'),
+        ];
+        var recipe = Recipe(id: 432, name: 'recipe #1', type: Source.web, url: 'https://my-recipe.com', image: 'https://thumbnail-image.com');
+        var expectedRecipeWithTags = RecipeWithTags(recipe, recipeTags, null, []);
+
+        when(recipeDao.getRecipeById(recipe.id)).thenAnswer((_) async => expectedRecipeWithTags);
+
+        // when
+        var actual = await recipeManager.getRecipeModel(recipe.id);
+
+        // then
+        expect(actual.id, expectedRecipeWithTags.recipe.id);
+        expect(actual.name, expectedRecipeWithTags.recipe.name);
+        expect(actual.type, expectedRecipeWithTags.recipe.type);
+        expect(actual.url, expectedRecipeWithTags.recipe.url);
+        expect(actual.thumbnailUrl, expectedRecipeWithTags.recipe.image);
+        expect(actual.tagIds, containsAll(expectedRecipeWithTags.tags.map((e) => e.id).toList()));
+      });
+    });
   });
 }
