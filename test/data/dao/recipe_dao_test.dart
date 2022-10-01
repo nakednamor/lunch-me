@@ -39,14 +39,7 @@ void main() {
       var recipesAfter = await dao.getAllRecipeWithTags();
       expect(recipesAfter.length, recipesBefore.length + 1);
 
-      var actualCreated = recipesAfter
-          .where((e) =>
-              e.recipe.name == name &&
-              e.recipe.type == type &&
-              e.recipe.url == url &&
-              e.recipe.image == imageUrl &&
-              e.tags.isEmpty)
-          .toList();
+      var actualCreated = recipesAfter.where((e) => e.recipe.name == name && e.recipe.type == type && e.recipe.url == url && e.recipe.image == imageUrl && e.tags.isEmpty).toList();
       expect(actualCreated.length, 1);
     });
   }
@@ -287,6 +280,33 @@ void main() {
     await _filteringRecipes([2, 3, 5, 6], [], {1: true, 2: true});
     await _filteringRecipes([10], [], {3: false});
     await _filteringRecipes([10], [], {3: true});
+  });
+
+  group("get recipe by id", () {
+    test('should throw NegativeValueException when ID negative', () async {
+      // expect
+      expect(() => dao.getRecipeById(-1), throwsA(isA<NegativeValueException>()));
+    });
+
+    test('should throw RecipeNotFoundException when recipe not found', () async {
+      // expect
+      expect(() => dao.getRecipeById(9876788788), throwsA(isA<RecipeNotFoundException>()));
+    });
+
+    test('should return recipe', () async {
+      // given
+      var allRecipes = await dao.getAllRecipeWithTags();
+      var recipeForTest = allRecipes.last;
+
+      // when
+      var actual = await dao.getRecipeById(recipeForTest.recipe.id);
+
+      // then
+      expect(actual.recipe.id, recipeForTest.recipe.id);
+      expect(actual.tags.length, recipeForTest.tags.length);
+      expect(actual.thumbnail, recipeForTest.thumbnail);
+      expect(actual.images.length, recipeForTest.images.length);
+    });
   });
 }
 

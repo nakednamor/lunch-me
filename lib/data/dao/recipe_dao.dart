@@ -46,10 +46,7 @@ class RecipeDao extends DatabaseAccessor<MyDatabase> with _$RecipeDaoMixin {
   }
 
   Future<void> deleteRecipe(int recipeId) async {
-    var recipe = await _getRecipeById(recipeId).getSingleOrNull();
-    if (recipe == null) {
-      throw RecipeNotFoundException(recipeId);
-    }
+    await _getRecipeByIdOrThrow(recipeId);
 
     transaction(() async {
       await _deleteRecipeHasTagsByRecipeId(recipeId);
@@ -58,10 +55,7 @@ class RecipeDao extends DatabaseAccessor<MyDatabase> with _$RecipeDaoMixin {
   }
 
   Future<void> assignTags(int recipeId, List<int> tagIds) async {
-    var recipe = await _getRecipeById(recipeId).getSingleOrNull();
-    if (recipe == null) {
-      throw RecipeNotFoundException(recipeId);
-    }
+    await _getRecipeByIdOrThrow(recipeId);
 
     var allTagIds = (await _allTags().get()).map((e) => e.id);
     var notExistingTagIds = tagIds.where((tagId) => allTagIds.contains(tagId) == false);
@@ -110,7 +104,27 @@ class RecipeDao extends DatabaseAccessor<MyDatabase> with _$RecipeDaoMixin {
     }
 
     var recipeIds = await _getRecipeIds(filterList);
+    var result = await _getRecipesByIds(recipeIds);
 
+    _sortRecipesByMatchingTagsAndName(result, selectedTagIds);
+
+    return result;
+  }
+
+  Future<RecipeWithTags> getRecipeById(int recipeId) async {
+    if (recipeId < 0) {
+      throw NegativeValueException(recipeId);
+    }
+
+    var recipeList = await _getRecipesByIds([recipeId]);
+    if (recipeList.isEmpty) {
+      throw RecipeNotFoundException(recipeId);
+    }
+
+    return recipeList.first;
+  }
+
+  Future<List<RecipeWithTags>> _getRecipesByIds(List<int> recipeIds) async {
     var query = select(recipes).join([
       leftOuterJoin(recipeTags, recipeTags.recipe.equalsExp(recipes.id)),
       leftOuterJoin(tags, tags.id.equalsExp(recipeTags.tag)),
@@ -136,9 +150,16 @@ class RecipeDao extends DatabaseAccessor<MyDatabase> with _$RecipeDaoMixin {
       return RecipeWithTags(recipe, tags, photo.thumbnail, photo.images);
     }).toList();
 
-    _sortRecipesByMatchingTagsAndName(result, selectedTagIds);
-
     return result;
+  }
+
+  Future<Recipe> _getRecipeByIdOrThrow(int recipeId) async {
+    var recipe = await _getRecipeById(recipeId).getSingleOrNull();
+    if (recipe == null) {
+      throw RecipeNotFoundException(recipeId);
+    }
+
+    return recipe;
   }
 
   Future<void> _validateRecipe(String name, Source type) async {
