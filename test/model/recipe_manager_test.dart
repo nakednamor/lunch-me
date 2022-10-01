@@ -401,4 +401,15 @@ void main() {
       expect(() => recipeManager.changeTagGroupOrdering(tagGroupId, newOrder), throwsA(isA<TagGroupException>()));
     });
   });
+
+  group('getRecipeModel', () {
+    test('should catch exceptions from recipe-dao and throw RecipeException', () async {
+      // given
+      var recipeId = 2232;
+      when(recipeDao.getRecipeById(recipeId)).thenThrow(Exception('some exception from dao or DB'));
+
+      // expect
+      expect(() => recipeManager.getRecipeModel(recipeId), throwsA(isA<RecipeException>()));
+    });
+  });
 }
