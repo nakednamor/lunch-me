@@ -416,7 +416,7 @@ void main() {
     group('should return recipe-model of type web', () {
       test('with thumbnail photo', () async {
         throw Exception("not yet implemented");
-      });
+      }, skip: 'skipped for now as not implemented yet');
 
       test('with thumbnail url', () async {
         // given
