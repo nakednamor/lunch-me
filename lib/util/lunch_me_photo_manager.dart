@@ -40,10 +40,19 @@ class LunchMePhotoManager {
 
   // deletes the photo with the given name from the image directory
   Future<void> deletePhoto(String photoName) async {
+    var file = await _getPhotoFile(photoName);
+    await file.delete();
+  }
+
+  Future<File> getPhotoFile(String photoName) async {
+    return _getPhotoFile(photoName);
+  }
+
+  Future<File> _getPhotoFile(String photoName) async {
     var imageDirectory = await getImageDirectory();
     var finalImagePath = _getFinalImagePath(imageDirectory, photoName);
     File file = File(finalImagePath);
-    await file.delete();
+    return file;
   }
 
   String _getFinalImagePath(Directory directory, String fileName) {

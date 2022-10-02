@@ -57,6 +57,10 @@ class RecipeManager {
       recipeModel.thumbnailUrl = recipeWithTags.recipe.image;
       recipeModel.tagIds = recipeWithTags.tags.map((e) => e.id).toList();
 
+      if(recipeWithTags.thumbnail != null){
+        recipeModel.thumbnailFile = await photoManager.getPhotoFile(recipeWithTags.thumbnail!);
+      }
+
       return recipeModel;
     } on Exception catch (e) {
       throw RecipeException('error while getting recipe-model: $e');
