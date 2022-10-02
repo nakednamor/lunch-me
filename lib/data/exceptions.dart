@@ -77,3 +77,9 @@ class RecipeAlreadyExistsException implements Exception {
 }
 
 class PhotoAlreadyExistsException implements Exception {}
+
+class RecipeException implements Exception {
+  String cause;
+
+  RecipeException(this.cause);
+}

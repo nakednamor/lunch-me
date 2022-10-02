@@ -49,6 +49,24 @@ class RecipeManager {
     }
   }
 
+  Future<RecipeModel> getRecipeModel(int recipeId) async {
+    try {
+      var recipeWithTags = await recipeDao.getRecipeById(recipeId);
+      var recipeModel = RecipeModel.existingRecipe(recipeWithTags.recipe.id, recipeWithTags.recipe.name, recipeWithTags.recipe.type);
+      recipeModel.url = recipeWithTags.recipe.url;
+      recipeModel.thumbnailUrl = recipeWithTags.recipe.image;
+      recipeModel.tagIds = recipeWithTags.tags.map((e) => e.id).toList();
+
+      if(recipeWithTags.thumbnail != null){
+        recipeModel.thumbnailFile = await photoManager.getPhotoFile(recipeWithTags.thumbnail!);
+      }
+
+      return recipeModel;
+    } on Exception catch (e) {
+      throw RecipeException('error while getting recipe-model: $e');
+    }
+  }
+
   Future<List<RecipeWithTags>> filterRecipes(List<RecipeFilter> filterList) async {
     return recipeDao.filterRecipes(filterList);
   }

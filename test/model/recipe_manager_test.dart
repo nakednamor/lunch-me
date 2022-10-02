@@ -1,6 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:lunch_me/data/dao/photo_dao.dart';
 import 'package:lunch_me/data/dao/recipe_dao.dart';
 import 'package:lunch_me/data/dao/tag_dao.dart';
@@ -14,9 +15,12 @@ import 'package:lunch_me/model/recipe_model.dart';
 import 'package:lunch_me/util/lunch_me_photo_manager.dart';
 import 'package:lunch_me/util/recipe_manager.dart';
 import 'package:mockito/mockito.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../data/dao/dao_mocks.dart';
+import '../util/lunch_me_photo_manager_mock.dart';
 
 void main() {
   late RecipeDao recipeDao;
@@ -34,7 +38,7 @@ void main() {
     tagDao = TagDaoMock();
     tagGroupDao = TagGroupDaoMock();
     uuid = const Uuid();
-    photoManager = LunchMePhotoManager(ImagePicker());
+    photoManager = LunchMePhotoManagerMock();
     recipeManager = RecipeManager(recipeDao, photoDao, tagDao, tagGroupDao, uuid, photoManager);
     debugPrint('test: setup finished');
   });
@@ -131,7 +135,7 @@ void main() {
       var tagGroups = await tagDao.getAllTagsWithGroups();
       var firstTagOfEachTagGroup = tagGroups.expand((tagGroup) => [tagGroup.tags.first]).toList();
 
-      var model = RecipeModel("new recipe", recipeType);
+      var model = RecipeModel.newRecipe("new recipe", recipeType);
       model.url = "https://some-url.com";
       model.thumbnailUrl = "https://some-image-url.com";
       model.tagIds = firstTagOfEachTagGroup.map((tag) => tag.id).toList();
@@ -399,6 +403,79 @@ void main() {
 
       // expect
       expect(() => recipeManager.changeTagGroupOrdering(tagGroupId, newOrder), throwsA(isA<TagGroupException>()));
+    });
+  });
+
+  group('getRecipeModel', () {
+    var uuid = const Uuid();
+
+    test('should catch exceptions from recipe-dao and throw RecipeException', () async {
+      // given
+      var recipeId = 2232;
+      when(recipeDao.getRecipeById(recipeId)).thenThrow(Exception('some exception from dao or DB'));
+
+      // expect
+      expect(() => recipeManager.getRecipeModel(recipeId), throwsA(isA<RecipeException>()));
+    });
+
+    // TODO add more tests for other types
+    group('should return recipe-model of type web', () {
+      test('with thumbnail photo', () async {
+        // given
+        var recipeTags = [
+          Tag(id: 33, tagGroup: 1, ordering: 0, label: 'tag #1'),
+          Tag(id: 34, tagGroup: 1, ordering: 1, label: 'tag #1'),
+          Tag(id: 35, tagGroup: 2, ordering: 0, label: 'tag #1'),
+        ];
+        var recipe = Recipe(id: 432, name: 'recipe #1', type: Source.web, url: 'https://my-recipe.com');
+        var expectedRecipeWithTags = RecipeWithTags(recipe, recipeTags, uuid.v4(), []);
+
+        when(recipeDao.getRecipeById(recipe.id)).thenAnswer((_) async => expectedRecipeWithTags);
+
+        var tempDirectory = await getTemporaryDirectory();
+        var thumbnailFile = File(join(tempDirectory.path, expectedRecipeWithTags.thumbnail!));
+        when(photoManager.getPhotoFile(expectedRecipeWithTags.thumbnail!)).thenAnswer((_) async => thumbnailFile);
+
+        // when
+        var actual = await recipeManager.getRecipeModel(recipe.id);
+
+        // then
+        expect(actual.id, expectedRecipeWithTags.recipe.id);
+        expect(actual.name, expectedRecipeWithTags.recipe.name);
+        expect(actual.type, expectedRecipeWithTags.recipe.type);
+        expect(actual.url, expectedRecipeWithTags.recipe.url);
+        expect(actual.thumbnailUrl, isNull);
+        expect(actual.tagIds, containsAll(expectedRecipeWithTags.tags.map((e) => e.id).toList()));
+        expect(actual.photos, isEmpty);
+        expect(actual.thumbnailFile, isNotNull);
+        expect(basename((actual.thumbnailFile!).path), expectedRecipeWithTags.thumbnail);
+      });
+
+      test('with thumbnail url', () async {
+        // given
+        var recipeTags = [
+          Tag(id: 33, tagGroup: 1, ordering: 0, label: 'tag #1'),
+          Tag(id: 34, tagGroup: 1, ordering: 1, label: 'tag #1'),
+          Tag(id: 35, tagGroup: 2, ordering: 0, label: 'tag #1'),
+        ];
+        var recipe = Recipe(id: 432, name: 'recipe #1', type: Source.web, url: 'https://my-recipe.com', image: 'https://thumbnail-image.com');
+        var expectedRecipeWithTags = RecipeWithTags(recipe, recipeTags, null, []);
+
+        when(recipeDao.getRecipeById(recipe.id)).thenAnswer((_) async => expectedRecipeWithTags);
+
+        // when
+        var actual = await recipeManager.getRecipeModel(recipe.id);
+
+        // then
+        expect(actual.id, expectedRecipeWithTags.recipe.id);
+        expect(actual.name, expectedRecipeWithTags.recipe.name);
+        expect(actual.type, expectedRecipeWithTags.recipe.type);
+        expect(actual.url, expectedRecipeWithTags.recipe.url);
+        expect(actual.thumbnailUrl, expectedRecipeWithTags.recipe.image);
+        expect(actual.thumbnailFile, isNull);
+        expect(actual.tagIds, containsAll(expectedRecipeWithTags.tags.map((e) => e.id).toList()));
+        expect(actual.photos, isEmpty);
+      });
     });
   });
 }

@@ -3,6 +3,7 @@ import 'package:lunch_me/data/dao/recipe_dao.dart';
 import 'package:lunch_me/data/dao/tag_dao.dart' as tag_dao;
 import 'package:lunch_me/data/dao/taggroup_dao.dart';
 import 'package:lunch_me/data/database.dart';
+import 'package:lunch_me/data/tables.dart';
 import 'package:lunch_me/model/recipe_filters.dart';
 import 'package:mockito/mockito.dart';
 
@@ -27,6 +28,9 @@ class TagDaoMock extends Mock implements tag_dao.TagDao {
 class RecipeDaoMock extends Mock implements RecipeDao {
   @override
   Future<List<RecipeWithTags>> filterRecipes(List<RecipeFilter>? filterList) => super.noSuchMethod(Invocation.method(#filterRecipes, [filterList]), returnValue: Future.value(<RecipeWithTags>[]));
+
+  @override
+  Future<RecipeWithTags> getRecipeById(int? recipeId) => super.noSuchMethod(Invocation.method(#getRecipeById, [recipeId]), returnValue: Future.value(RecipeWithTags(Recipe(id: 223, name: "some name", type: Source.web), [], null, [])));
 }
 
 class TagGroupDaoMock extends Mock implements TagGroupDao {
